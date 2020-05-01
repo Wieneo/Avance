@@ -52,7 +52,10 @@ import Vue from 'vue'
 export default Vue.extend({
     name: "Login",
     mounted: async function(){
-        console.log(await this.$GetRequest("/api/v1/session"))
+        //Check if session already is valid -> Redirect to main page
+        if ((await await this.$GetRequest("/api/v1/session")).Authorized){
+            window.location.href = "/"
+        }
     }
 })
 </script>

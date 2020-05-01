@@ -35,13 +35,7 @@ export function Utils<AxiosPlugOptions>(Vue: typeof _Vue): void {
         } catch (Exception) {
             // 401 means the session key expired
             if (Exception.response != null) {
-                if (Exception.response.status === 401) {
-                    if (!window.location.pathname.startsWith("/login")){
-                        window.location.href = '/login?redirect=' + encodeURI(window.location.pathname);
-                    }
-                    //
-                    return Exception.response.data
-                }
+                return Exception.response.data
             }
             // ToDo: Display error
             // console.log('Unknown error happened: ' + Exception)
@@ -61,12 +55,7 @@ export function Utils<AxiosPlugOptions>(Vue: typeof _Vue): void {
         } catch (Exception) {
             // 401 means the session key expired
             if (Exception.response != null) {
-                if (Exception.response.status === 401) {
-                    if (!window.location.pathname.startsWith("/login")){
-                        window.location.href = '/login?redirect=' + encodeURI(window.location.pathname);
-                    }
-                    return Exception.response.data
-                }
+                return Exception.response.data
             }
             // ToDo: Display error
             // console.log('Unknown error happened: ' + Exception)
