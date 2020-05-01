@@ -1,9 +1,16 @@
 {
+    "Debug": false,
+    "Port": 8000,
     "Postgres":{
         "Host": "localhost",
         "Port": 5432,
         "Username": "postgres",
         "Password": "debug",
         "Database": "tixter"
+    },
+    "Redis":{
+        "Host": "localhost",
+        "Port": "6379",
+        "Database": 0
     }
 }

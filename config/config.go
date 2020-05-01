@@ -11,6 +11,7 @@ import (
 
 //SampleConfig templates the used config
 type SampleConfig struct {
+	Debug    bool
 	Port     int
 	Postgres struct {
 		Host     string
@@ -44,6 +45,13 @@ func LoadConfig() {
 
 	if EnvEnabled {
 		dev.LogInfo("Using ENV-Variables for configuration")
+
+		CurrentConfig.Debug, Error = strconv.ParseBool(os.Getenv("TIX_Debug"))
+		if Error != nil {
+			dev.LogWarn("Debug is not a boolean! Using false as default")
+			CurrentConfig.Debug = false
+		}
+		dev.DeubgLogging = CurrentConfig.Debug
 
 		//Parse listen port to int
 		CurrentConfig.Port, Error = strconv.Atoi(os.Getenv("TIX_Port"))
@@ -92,6 +100,7 @@ func LoadConfig() {
 			dev.LogFatal("Couldn't read config:", err.Error())
 			return
 		}
+		dev.DeubgLogging = CurrentConfig.Debug
 	}
 
 	dev.LogInfo("Config was read completely!")
