@@ -52,7 +52,7 @@
     name: 'ProjectsContainer',
     props: ['showProjects'],
     methods: {
-      ChooseProject: function(ProjectID){
+      ChooseProject: function(ProjectID: number){
         //Switch Project
       }
     }

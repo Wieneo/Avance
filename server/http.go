@@ -1,6 +1,7 @@
 package server
 
 import (
+	"encoding/json"
 	"net/http"
 	"regexp"
 	"strconv"
@@ -21,8 +22,13 @@ func HTTPInit() {
 	router.Use(loggingMiddleware)
 	router.Use(authorizationMiddleware)
 
-	router.HandleFunc("/login", endpoints.ServeLoginPage)
-	router.HandleFunc("/api/health", endpoints.GetInstanceHealth)
+	router.HandleFunc("/api/v1/health", endpoints.GetInstanceHealth)
+	router.HandleFunc("/api/v1/session", serveSessionInfo)
+
+	//Needs to be at the bottom!
+	router.HandleFunc("/", endpoints.ServeAppFrontend)
+	router.HandleFunc("/login", endpoints.ServeAppFrontend)
+	router.PathPrefix("/").HandlerFunc(endpoints.ServeAssets)
 
 	srv := &http.Server{
 		Handler: router,
@@ -46,7 +52,10 @@ func loggingMiddleware(next http.Handler) http.Handler {
 
 //sitesForUnauthorized contains all URLs which should be accessible without being logged in
 var sitesForUnauthorized = []string{
-	"/login",
+	"/login$",
+	"/js/*",
+	"/css/*",
+	"/api/v1/session",
 }
 
 //authorizationMiddleware gets called at every request to check if user is authenticated
@@ -85,4 +94,14 @@ func IsAuthorized(r *http.Request) bool {
 	}
 
 	return redis.SessionValid(session)
+}
+
+//serveSessionInfo tells the client if the session key is working
+func serveSessionInfo(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(200)
+	json.NewEncoder(w).Encode(struct {
+		Authorized bool
+	}{
+		IsAuthorized(r),
+	})
 }

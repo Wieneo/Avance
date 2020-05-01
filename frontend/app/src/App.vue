@@ -1,45 +1,21 @@
 <template>
 <v-app>
-  <Drawer v-on:ShowProjects="showProjects = true"/>
-  <AppBar/>
-  <v-content>
-
-    <!-- Provides the application the proper gutter -->
-    <v-container fluid style="max-height: calc(100vh - 64px); overflow-y: auto">
-      <ProjectsContainer v-bind:showProjects="showProjects" v-on:closeProjects="showProjects = false"/>
-      <v-row no-gutters>
-        <v-col lg="3">
-          <TicketList style="max-height: calc(100vh - 88px); overflow-y: auto"/>
-        </v-col>
-        <v-col>
-          Ticket
-        </v-col>
-      </v-row>
-    </v-container>
-  </v-content>
+  <Login v-if="this.$route.name === 'Login'"/>
+  <MainApp v-if="this.$route.name === 'Main'"/>
 </v-app>
 </template>
 
 <script lang="ts">
 import Vue from 'vue';
-import Drawer from './components/Drawer.vue';
-import AppBar from './components/AppBar.vue';
-import ProjectsContainer from './components/misc/ProjectsContainer.vue';
-import TicketList from './components/TicketList.vue';
+import MainApp from './components/Main/MainApp.vue'
+import Login from './components/Login/Login.vue'
+
 
 export default Vue.extend({
   name: 'App',
-
   components: {
-    Drawer,
-    AppBar,
-    ProjectsContainer,
-    TicketList
+    MainApp,
+    Login
   },
-  data: function(){
-    return {
-      showProjects: false
-    }
-  }
 });
 </script>
