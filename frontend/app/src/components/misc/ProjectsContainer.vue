@@ -2,6 +2,7 @@
     <v-dialog
         v-model="showProjects"
         width="500"
+        @input="$emit('closeProjects')"
       >
       <v-card>
           <v-card-title
@@ -12,21 +13,34 @@
           </v-card-title>
 
           <v-card-text>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+            <v-list two-line>
+              <template>
+                <v-list-item v-for="index in 20" :key="index" @click="ChooseProject(index)">
+                  <v-list-item-avatar>
+                    <v-img src="https://randomuser.me/api/portraits/women/85.jpg"></v-img>
+                  </v-list-item-avatar>
+
+                  <v-list-item-content>
+                    <v-list-item-title>Project {{index}}</v-list-item-title>
+                    <v-list-item-subtitle>This is the first project</v-list-item-subtitle>
+                  </v-list-item-content>
+                </v-list-item>
+              </template>
+            </v-list>
           </v-card-text>
 
           <v-divider></v-divider>
 
-          <v-card-actions>
+          <!--<v-card-actions>
             <v-spacer></v-spacer>
             <v-btn
               color="primary"
               text
-              @click="showProjects = false"
+              @click="$emit('closeProjects')"
             >
               I accept
             </v-btn>
-          </v-card-actions>
+          </v-card-actions-->
         </v-card>
       </v-dialog>
 </template>
@@ -36,6 +50,11 @@
 
   export default Vue.extend({
     name: 'ProjectsContainer',
-    props: ['showProjects']
+    props: ['showProjects'],
+    methods: {
+      ChooseProject: function(ProjectID){
+        //Switch Project
+      }
+    }
   })
 </script>
