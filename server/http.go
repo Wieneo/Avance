@@ -91,7 +91,13 @@ func canBeIgnored(URL string) bool {
 func IsAuthorized(r *http.Request) bool {
 	session := r.Header.Get("Authorization")
 	if len(session) == 0 {
-		return false
+		//Check if maybe cookie was set
+		keks, err := r.Cookie("session")
+		if err != nil {
+			return false
+		}
+
+		session = keks.Value
 	}
 
 	return redis.SessionValid(session)
