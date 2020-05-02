@@ -26,6 +26,8 @@ func HTTPInit() {
 	router.HandleFunc("/api/v1/session", serveSessionInfo).Methods("GET")
 	router.HandleFunc("/api/v1/login", endpoints.LoginUser).Methods("POST")
 
+	router.HandleFunc("/api/v1/projects", endpoints.GetProjects).Methods("GET")
+
 	//Needs to be at the bottom!
 	router.HandleFunc("/", endpoints.ServeAppFrontend).Methods("GET")
 	router.HandleFunc("/login", endpoints.ServeAppFrontend).Methods("GET")
@@ -44,7 +46,6 @@ func HTTPInit() {
 
 func loggingMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Do stuff here
 		dev.LogDebug(r.RemoteAddr, r.RequestURI)
 		// Call the next handler, which can be another middleware in the chain, or the final handler.
 		next.ServeHTTP(w, r)

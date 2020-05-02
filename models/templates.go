@@ -1,4 +1,4 @@
-package perms
+package models
 
 //User is the default user struct from the database
 type User struct {
@@ -30,6 +30,7 @@ type Queue struct {
 
 //Permissions should store all permissions regarding a user or a group
 type Permissions struct {
+	Admin    bool
 	AccessTo struct {
 		Projects []ProjectPermission
 		Queues   []QueuePermission
@@ -38,7 +39,7 @@ type Permissions struct {
 
 //ProjectPermission stores the permissions given to a single project
 type ProjectPermission struct {
-	QueueID              int
+	ProjectID            int
 	CanSee               bool
 	CanModify            bool
 	CanChangePermissions bool

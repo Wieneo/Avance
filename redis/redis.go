@@ -1,6 +1,7 @@
 package redis
 
 import (
+	"errors"
 	"fmt"
 	"strconv"
 	"strings"
@@ -51,6 +52,24 @@ func CreateSession(UserID int) (string, error) {
 		return "", err
 	}
 	return "session_" + strconv.Itoa(UserID) + "_" + Session.String(), nil
+}
+
+//SessionToUserID return the user id stores as value to the session key
+func SessionToUserID(SessionKey string) (int, error) {
+	key, err := connection.Get(SessionKey).Result()
+	if err != nil {
+		return 0, err
+	}
+
+	if len(key) == 0 {
+		return 0, errors.New("No valid user to session key")
+	}
+
+	id, err := strconv.Atoi(key)
+	if err != nil {
+		return 0, err
+	}
+	return id, nil
 }
 
 func refreshSession(Session string) {
