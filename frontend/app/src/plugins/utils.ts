@@ -1,5 +1,6 @@
 import _Vue from "vue"
 import Axios from "axios"
+import Noty from "noty"
 
 export function Utils<AxiosPlugOptions>(Vue: typeof _Vue): void {
     Vue.prototype.$GetCookie = (Name: string) => {
@@ -61,5 +62,21 @@ export function Utils<AxiosPlugOptions>(Vue: typeof _Vue): void {
             // console.log('Unknown error happened: ' + Exception)
             return null
         }
+    }
+    Vue.prototype.$NotifySuccess = (Message: string) => {
+        new Noty({
+            type: "success",
+            theme: 'metroui',
+            text: Message,
+            timeout: 2500
+        }).show();
+    }
+    Vue.prototype.$NotifyError = (Message: string) => {
+        new Noty({
+            type: "error",
+            theme: 'metroui',
+            text: Message,
+            timeout: 2500
+        }).show();
     }
 }
