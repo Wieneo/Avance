@@ -21,6 +21,34 @@ SET default_tablespace = '';
 SET default_table_access_method = heap;
 
 --
+-- Name: Users; Type: TABLE; Schema: public; Owner: tixter
+--
+
+CREATE TABLE public."Users" (
+    "ID" bigint NOT NULL,
+    "Username" text NOT NULL,
+    "Password" text NOT NULL,
+    "Mail" text NOT NULL
+);
+
+
+ALTER TABLE public."Users" OWNER TO tixter;
+
+--
+-- Name: Users_ID_seq; Type: SEQUENCE; Schema: public; Owner: tixter
+--
+
+ALTER TABLE public."Users" ALTER COLUMN "ID" ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public."Users_ID_seq"
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
+
+
+--
 -- Name: Version; Type: TABLE; Schema: public; Owner: tixter
 --
 
@@ -32,12 +60,36 @@ CREATE TABLE public."Version" (
 ALTER TABLE public."Version" OWNER TO tixter;
 
 --
+-- Data for Name: Users; Type: TABLE DATA; Schema: public; Owner: tixter
+--
+
+COPY public."Users" ("ID", "Username", "Password", "Mail") FROM stdin;
+1	Admin	$2y$12$ghd7daO/gSufBzmFzJZSYuv7HRplIia1kktycoELfEfGhiIromR1u	johann@gnaucke.com
+\.
+
+
+--
 -- Data for Name: Version; Type: TABLE DATA; Schema: public; Owner: tixter
 --
 
 COPY public."Version" ("Schema") FROM stdin;
 2
 \.
+
+
+--
+-- Name: Users_ID_seq; Type: SEQUENCE SET; Schema: public; Owner: tixter
+--
+
+SELECT pg_catalog.setval('public."Users_ID_seq"', 1, true);
+
+
+--
+-- Name: Users Users_pkey; Type: CONSTRAINT; Schema: public; Owner: tixter
+--
+
+ALTER TABLE ONLY public."Users"
+    ADD CONSTRAINT "Users_pkey" PRIMARY KEY ("ID");
 
 
 --
