@@ -2,10 +2,12 @@ package redis
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 	"time"
 
 	"github.com/go-redis/redis"
+	"github.com/google/uuid"
 	"gitlab.gnaucke.dev/tixter/tixter-app/v2/config"
 	"gitlab.gnaucke.dev/tixter/tixter-app/v2/dev"
 )
@@ -38,6 +40,17 @@ func SessionValid(Session string) bool {
 
 	go refreshSession(Session)
 	return true
+}
+
+//CreateSession returns a session key for the given userid
+//SessionKey will be saved as follows: session_USERID_UUID
+//This is used to be able to delete all sessions of a user
+func CreateSession(UserID int) (string, error) {
+	Session := uuid.New()
+	if err := connection.Set("session_"+strconv.Itoa(UserID)+"_"+Session.String(), strconv.Itoa(UserID), time.Hour).Err(); err != nil {
+		return "", err
+	}
+	return "session_" + strconv.Itoa(UserID) + "_" + Session.String(), nil
 }
 
 func refreshSession(Session string) {

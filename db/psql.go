@@ -12,7 +12,8 @@ import (
 	"gitlab.gnaucke.dev/tixter/tixter-app/v2/dev"
 )
 
-var connection *sql.DB
+//Connection stores the current connection to postgres
+var Connection *sql.DB
 
 //Init is called after config is read to connect to postgres
 func Init() {
@@ -26,7 +27,7 @@ func Init() {
 		dev.LogFatal("Couldn't initialize Postgres: ", err)
 		//Program will terminate here
 	}
-	connection = db
+	Connection = db
 	dev.LogInfo("-- Connection to Postgres established --")
 	migrate()
 }
@@ -36,7 +37,7 @@ func migrate() {
 
 	//Get current verison from "Version" table
 	var currentVersion int
-	rows, err := connection.Query(`SELECT "Schema" FROM "Version"`)
+	rows, err := Connection.Query(`SELECT "Schema" FROM "Version"`)
 	if err != nil {
 		dev.LogFatal("Prepare failed:", err)
 	}
@@ -79,12 +80,12 @@ func migrate() {
 				dev.LogFatal("Couldn't read migration:", err.Error())
 			}
 
-			_, err = connection.Exec(string(rawBytes))
+			_, err = Connection.Exec(string(rawBytes))
 			if err != nil {
 				dev.LogFatal("Couldn't apply migration:", err.Error())
 			}
 
-			_, err = connection.Exec(`UPDATE "Version" SET "Schema" = $1`, currentVersion)
+			_, err = Connection.Exec(`UPDATE "Version" SET "Schema" = $1`, currentVersion)
 			if err != nil {
 				dev.LogFatal("Couldn't apply migration:", err.Error())
 			}

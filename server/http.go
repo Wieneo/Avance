@@ -22,13 +22,14 @@ func HTTPInit() {
 	router.Use(loggingMiddleware)
 	router.Use(authorizationMiddleware)
 
-	router.HandleFunc("/api/v1/health", endpoints.GetInstanceHealth)
-	router.HandleFunc("/api/v1/session", serveSessionInfo)
+	router.HandleFunc("/api/v1/health", endpoints.GetInstanceHealth).Methods("GET")
+	router.HandleFunc("/api/v1/session", serveSessionInfo).Methods("GET")
+	router.HandleFunc("/api/v1/login", endpoints.LoginUser).Methods("POST")
 
 	//Needs to be at the bottom!
-	router.HandleFunc("/", endpoints.ServeAppFrontend)
-	router.HandleFunc("/login", endpoints.ServeAppFrontend)
-	router.PathPrefix("/").HandlerFunc(endpoints.ServeAssets)
+	router.HandleFunc("/", endpoints.ServeAppFrontend).Methods("GET")
+	router.HandleFunc("/login", endpoints.ServeAppFrontend).Methods("GET")
+	router.PathPrefix("/").HandlerFunc(endpoints.ServeAssets).Methods("GET")
 
 	srv := &http.Server{
 		Handler: router,
