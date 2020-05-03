@@ -21,3 +21,26 @@ func GetUser(UserID int) (models.User, error) {
 
 	return Requested, nil
 }
+
+//GetGroups returns all groups from a user
+func GetGroups(User models.User) ([]models.Group, error) {
+	Groups := make([]models.Group, 0)
+	rows, err := Connection.Query(`SELECT "g"."ID", "g"."Name", "g"."Permissions" FROM "map_User_Group" AS "m" INNER JOIN "Groups" AS "g" ON "g"."ID" = "m"."GroupID" WHERE "m"."UserID" = $1`, User.ID)
+	if err != nil {
+		return make([]models.Group, 0), err
+	}
+
+	for rows.Next() {
+		var SingleGroup models.Group
+		var RAWJson string
+		rows.Scan(&SingleGroup.ID, &SingleGroup.Name, &RAWJson)
+		err = json.Unmarshal([]byte(RAWJson), &SingleGroup.Permissions)
+		if err != nil {
+			return make([]models.Group, 0), err
+		}
+		Groups = append(Groups, SingleGroup)
+	}
+
+	rows.Close()
+	return Groups, nil
+}
