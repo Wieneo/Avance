@@ -34,3 +34,36 @@ func GetVisibleProjects(User models.User) ([]models.Project, error) {
 	return VisibleProjects, nil
 
 }
+
+//GetVisibleQueuesFromProject returns all queues visible for the given user
+func GetVisibleQueuesFromProject(User models.User, ProjectID int) ([]models.Queue, error) {
+	Perms, err := CombinePermissions(User)
+	if err != nil {
+		return make([]models.Queue, 0), err
+	}
+
+	Project, err := db.GetProject(ProjectID)
+	if err != nil {
+		return make([]models.Queue, 0), err
+	}
+
+	Queues, err := db.QueuesInProject(Project)
+	if err != nil {
+		return make([]models.Queue, 0), err
+	}
+
+	if Perms.Admin {
+		return Queues, nil
+	}
+
+	QueuesVisible := make([]models.Queue, 0)
+	for _, k := range Queues {
+		if found, perm := permsContainQueue(k, Perms.AccessTo.Queues); found {
+			if perm.CanSee {
+				QueuesVisible = append(QueuesVisible, k)
+			}
+		}
+	}
+
+	return QueuesVisible, nil
+}

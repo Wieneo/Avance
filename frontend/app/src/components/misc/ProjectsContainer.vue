@@ -15,14 +15,14 @@
           <v-card-text>
             <v-list two-line>
               <template>
-                <v-list-item v-for="index in 20" :key="index" @click="ChooseProject(index)">
+                <v-list-item v-for="project in this.Projects" :key="project.ID" @click="ChooseProject(project.ID)">
                   <v-list-item-avatar>
                     <v-img src="https://randomuser.me/api/portraits/women/85.jpg"></v-img>
                   </v-list-item-avatar>
 
                   <v-list-item-content>
-                    <v-list-item-title>Project {{index}}</v-list-item-title>
-                    <v-list-item-subtitle>This is the first project</v-list-item-subtitle>
+                    <v-list-item-title>{{project.Name}}</v-list-item-title>
+                    <v-list-item-subtitle>{{project.Description}}</v-list-item-subtitle>
                   </v-list-item-content>
                 </v-list-item>
               </template>
@@ -48,9 +48,25 @@
 <script lang="ts">
   import Vue from 'vue'
 
+  interface Project{
+    ID: number;
+    Name: string;
+    Description: string;
+  }
+
+  const Projects: Project[] = []
+
   export default Vue.extend({
     name: 'ProjectsContainer',
     props: ['showProjects'],
+    data: function(){
+      return {
+          Projects
+      }
+    },
+    mounted: async function(){
+      this.Projects = (await Vue.prototype.$GetRequest("/api/v1/projects")).Projects
+    },
     methods: {
       ChooseProject: function(ProjectID: number){
         //Switch Project

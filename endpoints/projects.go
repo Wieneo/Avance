@@ -3,6 +3,8 @@ package endpoints
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
+	"strings"
 
 	"gitlab.gnaucke.dev/tixter/tixter-app/v2/dev"
 	"gitlab.gnaucke.dev/tixter/tixter-app/v2/models"
@@ -27,4 +29,24 @@ func GetProjects(w http.ResponseWriter, r *http.Request) {
 		})
 	}
 
+}
+
+//GetProjectQueues returns all queues a user has access to from one project
+func GetProjectQueues(w http.ResponseWriter, r *http.Request) {
+	if user, err := GetUser(r, w); err == nil {
+		//strconv should never throw error because http router expression specifies that only /api/v1/project/[0-9]{*}/queues should be sent here
+		projectid, _ := strconv.Atoi(strings.Split(r.RequestURI, "/")[4])
+		queues, err := perms.GetVisibleQueuesFromProject(user, projectid)
+		if err != nil {
+			w.WriteHeader(500)
+			dev.ReportError(w, err.Error())
+			return
+		}
+
+		json.NewEncoder(w).Encode(struct {
+			Queues []models.Queue
+		}{
+			queues,
+		})
+	}
 }

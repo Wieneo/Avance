@@ -12,8 +12,8 @@
 
         <v-list-item link>
             <v-list-item-content>
-            <v-list-item-title class="title">Sandra Adams</v-list-item-title>
-            <v-list-item-subtitle>sandra_a88@gmail.com</v-list-item-subtitle>
+            <v-list-item-title class="title">{{UserInfo.Firstname}} {{UserInfo.Lastname}}</v-list-item-title>
+            <v-list-item-subtitle>{{UserInfo.Mail}}</v-list-item-subtitle>
             </v-list-item-content>
         </v-list-item>
         </v-list>
@@ -46,10 +46,24 @@
 <script lang="ts">
   import Vue from 'vue'
 
+  interface User {
+    ID:          number;
+	Username:    string;
+    Mail:        string;
+    Firstname:   string;
+    Lastname:    string;
+  }
+  let UserInfo: User
+
   export default Vue.extend({
     name: 'Drawer',
-
-    components: {
+    data: function(){
+        return {
+            UserInfo
+        }
+    },
+    mounted: async function(){
+        this.UserInfo = await Vue.prototype.$GetRequest("/api/v1/profile")
     }
   })
 </script>

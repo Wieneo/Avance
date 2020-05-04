@@ -92,3 +92,13 @@ func containsQueue(queue models.QueuePermission, queues []models.QueuePermission
 
 	return false, nil
 }
+
+func permsContainQueue(queue models.Queue, queues []models.QueuePermission) (bool, *models.QueuePermission) {
+	for i, k := range queues {
+		if k.QueueID == queue.ID {
+			return true, &queues[i]
+		}
+	}
+
+	return false, nil
+}

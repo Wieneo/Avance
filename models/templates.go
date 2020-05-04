@@ -6,6 +6,8 @@ type User struct {
 	Username    string
 	Mail        string
 	Permissions Permissions
+	Firstname   string
+	Lastname    string
 }
 
 //Group is the default Group struct from the database
@@ -17,8 +19,9 @@ type Group struct {
 
 //Project is the default Project struct from the database
 type Project struct {
-	ID   int
-	Name string
+	ID          int
+	Name        string
+	Description string
 }
 
 //Queue is the default Queue struct from the database
