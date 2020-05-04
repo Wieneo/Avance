@@ -37,6 +37,10 @@ type Permissions struct {
 	}
 }
 
+/*
+	ALWAYS!! If a new permission is added here! PLEASE add it to perms/combine.go
+*/
+
 //ProjectPermission stores the permissions given to a single project
 type ProjectPermission struct {
 	ProjectID            int

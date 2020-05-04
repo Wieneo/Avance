@@ -26,6 +26,7 @@
                     prepend-icon="mdi-account"
                     type="text"
                     v-model="Username"
+                    @keyup.enter.native="Login"
                   />
 
                   <v-text-field
@@ -35,6 +36,7 @@
                     prepend-icon="mdi-form-textbox-password"
                     type="password"
                     v-model="Password"
+                    @keyup.enter.native="Login"
                   />
                 </v-form>
               </v-card-text>
