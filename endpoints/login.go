@@ -83,3 +83,39 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 }
+
+//LogoutUser is called when a user send a POST Request to /api/v1/login
+func LogoutUser(w http.ResponseWriter, r *http.Request) {
+	session := r.Header.Get("Authorization")
+	if len(session) == 0 {
+		//Check if maybe cookie was set
+		keks, err := r.Cookie("session")
+		if err != nil {
+			w.WriteHeader(500)
+			dev.ReportError(w, err.Error())
+			return
+		}
+
+		session = keks.Value
+	}
+
+	if len(session) == 0 {
+		w.WriteHeader(404)
+		dev.ReportError(w, "No session found")
+		return
+	}
+
+	if redis.SessionValid(session) {
+		if err := redis.DestroySession(session); err != nil {
+			w.WriteHeader(500)
+			dev.ReportError(w, err.Error())
+			return
+		}
+	}
+
+	json.NewEncoder(w).Encode(struct {
+		Result string
+	}{
+		"Session destroyed",
+	})
+}

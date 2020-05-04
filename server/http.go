@@ -26,6 +26,8 @@ func HTTPInit() {
 	router.HandleFunc("/api/v1/session", serveSessionInfo).Methods("GET")
 	router.HandleFunc("/api/v1/login", endpoints.LoginUser).Methods("POST")
 
+	router.HandleFunc("/api/v1/logout", endpoints.LogoutUser).Methods("GET")
+
 	router.HandleFunc("/api/v1/profile", endpoints.GetProfile).Methods("GET")
 	router.HandleFunc("/api/v1/projects", endpoints.GetProjects).Methods("GET")
 

@@ -54,6 +54,11 @@ func CreateSession(UserID int) (string, error) {
 	return "session_" + strconv.Itoa(UserID) + "_" + Session.String(), nil
 }
 
+//DestroySession removes the session key from redis
+func DestroySession(SessionKey string) error {
+	return connection.Del(SessionKey).Err()
+}
+
 //SessionToUserID return the user id stores as value to the session key
 func SessionToUserID(SessionKey string) (int, error) {
 	key, err := connection.Get(SessionKey).Result()
