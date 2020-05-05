@@ -19,10 +19,19 @@ var connection *redis.Client
 //Init creates the redis client
 func Init() {
 	dev.LogInfo("Redis is being initialized")
-	connection = redis.NewClient(&redis.Options{
-		Addr: fmt.Sprint(config.CurrentConfig.Redis.Host, ":", config.CurrentConfig.Redis.Port),
-		DB:   config.CurrentConfig.Redis.Database, // use default DB
-	})
+
+	if !config.CurrentConfig.Redis.Sentinel.Enabled {
+		connection = redis.NewClient(&redis.Options{
+			Addr: fmt.Sprint(config.CurrentConfig.Redis.Host, ":", config.CurrentConfig.Redis.Port),
+			DB:   config.CurrentConfig.Redis.Database, // use default DB
+		})
+	} else {
+		connection = redis.NewFailoverClient(&redis.FailoverOptions{
+			MasterName:    config.CurrentConfig.Redis.Sentinel.Master,
+			SentinelAddrs: config.CurrentConfig.Redis.Sentinel.Endpoints,
+			DB:            config.CurrentConfig.Redis.Database,
+		})
+	}
 
 	_, err := connection.Ping().Result()
 	if err != nil {

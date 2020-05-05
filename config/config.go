@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"os"
 	"strconv"
+	"strings"
 
 	"gitlab.gnaucke.dev/tixter/tixter-app/v2/dev"
 )
@@ -24,6 +25,11 @@ type SampleConfig struct {
 		Host     string
 		Port     int
 		Database int
+		Sentinel struct {
+			Enabled   bool
+			Master    string
+			Endpoints []string
+		}
 	}
 }
 
@@ -87,6 +93,25 @@ func LoadConfig() {
 			CurrentConfig.Redis.Port = 6379
 		}
 
+		CurrentConfig.Redis.Sentinel.Enabled, Error = strconv.ParseBool(os.Getenv("TIX_Redis_Sentinel_Enabled"))
+		if Error != nil {
+			dev.LogWarn("Redis Sentinel is not a boolean! Using false as default")
+			CurrentConfig.Redis.Sentinel.Enabled = false
+		}
+
+		if CurrentConfig.Redis.Sentinel.Enabled {
+			CurrentConfig.Redis.Sentinel.Master = os.Getenv("TIX_Redis_Sentinel_Master")
+
+			//Search for sentinels
+			for _, e := range os.Environ() {
+				if strings.HasPrefix(e, "TIX_Redis_Sentinel_Endpoint_") {
+					value := strings.Split(e, "=")[1]
+					CurrentConfig.Redis.Sentinel.Endpoints = append(CurrentConfig.Redis.Sentinel.Endpoints, value)
+				}
+			}
+
+		}
+
 	} else {
 		dir, _ := os.Getwd()
 		dev.LogInfo("Using ", dir+"/config/config.json", " for configuration")
@@ -101,6 +126,12 @@ func LoadConfig() {
 			return
 		}
 		dev.DeubgLogging = CurrentConfig.Debug
+
+	}
+
+	if CurrentConfig.Redis.Sentinel.Enabled {
+		dev.LogInfo(len(CurrentConfig.Redis.Sentinel.Endpoints), "Redis Sentinel Nodes configured")
+		dev.LogInfo("Looking for", CurrentConfig.Redis.Sentinel.Master, "as master")
 	}
 
 	dev.LogInfo("Config was read completely!")
