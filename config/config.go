@@ -105,7 +105,7 @@ func LoadConfig() {
 			//Search for sentinels
 			for _, e := range os.Environ() {
 				if strings.HasPrefix(e, "TIX_Redis_Sentinel_Endpoint_") {
-					value := strings.Split(e, "=")[1]
+					value := strings.Join(strings.Split(e, "=")[1:], "=")
 					CurrentConfig.Redis.Sentinel.Endpoints = append(CurrentConfig.Redis.Sentinel.Endpoints, value)
 				}
 			}
