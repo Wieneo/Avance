@@ -1,16 +1,24 @@
 package db
 
 import (
+	"errors"
+
 	"gitlab.gnaucke.dev/tixter/tixter-app/v2/models"
 )
 
 //GetProject returns the project struct to a given projectid
 func GetProject(ProjectID int) (models.Project, error) {
 	var Requested models.Project
-	err := Connection.QueryRow(`SELECT * FROM "Projects" WHERE "ID" = $1`, ProjectID).Scan(&Requested.ID, &Requested.Name, &Requested.Description)
+	rows, err := Connection.Query(`SELECT * FROM "Projects" WHERE "ID" = $1`, ProjectID)
 	if err != nil {
 		return Requested, err
 	}
+
+	if !rows.Next() {
+		return Requested, errors.New("Project not found")
+	}
+
+	rows.Scan(&Requested.ID, &Requested.Name, &Requested.Description)
 	return Requested, nil
 }
 
