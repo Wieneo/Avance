@@ -7,7 +7,7 @@ import (
 )
 
 //GetProject returns the project struct to a given projectid
-func GetProject(ProjectID int) (models.Project, error) {
+func GetProject(ProjectID int64) (models.Project, error) {
 	var Requested models.Project
 	rows, err := Connection.Query(`SELECT * FROM "Projects" WHERE "ID" = $1`, ProjectID)
 	if err != nil {

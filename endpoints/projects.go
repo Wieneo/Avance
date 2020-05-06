@@ -35,7 +35,7 @@ func GetProjects(w http.ResponseWriter, r *http.Request) {
 func GetProjectQueues(w http.ResponseWriter, r *http.Request) {
 	if user, err := GetUser(r, w); err == nil {
 		//strconv should never throw error because http router expression specifies that only /api/v1/project/[0-9]{*}/queues should be sent here
-		projectid, _ := strconv.Atoi(strings.Split(r.RequestURI, "/")[4])
+		projectid, _ := strconv.ParseInt(strings.Split(r.RequestURI, "/")[4], 10, 64)
 		queues, err := perms.GetVisibleQueuesFromProject(user, projectid)
 		if err != nil {
 			w.WriteHeader(500)

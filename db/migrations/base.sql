@@ -53,7 +53,8 @@ ALTER TABLE public."Groups" ALTER COLUMN "ID" ADD GENERATED ALWAYS AS IDENTITY (
 
 CREATE TABLE public."Projects" (
     "ID" bigint NOT NULL,
-    "Name" text NOT NULL
+    "Name" text NOT NULL,
+    "Description" text NOT NULL
 );
 
 
@@ -109,7 +110,9 @@ CREATE TABLE public."Users" (
     "Username" text NOT NULL,
     "Password" text NOT NULL,
     "Mail" text NOT NULL,
-    "Permissions" json NOT NULL
+    "Permissions" json NOT NULL,
+    "Firstname" text NOT NULL,
+    "Lastname" text NOT NULL
 );
 
 
@@ -168,95 +171,6 @@ ALTER TABLE public."map_User_Group" ALTER COLUMN "ID" ADD GENERATED ALWAYS AS ID
 
 
 --
--- Data for Name: Groups; Type: TABLE DATA; Schema: public; Owner: tixter
---
-
-COPY public."Groups" ("ID", "Name", "Permissions") FROM stdin;
-1	Developers	{\n    "AccessTo":{\n        "Projects":[\n            {\n                "ProjectID": 1,\n                "CanSee": true\n            },\n            {\n                "ProjectID": 2,\n                "CanSee": true\n            }\n        ]\n    }\n}
-\.
-
-
---
--- Data for Name: Projects; Type: TABLE DATA; Schema: public; Owner: tixter
---
-
-COPY public."Projects" ("ID", "Name") FROM stdin;
-1	DEV
-2	Debug
-\.
-
-
---
--- Data for Name: Queue; Type: TABLE DATA; Schema: public; Owner: tixter
---
-
-COPY public."Queue" ("ID", "Name", "Project") FROM stdin;
-\.
-
-
---
--- Data for Name: Users; Type: TABLE DATA; Schema: public; Owner: tixter
---
-
-COPY public."Users" ("ID", "Username", "Password", "Mail", "Permissions") FROM stdin;
-1	Admin	$2y$12$ghd7daO/gSufBzmFzJZSYuv7HRplIia1kktycoELfEfGhiIromR1u	johann@gnaucke.com	{\n    "AccessTo":{\n        "Projects":[\n            {\n                "ProjectID": 2,\n                "CanSee": true\n            }\n        ]\n    }\n}
-\.
-
-
---
--- Data for Name: Version; Type: TABLE DATA; Schema: public; Owner: tixter
---
-
-COPY public."Version" ("Schema") FROM stdin;
-5
-\.
-
-
---
--- Data for Name: map_User_Group; Type: TABLE DATA; Schema: public; Owner: tixter
---
-
-COPY public."map_User_Group" ("ID", "UserID", "GroupID") FROM stdin;
-2	1	1
-\.
-
-
---
--- Name: Groups_ID_seq; Type: SEQUENCE SET; Schema: public; Owner: tixter
---
-
-SELECT pg_catalog.setval('public."Groups_ID_seq"', 1, true);
-
-
---
--- Name: Projects_ID_seq; Type: SEQUENCE SET; Schema: public; Owner: tixter
---
-
-SELECT pg_catalog.setval('public."Projects_ID_seq"', 2, true);
-
-
---
--- Name: Queue_ID_seq; Type: SEQUENCE SET; Schema: public; Owner: tixter
---
-
-SELECT pg_catalog.setval('public."Queue_ID_seq"', 1, false);
-
-
---
--- Name: Users_ID_seq; Type: SEQUENCE SET; Schema: public; Owner: tixter
---
-
-SELECT pg_catalog.setval('public."Users_ID_seq"', 1, true);
-
-
---
--- Name: map_User_Group_ID_seq; Type: SEQUENCE SET; Schema: public; Owner: tixter
---
-
-SELECT pg_catalog.setval('public."map_User_Group_ID_seq"', 2, true);
-
-
---
 -- Name: Groups Groups_pkey; Type: CONSTRAINT; Schema: public; Owner: tixter
 --
 
@@ -294,6 +208,13 @@ ALTER TABLE ONLY public."Users"
 
 ALTER TABLE ONLY public."map_User_Group"
     ADD CONSTRAINT "map_User_Group_pkey" PRIMARY KEY ("ID");
+
+
+--
+-- Name: None; Type: INDEX; Schema: public; Owner: tixter
+--
+
+CREATE INDEX "None" ON public."Queue" USING btree ("Project");
 
 
 --

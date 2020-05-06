@@ -2,7 +2,7 @@ package models
 
 //User is the default user struct from the database
 type User struct {
-	ID          int
+	ID          int64
 	Username    string
 	Mail        string
 	Permissions Permissions
@@ -12,21 +12,21 @@ type User struct {
 
 //Group is the default Group struct from the database
 type Group struct {
-	ID          int
+	ID          int64
 	Name        string
 	Permissions Permissions
 }
 
 //Project is the default Project struct from the database
 type Project struct {
-	ID          int
+	ID          int64
 	Name        string
 	Description string
 }
 
 //Queue is the default Queue struct from the database
 type Queue struct {
-	ID      int
+	ID      int64
 	Name    string
 	Project Project
 }
@@ -46,7 +46,7 @@ type Permissions struct {
 
 //ProjectPermission stores the permissions given to a single project
 type ProjectPermission struct {
-	ProjectID            int
+	ProjectID            int64
 	CanSee               bool
 	CanModify            bool
 	CanChangePermissions bool
@@ -57,7 +57,7 @@ type ProjectPermission struct {
 
 //QueuePermission stores the permissions given to a single queue
 type QueuePermission struct {
-	QueueID              int
+	QueueID              int64
 	CanSee               bool
 	CanCreateTicket      bool
 	CanEditTicket        bool

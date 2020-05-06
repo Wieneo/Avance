@@ -15,11 +15,12 @@ type SampleConfig struct {
 	Debug    bool
 	Port     int
 	Postgres struct {
-		Host     string
-		Port     int
-		Username string
-		Password string
-		Database string
+		ConnectionString string
+		Host             string
+		Port             int
+		Username         string
+		Password         string
+		Database         string
 	}
 	Redis struct {
 		Host     string
@@ -66,10 +67,14 @@ func LoadConfig() {
 			CurrentConfig.Port = 8000
 		}
 
-		CurrentConfig.Postgres.Host = os.Getenv("TIX_Postgres_Host")
-		CurrentConfig.Postgres.Username = os.Getenv("TIX_Postgres_Username")
-		CurrentConfig.Postgres.Password = os.Getenv("TIX_Postgres_Password")
-		CurrentConfig.Postgres.Database = os.Getenv("TIX_Postgres_Database")
+		if len(os.Getenv("DATABASE_URL")) == 0 {
+			CurrentConfig.Postgres.Host = os.Getenv("TIX_Postgres_Host")
+			CurrentConfig.Postgres.Username = os.Getenv("TIX_Postgres_Username")
+			CurrentConfig.Postgres.Password = os.Getenv("TIX_Postgres_Password")
+			CurrentConfig.Postgres.Database = os.Getenv("TIX_Postgres_Database")
+		} else {
+			CurrentConfig.Postgres.ConnectionString = os.Getenv("DATABASE_URL")
+		}
 
 		//Parse Postgres Port to int
 		CurrentConfig.Postgres.Port, Error = strconv.Atoi(os.Getenv("TIX_Postgres_Port"))
