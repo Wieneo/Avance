@@ -14,7 +14,7 @@ func GetProfile(w http.ResponseWriter, r *http.Request) {
 	user, err := GetUser(r, w)
 	if err != nil {
 		w.WriteHeader(500)
-		dev.ReportError(w, err.Error())
+		dev.ReportError(err, w, err.Error())
 	}
 
 	json.NewEncoder(w).Encode(struct {
