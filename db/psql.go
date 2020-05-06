@@ -7,9 +7,11 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 
 	"gitlab.gnaucke.dev/tixter/tixter-app/v2/config"
 	"gitlab.gnaucke.dev/tixter/tixter-app/v2/dev"
+	"gitlab.gnaucke.dev/tixter/tixter-app/v2/models"
 )
 
 //Connection stores the current connection to postgres
@@ -19,8 +21,14 @@ var Connection *sql.DB
 func Init() {
 	dev.LogInfo("Postgres is being initialized")
 	//FROM: https://godoc.org/github.com/lib/pq
-	//ToDo: Postgres Port is currently ignored!
-	connStr := fmt.Sprint("postgres://", config.CurrentConfig.Postgres.Username, ":", config.CurrentConfig.Postgres.Password, "@", config.CurrentConfig.Postgres.Host, ":", config.CurrentConfig.Postgres.Port, "/", config.CurrentConfig.Postgres.Database, "?sslmode=disable")
+	connStr := "ERROR"
+	if len(config.CurrentConfig.Postgres.ConnectionString) == 0 {
+		connStr = fmt.Sprint("postgres://", config.CurrentConfig.Postgres.Username, ":", config.CurrentConfig.Postgres.Password, "@", config.CurrentConfig.Postgres.Host, ":", config.CurrentConfig.Postgres.Port, "/", config.CurrentConfig.Postgres.Database, "?sslmode=disable")
+	} else {
+		connStr = config.CurrentConfig.Postgres.ConnectionString + "?sslmode=disable"
+		dev.LogInfo("DATABASE_URL was set! Using that instead of TIX_Postgres_*")
+	}
+
 	dev.LogDebug("Connecting to ", connStr)
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
@@ -28,7 +36,6 @@ func Init() {
 		//Program will terminate here
 	}
 	Connection = db
-	dev.LogInfo("-- Connection to Postgres established --")
 	migrate()
 }
 
@@ -39,7 +46,15 @@ func migrate() {
 	var currentVersion int
 	rows, err := Connection.Query(`SELECT "Schema" FROM "Version"`)
 	if err != nil {
-		dev.LogFatal("Prepare failed:", err)
+		dev.LogError(err.Error())
+		//If table doesn't exist
+		if strings.Contains(err.Error(), "does not exist") {
+			deploy()
+			migrate()
+			return
+		}
+
+		dev.LogFatal(err.Error())
 	}
 	if !rows.Next() {
 		dev.LogFatal("Version Table is empty! Something went horribly wrong... Check your database.")
@@ -93,4 +108,52 @@ func migrate() {
 	} else {
 		dev.LogInfo("No migrations needed!")
 	}
+}
+
+func deploy() {
+	dev.LogInfo("Trying automatic deploy...")
+	dev.LogInfo("Looking for other/remaining tables")
+	rows, err := Connection.Query("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' ORDER BY table_name;")
+	if err != nil {
+		dev.LogFatal("Couldn't read schema! Please check permissions and roles!")
+	}
+
+	if rows.Next() {
+		dev.LogFatal("Schema not empty! Not deploying due to safety concerns")
+	}
+
+	rows.Close()
+
+	cwd, _ := os.Getwd()
+	rawBytes, err := ioutil.ReadFile(cwd + "/db/migrations/base.sql")
+	if err != nil {
+		dev.LogFatal("Couldn't read " + cwd + "/db/migrations/base.sql! Please check permissions and roles!")
+	}
+
+	_, err = Connection.Query(string(rawBytes))
+	if err != nil {
+		dev.LogFatal("Couldn't deploy schema!", err.Error())
+	}
+
+	dev.LogInfo("Schema deployed. Waiting 5 Seconds until restarting migration process")
+	time.Sleep(5 * time.Second)
+
+	dev.LogInfo("Setting default schema version")
+	_, err = Connection.Exec(`INSERT INTO "Version" VALUES ('0')`)
+	if err != nil {
+		dev.LogFatal("Couldn't set schema version:", err.Error())
+	}
+
+	_, err = CreateUser(models.User{
+		Username:    "Admin",
+		Firstname:   "Admin",
+		Lastname:    "istrator",
+		Mail:        "root@localhost",
+		Permissions: models.Permissions{},
+	}, "tixter")
+
+	if err != nil {
+		dev.LogFatal("Couldn't create administrator!", err.Error())
+	}
+
 }

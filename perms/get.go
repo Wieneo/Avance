@@ -36,7 +36,7 @@ func GetVisibleProjects(User models.User) ([]models.Project, error) {
 }
 
 //GetVisibleQueuesFromProject returns all queues visible for the given user
-func GetVisibleQueuesFromProject(User models.User, ProjectID int) ([]models.Queue, error) {
+func GetVisibleQueuesFromProject(User models.User, ProjectID int64) ([]models.Queue, error) {
 	Perms, err := CombinePermissions(User)
 	if err != nil {
 		return make([]models.Queue, 0), err

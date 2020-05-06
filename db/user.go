@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 
 	"gitlab.gnaucke.dev/tixter/tixter-app/v2/models"
+	"golang.org/x/crypto/bcrypt"
 )
 
 //GetUser returns the user struct from the database
@@ -43,4 +44,25 @@ func GetGroups(User models.User) ([]models.Group, error) {
 
 	rows.Close()
 	return Groups, nil
+}
+
+//CreateUser creates a user in the database
+func CreateUser(User models.User, Password string) (int64, error) {
+	hash, err := bcrypt.GenerateFromPassword([]byte(Password), 14)
+	if err != nil {
+		return 0, err
+	}
+
+	permsJSON, err := json.Marshal(User.Permissions)
+	if err != nil {
+		return 0, err
+	}
+
+	var newID int64
+	err = Connection.QueryRow(`INSERT INTO "Users" ("Username", "Password", "Mail", "Permissions", "Firstname", "Lastname") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "ID"`, User.Username, string(hash), User.Mail, permsJSON, User.Firstname, User.Lastname).Scan(&newID)
+	if err != nil {
+		return 0, err
+	}
+
+	return newID, nil
 }
