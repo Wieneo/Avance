@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/getsentry/sentry-go"
 	"gitlab.gnaucke.dev/tixter/tixter-app/v2/dev"
 )
 
@@ -31,6 +32,10 @@ type SampleConfig struct {
 			Master    string
 			Endpoints []string
 		}
+	}
+	Sentry struct {
+		DSN         string
+		Environment string
 	}
 }
 
@@ -117,17 +122,24 @@ func LoadConfig() {
 
 		}
 
+		CurrentConfig.Sentry.DSN = os.Getenv("TIX_Sentry_DSN")
+		CurrentConfig.Sentry.Environment = os.Getenv("TIX_Sentry_Environment")
+		if len(CurrentConfig.Sentry.Environment) == 0 {
+			CurrentConfig.Sentry.Environment = os.Getenv("GITLAB_ENVIRONMENT_NAME")
+			dev.LogInfo("Used GITLAB_ENVIRONMENT_NAME as Sentry Environment")
+		}
+
 	} else {
 		dir, _ := os.Getwd()
 		dev.LogInfo("Using ", dir+"/config/config.json", " for configuration")
 		rawBytes, err := ioutil.ReadFile(dir + "/config/config.json")
 		if err != nil {
-			dev.LogFatal("Couldn't read config:", err.Error())
+			dev.LogFatal(err, "Couldn't read config:", err.Error())
 			return
 		}
 		err = json.Unmarshal(rawBytes, &CurrentConfig)
 		if err != nil {
-			dev.LogFatal("Couldn't read config:", err.Error())
+			dev.LogFatal(err, "Couldn't read config:", err.Error())
 			return
 		}
 		dev.DeubgLogging = CurrentConfig.Debug
@@ -137,6 +149,20 @@ func LoadConfig() {
 	if CurrentConfig.Redis.Sentinel.Enabled {
 		dev.LogInfo(len(CurrentConfig.Redis.Sentinel.Endpoints), "Redis Sentinel Nodes configured")
 		dev.LogInfo("Looking for", CurrentConfig.Redis.Sentinel.Master, "as master")
+	}
+
+	if len(CurrentConfig.Sentry.DSN) == 0 {
+		dev.LogInfo("Sentry was not configured to report errors!")
+	} else {
+		dev.LogInfo("Initializing Sentry")
+		err := sentry.Init(sentry.ClientOptions{
+			Dsn:         CurrentConfig.Sentry.DSN,
+			Environment: CurrentConfig.Sentry.Environment,
+		})
+
+		if err != nil {
+			dev.LogFatal(err, "Couldn't initialize sentry:", err.Error())
+		}
 	}
 
 	dev.LogInfo("Config was read completely!")

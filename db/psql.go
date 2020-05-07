@@ -32,7 +32,7 @@ func Init() {
 	dev.LogDebug("Connecting to ", connStr)
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
-		dev.LogFatal("Couldn't initialize Postgres: ", err)
+		dev.LogFatal(err, "Couldn't initialize Postgres: ", err)
 		//Program will terminate here
 	}
 	Connection = db
@@ -46,7 +46,7 @@ func migrate() {
 	var currentVersion int
 	rows, err := Connection.Query(`SELECT "Schema" FROM "Version"`)
 	if err != nil {
-		dev.LogError(err.Error())
+		dev.LogError(err, err.Error())
 		//If table doesn't exist
 		if strings.Contains(err.Error(), "does not exist") {
 			deploy()
@@ -54,21 +54,21 @@ func migrate() {
 			return
 		}
 
-		dev.LogFatal(err.Error())
+		dev.LogFatal(err, err.Error())
 	}
 	if !rows.Next() {
-		dev.LogFatal("Version Table is empty! Something went horribly wrong... Check your database.")
+		dev.LogFatal(err, "Version Table is empty! Something went horribly wrong... Check your database.")
 	}
 
 	//Scan returns error
 	if rows.Scan(&currentVersion) != nil {
-		dev.LogFatal("Version Table is malformed! Something went horribly wrong... Check your database.")
+		dev.LogFatal(err, "Version Table is malformed! Something went horribly wrong... Check your database.")
 	}
 
 	cwd, _ := os.Getwd()
 	files, err := ioutil.ReadDir(fmt.Sprint(cwd, "/db/migrations/"))
 	if err != nil {
-		dev.LogFatal("Couldn't find/read migrations: ", err.Error())
+		dev.LogFatal(err, "Couldn't find/read migrations: ", err.Error())
 	}
 
 	var newestVersion int
@@ -92,17 +92,17 @@ func migrate() {
 			dev.LogInfo("Applying", migrationsAvailable[currentVersion])
 			rawBytes, err := ioutil.ReadFile(cwd + "/db/migrations/" + migrationsAvailable[currentVersion])
 			if err != nil {
-				dev.LogFatal("Couldn't read migration:", err.Error())
+				dev.LogFatal(err, "Couldn't read migration:", err.Error())
 			}
 
 			_, err = Connection.Exec(string(rawBytes))
 			if err != nil {
-				dev.LogFatal("Couldn't apply migration:", err.Error())
+				dev.LogFatal(err, "Couldn't apply migration:", err.Error())
 			}
 
 			_, err = Connection.Exec(`UPDATE "Version" SET "Schema" = $1`, currentVersion)
 			if err != nil {
-				dev.LogFatal("Couldn't apply migration:", err.Error())
+				dev.LogFatal(err, "Couldn't apply migration:", err.Error())
 			}
 		}
 	} else {
@@ -115,11 +115,11 @@ func deploy() {
 	dev.LogInfo("Looking for other/remaining tables")
 	rows, err := Connection.Query("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' ORDER BY table_name;")
 	if err != nil {
-		dev.LogFatal("Couldn't read schema! Please check permissions and roles!")
+		dev.LogFatal(err, "Couldn't read schema! Please check permissions and roles!")
 	}
 
 	if rows.Next() {
-		dev.LogFatal("Schema not empty! Not deploying due to safety concerns")
+		dev.LogFatal(err, "Schema not empty! Not deploying due to safety concerns")
 	}
 
 	rows.Close()
@@ -127,12 +127,12 @@ func deploy() {
 	cwd, _ := os.Getwd()
 	rawBytes, err := ioutil.ReadFile(cwd + "/db/migrations/base.sql")
 	if err != nil {
-		dev.LogFatal("Couldn't read " + cwd + "/db/migrations/base.sql! Please check permissions and roles!")
+		dev.LogFatal(err, "Couldn't read "+cwd+"/db/migrations/base.sql! Please check permissions and roles!")
 	}
 
 	_, err = Connection.Query(string(rawBytes))
 	if err != nil {
-		dev.LogFatal("Couldn't deploy schema!", err.Error())
+		dev.LogFatal(err, "Couldn't deploy schema!", err.Error())
 	}
 
 	dev.LogInfo("Schema deployed. Waiting 5 Seconds until restarting migration process")
@@ -141,7 +141,7 @@ func deploy() {
 	dev.LogInfo("Setting default schema version")
 	_, err = Connection.Exec(`INSERT INTO "Version" VALUES ('0')`)
 	if err != nil {
-		dev.LogFatal("Couldn't set schema version:", err.Error())
+		dev.LogFatal(err, "Couldn't set schema version:", err.Error())
 	}
 
 	_, err = CreateUser(models.User{
@@ -153,7 +153,7 @@ func deploy() {
 	}, "tixter")
 
 	if err != nil {
-		dev.LogFatal("Couldn't create administrator!", err.Error())
+		dev.LogFatal(err, "Couldn't create administrator!", err.Error())
 	}
 
 }

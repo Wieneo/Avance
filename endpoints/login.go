@@ -16,7 +16,7 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 	//Check if a body was sent with the request
 	if r.Body == nil {
 		w.WriteHeader(400)
-		dev.ReportError(w, "You must send a body with your request!")
+		dev.ReportUserError(w, "You must send a body with your request!")
 		return
 	}
 
@@ -29,20 +29,20 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 	body, _ := ioutil.ReadAll(r.Body)
 	if err := json.Unmarshal(body, &loginRequest); err != nil {
 		w.WriteHeader(400)
-		dev.ReportError(w, "Invalid Body recieved. Please check your JSON.")
+		dev.ReportError(err, w, "Invalid Body recieved. Please check your JSON.")
 		return
 	}
 
 	//Select ID + Password from Database
 	if rows, err := db.Connection.Query(`SELECT "ID","Password" FROM "Users" WHERE "Username" = $1`, loginRequest.Username); err != nil {
 		w.WriteHeader(500)
-		dev.ReportError(w, "An error happened on our side :( Please try again later!")
-		dev.LogError(err.Error())
+		dev.ReportError(err, w, "An error happened on our side :( Please try again later!")
+		dev.LogError(err, err.Error())
 	} else {
 		//If the query returned an empty result set
 		if !rows.Next() {
 			w.WriteHeader(401)
-			dev.ReportError(w, "Combination of username and password doesn't match")
+			dev.ReportError(err, w, "Combination of username and password doesn't match")
 			return
 		}
 
@@ -51,8 +51,8 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 
 		if err := rows.Scan(&UserID, &PasswordHash); err != nil {
 			w.WriteHeader(500)
-			dev.ReportError(w, "An error happened on our side :( Please try again later!")
-			dev.LogError(err.Error())
+			dev.ReportError(err, w, "An error happened on our side :( Please try again later!")
+			dev.LogError(err, err.Error())
 			return
 		}
 
@@ -61,7 +61,7 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 		//Compare password from request with hashed password from query
 		if correct := bcrypt.CompareHashAndPassword([]byte(PasswordHash), []byte(loginRequest.Password)); correct != nil {
 			w.WriteHeader(401)
-			dev.ReportError(w, "Combination of username and password doesn't match")
+			dev.ReportError(err, w, "Combination of username and password doesn't match")
 			return
 		}
 
@@ -69,8 +69,8 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 		SessionKey, err := redis.CreateSession(UserID)
 		if err != nil {
 			w.WriteHeader(500)
-			dev.ReportError(w, "An error happened on our side :( Please try again later!")
-			dev.LogError(err.Error())
+			dev.ReportError(err, w, "An error happened on our side :( Please try again later!")
+			dev.LogError(err, err.Error())
 			return
 		}
 
@@ -92,7 +92,7 @@ func LogoutUser(w http.ResponseWriter, r *http.Request) {
 		keks, err := r.Cookie("session")
 		if err != nil {
 			w.WriteHeader(500)
-			dev.ReportError(w, err.Error())
+			dev.ReportError(err, w, err.Error())
 			return
 		}
 
@@ -101,14 +101,14 @@ func LogoutUser(w http.ResponseWriter, r *http.Request) {
 
 	if len(session) == 0 {
 		w.WriteHeader(404)
-		dev.ReportError(w, "No session found")
+		dev.ReportUserError(w, "No session found")
 		return
 	}
 
 	if redis.SessionValid(session) {
 		if err := redis.DestroySession(session); err != nil {
 			w.WriteHeader(500)
-			dev.ReportError(w, err.Error())
+			dev.ReportError(err, w, err.Error())
 			return
 		}
 	}

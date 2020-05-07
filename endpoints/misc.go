@@ -15,14 +15,14 @@ func GetUser(r *http.Request, w http.ResponseWriter) (models.User, error) {
 	userid, err := GetUserID(r)
 	if err != nil {
 		w.WriteHeader(500)
-		dev.ReportError(w, err.Error())
+		dev.ReportError(err, w, err.Error())
 		return models.User{}, err
 	}
 
 	user, err := db.GetUser(userid)
 	if err != nil {
 		w.WriteHeader(500)
-		dev.ReportError(w, err.Error())
+		dev.ReportError(err, w, err.Error())
 		return models.User{}, err
 	}
 
