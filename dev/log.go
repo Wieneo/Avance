@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 	"time"
+
+	"github.com/getsentry/sentry-go"
 )
 
 //DebugLogging should be set to true if app runs in debug mode
@@ -22,13 +24,17 @@ func LogWarn(Message ...interface{}) {
 }
 
 //LogError logs with the info prefix
-func LogError(Message ...interface{}) {
+func LogError(Error error, Message ...interface{}) {
 	fmt.Printf("[%s] [ERROR] %v\n", dateForLog(), Message)
+	sentry.CaptureException(Error)
+	sentry.Flush(time.Second * 5)
 }
 
 //LogFatal logs with the info prefix
-func LogFatal(Message ...interface{}) {
+func LogFatal(Error error, Message ...interface{}) {
 	fmt.Printf("[%s] [!FATAL!] %v\n", dateForLog(), Message)
+	sentry.CaptureException(Error)
+	sentry.Flush(time.Second * 5)
 	os.Exit(255)
 }
 

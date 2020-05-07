@@ -35,7 +35,7 @@ func Init() {
 
 	_, err := connection.Ping().Result()
 	if err != nil {
-		dev.LogFatal("Couldn't connect to redis: ", err.Error())
+		dev.LogFatal(err, "Couldn't connect to redis: ", err.Error())
 	}
 
 	dev.LogInfo("Connection to redis established")
@@ -91,6 +91,6 @@ func refreshSession(Session string) {
 	//The user id is contained inside the sessionkey (Example: session_1_as231fsdf413 -> 1 will be the user id)
 	var Value = strings.Split(strings.Split(Session, "session_")[1], "_")[0]
 	if err := connection.Set(Session, Value, time.Hour).Err(); err != nil {
-		dev.LogError("Couldn't refresh session \""+Session+"\" -> ", err.Error())
+		dev.LogError(err, "Couldn't refresh session \""+Session+"\" -> ", err.Error())
 	}
 }

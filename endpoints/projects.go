@@ -17,7 +17,7 @@ func GetProjects(w http.ResponseWriter, r *http.Request) {
 		projects, err := perms.GetVisibleProjects(user)
 		if err != nil {
 			w.WriteHeader(500)
-			dev.ReportError(w, err.Error())
+			dev.ReportError(err, w, err.Error())
 			return
 		}
 
@@ -39,7 +39,7 @@ func GetProjectQueues(w http.ResponseWriter, r *http.Request) {
 		queues, err := perms.GetVisibleQueuesFromProject(user, projectid)
 		if err != nil {
 			w.WriteHeader(500)
-			dev.ReportError(w, err.Error())
+			dev.ReportError(err, w, err.Error())
 			return
 		}
 
