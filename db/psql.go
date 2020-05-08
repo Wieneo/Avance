@@ -89,20 +89,23 @@ func migrate() {
 	if currentVersion < newestVersion {
 		for currentVersion < newestVersion {
 			currentVersion++
-			dev.LogInfo("Applying", migrationsAvailable[currentVersion])
-			rawBytes, err := ioutil.ReadFile(cwd + "/db/migrations/" + migrationsAvailable[currentVersion])
-			if err != nil {
-				dev.LogFatal(err, "Couldn't read migration:", err.Error())
-			}
+			//Ignore versions that arent mapped
+			if len(migrationsAvailable[currentVersion]) > 0{
+				dev.LogInfo("Applying", migrationsAvailable[currentVersion])
+				rawBytes, err := ioutil.ReadFile(cwd + "/db/migrations/" + migrationsAvailable[currentVersion])
+				if err != nil {
+					dev.LogFatal(err, "Couldn't read migration:", err.Error())
+				}
 
-			_, err = Connection.Exec(string(rawBytes))
-			if err != nil {
-				dev.LogFatal(err, "Couldn't apply migration:", err.Error())
-			}
+				_, err = Connection.Exec(string(rawBytes))
+				if err != nil {
+					dev.LogFatal(err, "Couldn't apply migration:", err.Error())
+				}
 
-			_, err = Connection.Exec(`UPDATE "Version" SET "Schema" = $1`, currentVersion)
-			if err != nil {
-				dev.LogFatal(err, "Couldn't apply migration:", err.Error())
+				_, err = Connection.Exec(`UPDATE "Version" SET "Schema" = $1`, currentVersion)
+				if err != nil {
+					dev.LogFatal(err, "Couldn't apply migration:", err.Error())
+				}
 			}
 		}
 	} else {
