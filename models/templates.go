@@ -40,6 +40,15 @@ type Permissions struct {
 	}
 }
 
+//Severity is the default Severity struct from the database
+type Severity struct {
+	ID           int
+	Enabled      bool
+	Name         string
+	DisplayColor string
+	Priority     int
+}
+
 /*
 	ALWAYS!! If a new permission is added here! PLEASE add it to perms/combine.go
 */
