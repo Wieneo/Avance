@@ -28,7 +28,7 @@ func GetSeverities(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		if err != nil {
 			w.WriteHeader(500)
-			dev.ReportError(err, w, "showDisabled Argument is not a boolean")
+			dev.ReportError(err, w, "Internal Error:"+err.Error())
 			return
 		}
 	}
