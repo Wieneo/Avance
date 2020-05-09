@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"gitlab.gnaucke.dev/tixter/tixter-app/v2/db"
 	"gitlab.gnaucke.dev/tixter/tixter-app/v2/models"
@@ -24,13 +25,20 @@ func GetSeverities(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	severities, err := db.GetAllSeverities(showDisabled)
+	projectid, _ := strconv.ParseInt(strings.Split(r.URL.String(), "/")[4], 10, 64)
+	project, err := db.GetProject(projectid)
+
 	if err != nil {
-		if err != nil {
-			w.WriteHeader(500)
-			dev.ReportError(err, w, "showDisabled Argument is not a boolean")
-			return
-		}
+		w.WriteHeader(404)
+		dev.ReportUserError(w, err.Error())
+		return
+	}
+
+	severities, err := db.GetSeverities(project, showDisabled)
+	if err != nil {
+		w.WriteHeader(500)
+		dev.ReportError(err, w, err.Error())
+		return
 	}
 
 	json.NewEncoder(w).Encode(struct {
