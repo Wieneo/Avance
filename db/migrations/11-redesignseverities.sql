@@ -3,6 +3,10 @@
 -- to the script to ensure changes are applied in the correct order.
 -- Please report an issue for any failure with the reproduction steps. 
 BEGIN;
+CREATE INDEX "None"
+    ON public."Queue"("Project");
+DROP INDEX public."None";
+
 -- WARNING:
 -- The SQL statement below would normally be used to alter the datatype for the Enabled column, however,
 -- the current datatype cannot be cast to the target datatype so this conversion cannot be made automatically.
@@ -32,7 +36,5 @@ ALTER TABLE public."Severities"
     ON UPDATE NO ACTION
     ON DELETE CASCADE
     NOT VALID;
-CREATE INDEX "None"
-    ON public."Severities"("Project");
 
 END;
