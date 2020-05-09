@@ -42,7 +42,7 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 		//If the query returned an empty result set
 		if !rows.Next() {
 			w.WriteHeader(401)
-			dev.ReportError(err, w, "Combination of username and password doesn't match")
+			dev.ReportUserError(w, "Combination of username and password doesn't match")
 			return
 		}
 
@@ -61,7 +61,7 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 		//Compare password from request with hashed password from query
 		if correct := bcrypt.CompareHashAndPassword([]byte(PasswordHash), []byte(loginRequest.Password)); correct != nil {
 			w.WriteHeader(401)
-			dev.ReportError(err, w, "Combination of username and password doesn't match")
+			dev.ReportUserError(w, "Combination of username and password doesn't match")
 			return
 		}
 
