@@ -20,6 +20,7 @@ func GetSeverities(Project models.Project, ShowDisabled bool) ([]models.Severity
 	for rows.Next() {
 		var singleSeverity models.Severity
 		rows.Scan(&singleSeverity.ID, &singleSeverity.Enabled, &singleSeverity.Name, &singleSeverity.DisplayColor, &singleSeverity.Priority)
+		severities = append(severities, singleSeverity)
 	}
 
 	return severities, nil
