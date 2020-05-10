@@ -31,11 +31,17 @@ func GetSeverities(w http.ResponseWriter, r *http.Request) {
 	}
 
 	projectid, _ := strconv.ParseInt(strings.Split(r.URL.String(), "/")[4], 10, 64)
-	project, err := db.GetProject(projectid)
+	project, found, err := db.GetProject(projectid)
+
+	if !found {
+		w.WriteHeader(404)
+		dev.ReportUserError(w, "Project not found")
+		return
+	}
 
 	if err != nil {
-		w.WriteHeader(404)
-		dev.ReportUserError(w, err.Error())
+		w.WriteHeader(500)
+		dev.ReportError(err, w, err.Error())
 		return
 	}
 
@@ -91,7 +97,13 @@ func CreateSeverity(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	project, err := db.GetProject(projectid)
+	project, found, err := db.GetProject(projectid)
+	if !found {
+		w.WriteHeader(404)
+		dev.ReportUserError(w, "Project not found")
+		return
+	}
+
 	if err != nil {
 		w.WriteHeader(500)
 		dev.ReportError(err, w, err.Error())
@@ -159,7 +171,13 @@ func DeleteSeverity(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	project, err := db.GetProject(projectid)
+	project, found, err := db.GetProject(projectid)
+	if !found {
+		w.WriteHeader(404)
+		dev.ReportUserError(w, "Project not found")
+		return
+	}
+
 	if err != nil {
 		w.WriteHeader(500)
 		dev.ReportError(err, w, err.Error())

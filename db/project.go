@@ -7,19 +7,19 @@ import (
 )
 
 //GetProject returns the project struct to a given projectid
-func GetProject(ProjectID int64) (models.Project, error) {
+func GetProject(ProjectID int64) (models.Project, bool, error) {
 	var Requested models.Project
 	rows, err := Connection.Query(`SELECT * FROM "Projects" WHERE "ID" = $1`, ProjectID)
 	if err != nil {
-		return Requested, err
+		return Requested, false, err
 	}
 
 	if !rows.Next() {
-		return Requested, errors.New("Project not found")
+		return Requested, false, errors.New("Project not found")
 	}
 
 	rows.Scan(&Requested.ID, &Requested.Name, &Requested.Description)
-	return Requested, nil
+	return Requested, true, nil
 }
 
 //GetAllProjects returns all projects

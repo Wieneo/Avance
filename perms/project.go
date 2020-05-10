@@ -22,10 +22,16 @@ func CheckAccessToProject(next http.Handler) http.Handler {
 		if matched, _ := regexp.MatchString("/api/v1/project/[0-9]*/", r.URL.String()); matched {
 			projectid, _ := strconv.ParseInt(strings.Split(r.URL.String(), "/")[4], 10, 64)
 
-			project, err := db.GetProject(projectid)
-			if err != nil {
+			project, found, err := db.GetProject(projectid)
+			if !found {
 				w.WriteHeader(404)
 				dev.ReportUserError(w, "Project not found")
+				return
+			}
+
+			if err != nil {
+				w.WriteHeader(500)
+				dev.ReportError(err, w, err.Error())
 				return
 			}
 
