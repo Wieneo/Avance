@@ -39,7 +39,7 @@ func GetSeverities(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	severities, err := db.GetSeverities(project, showDisabled)
+	severities, err := db.GetSeverities(project.ID, showDisabled)
 	if err != nil {
 		w.WriteHeader(500)
 		dev.ReportError(err, w, err.Error())
@@ -106,7 +106,7 @@ func CreateSeverity(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if perms.CanCreateSeverities {
-		severities, err := db.GetSeverities(project, true)
+		severities, err := db.GetSeverities(project.ID, true)
 		if err != nil {
 			w.WriteHeader(500)
 			dev.ReportError(err, w, err.Error())
@@ -143,6 +143,65 @@ func CreateSeverity(w http.ResponseWriter, r *http.Request) {
 	} else {
 		w.WriteHeader(401)
 		dev.ReportUserError(w, "You are not allowed to create severities in this project")
+		return
+	}
+}
+
+//DeleteSeverity deletes a severity
+func DeleteSeverity(w http.ResponseWriter, r *http.Request) {
+	projectid, _ := strconv.ParseInt(strings.Split(r.URL.String(), "/")[4], 10, 64)
+	severityid, _ := strconv.Atoi(strings.Split(r.URL.String(), "/")[6])
+
+	user, err := utils.GetUser(r, w)
+	if err != nil {
+		w.WriteHeader(500)
+		dev.ReportError(err, w, err.Error())
+		return
+	}
+
+	project, err := db.GetProject(projectid)
+	if err != nil {
+		w.WriteHeader(500)
+		dev.ReportError(err, w, err.Error())
+		return
+	}
+
+	perms, err := perms.GetPermissionsToProject(user, project)
+	if err != nil {
+		w.WriteHeader(500)
+		dev.ReportError(err, w, err.Error())
+		return
+	}
+
+	if perms.CanRemoveSeverities {
+		_, found, err := db.GetSeverity(projectid, severityid)
+		if err != nil {
+			w.WriteHeader(500)
+			dev.ReportError(err, w, err.Error())
+			return
+		}
+
+		if !found {
+			w.WriteHeader(404)
+			dev.ReportUserError(w, "Severity not found")
+			return
+		}
+
+		err = db.RemoveSeverity(projectid, severityid)
+		if err != nil {
+			w.WriteHeader(500)
+			dev.ReportError(err, w, err.Error())
+			return
+		}
+
+		json.NewEncoder(w).Encode(struct {
+			Severity string
+		}{
+			fmt.Sprintf("Severity %d deleted", severityid),
+		})
+	} else {
+		w.WriteHeader(401)
+		dev.ReportUserError(w, "You are not allowed to delete severities in this project")
 		return
 	}
 }
