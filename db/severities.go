@@ -25,3 +25,14 @@ func GetSeverities(Project models.Project, ShowDisabled bool) ([]models.Severity
 
 	return severities, nil
 }
+
+//CreateSeverity creates a severity in the database
+func CreateSeverity(Enabled bool, Name, DisplayColor string, Priority int, Project int64) (int, error) {
+	var newID int
+	err := Connection.QueryRow(`INSERT INTO "Severities" ("Enabled", "Name", "DisplayColor", "Priority", "Project") VALUES ($1, $2, $3, $4, $5) RETURNING "ID"`, Enabled, Name, DisplayColor, Priority, Project).Scan(&newID)
+	if err != nil {
+		return 0, err
+	}
+
+	return newID, nil
+}

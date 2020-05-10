@@ -33,11 +33,12 @@ func HTTPInit() {
 	router.HandleFunc("/api/v1/logout", endpoints.LogoutUser).Methods("GET")
 
 	router.HandleFunc("/api/v1/profile", endpoints.GetProfile).Methods("GET")
-	router.HandleFunc("/api/v1/projects", endpoints.GetProjects).Methods("GET")
 
 	//PROJECT APIs
+	router.HandleFunc("/api/v1/projects", endpoints.GetProjects).Methods("GET")
 	router.HandleFunc("/api/v1/project/{[0-9]{*}}/queues", endpoints.GetProjectQueues).Methods("GET")
 	router.HandleFunc("/api/v1/project/{[0-9]{*}}/severities", endpoints.GetSeverities).Methods("GET")
+	router.HandleFunc("/api/v1/project/{[0-9]{*}}/severities", endpoints.CreateSeverity).Methods("POST")
 
 	//Needs to be at the bottom!
 	router.HandleFunc("/", endpoints.ServeAppFrontend).Methods("GET")

@@ -62,6 +62,9 @@ type ProjectPermission struct {
 	CanCreateQueues      bool
 	CanModifyQueues      bool
 	CanRemoveQueues      bool
+	CanCreateSeverities  bool
+	CanModifySeverities  bool
+	CanRemoveSeverities  bool
 }
 
 //QueuePermission stores the permissions given to a single queue

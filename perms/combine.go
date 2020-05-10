@@ -44,6 +44,15 @@ func combinePermissions(User models.User) (models.Permissions, error) {
 				if k.CanRemoveQueues {
 					project.CanRemoveQueues = true
 				}
+				if k.CanCreateSeverities {
+					project.CanCreateSeverities = true
+				}
+				if k.CanModifySeverities {
+					project.CanModifySeverities = true
+				}
+				if k.CanRemoveSeverities {
+					project.CanRemoveSeverities = true
+				}
 			}
 		}
 
