@@ -12,7 +12,7 @@ func GetSeverities(Project models.Project, ShowDisabled bool) ([]models.Severity
 	If ShowDisabled is true it says "Enabled" can to be true and "Enabled" can be false (ShowDisabled Negative)
 	If ShowDisabled is false it says "Enabled" can to be true and "Enabled" can be true (ShowDisabled Negative)
 	*/
-	rows, err := Connection.Query(`SELECT "ID", "Enabled", "Name", "DisplayColor", "Priority" FROM "Severities" WHERE "Enabled" = true OR "Enabled" = $1 AND "Project" = $2`, !ShowDisabled, Project.ID)
+	rows, err := Connection.Query(`SELECT "ID", "Enabled", "Name", "DisplayColor", "Priority" FROM "Severities" WHERE ("Enabled" = true OR "Enabled" = $1) AND "Project" = $2`, !ShowDisabled, Project.ID)
 	if err != nil {
 		return severities, err
 	}

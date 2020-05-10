@@ -7,6 +7,8 @@ import (
 	"strconv"
 	"time"
 
+	"gitlab.gnaucke.dev/tixter/tixter-app/v2/perms"
+
 	"gitlab.gnaucke.dev/tixter/tixter-app/v2/config"
 	"gitlab.gnaucke.dev/tixter/tixter-app/v2/dev"
 	"gitlab.gnaucke.dev/tixter/tixter-app/v2/endpoints"
@@ -22,6 +24,8 @@ func HTTPInit() {
 	router.Use(loggingMiddleware)
 	router.Use(authorizationMiddleware)
 
+	router.Use(perms.CheckAccessToProject)
+
 	router.HandleFunc("/api/v1/health", endpoints.GetInstanceHealth).Methods("GET")
 	router.HandleFunc("/api/v1/session", serveSessionInfo).Methods("GET")
 	router.HandleFunc("/api/v1/login", endpoints.LoginUser).Methods("POST")
@@ -31,6 +35,7 @@ func HTTPInit() {
 	router.HandleFunc("/api/v1/profile", endpoints.GetProfile).Methods("GET")
 	router.HandleFunc("/api/v1/projects", endpoints.GetProjects).Methods("GET")
 
+	//PROJECT APIs
 	router.HandleFunc("/api/v1/project/{[0-9]{*}}/queues", endpoints.GetProjectQueues).Methods("GET")
 	router.HandleFunc("/api/v1/project/{[0-9]{*}}/severities", endpoints.GetSeverities).Methods("GET")
 

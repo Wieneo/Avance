@@ -6,7 +6,7 @@ import (
 )
 
 //CombinePermissions combines the permission from the user and the assigned groups to produce the highest permission set
-func CombinePermissions(User models.User) (models.Permissions, error) {
+func combinePermissions(User models.User) (models.Permissions, error) {
 	var PermissionSet models.Permissions
 	PermissionSet = User.Permissions
 
@@ -23,7 +23,7 @@ func CombinePermissions(User models.User) (models.Permissions, error) {
 		}
 
 		for _, k := range k.Permissions.AccessTo.Projects {
-			if found, project := containsProject(k, PermissionSet.AccessTo.Projects); !found {
+			if found, project := containsProjectPermission(k, PermissionSet.AccessTo.Projects); !found {
 				PermissionSet.AccessTo.Projects = append(PermissionSet.AccessTo.Projects, k)
 			} else {
 				if k.CanSee {
@@ -48,7 +48,7 @@ func CombinePermissions(User models.User) (models.Permissions, error) {
 		}
 
 		for _, k := range k.Permissions.AccessTo.Queues {
-			if found, project := containsQueue(k, PermissionSet.AccessTo.Queues); !found {
+			if found, project := containsQueuePermission(k, PermissionSet.AccessTo.Queues); !found {
 				PermissionSet.AccessTo.Queues = append(PermissionSet.AccessTo.Queues, k)
 			} else {
 				if k.CanSee {
@@ -73,7 +73,17 @@ func CombinePermissions(User models.User) (models.Permissions, error) {
 	return PermissionSet, nil
 }
 
-func containsProject(project models.ProjectPermission, projects []models.ProjectPermission) (bool, *models.ProjectPermission) {
+func containsProject(project models.Project, projects []models.ProjectPermission) (bool, *models.ProjectPermission) {
+	for i, k := range projects {
+		if k.ProjectID == project.ID {
+			return true, &projects[i]
+		}
+	}
+
+	return false, nil
+}
+
+func containsProjectPermission(project models.ProjectPermission, projects []models.ProjectPermission) (bool, *models.ProjectPermission) {
 	for i, k := range projects {
 		if k.ProjectID == project.ProjectID {
 			return true, &projects[i]
@@ -83,7 +93,7 @@ func containsProject(project models.ProjectPermission, projects []models.Project
 	return false, nil
 }
 
-func containsQueue(queue models.QueuePermission, queues []models.QueuePermission) (bool, *models.QueuePermission) {
+func containsQueuePermission(queue models.QueuePermission, queues []models.QueuePermission) (bool, *models.QueuePermission) {
 	for i, k := range queues {
 		if k.QueueID == queue.QueueID {
 			return true, &queues[i]
