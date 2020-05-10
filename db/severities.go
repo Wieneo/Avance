@@ -56,6 +56,12 @@ func CreateSeverity(Enabled bool, Name, DisplayColor string, Priority int, Proje
 	return newID, nil
 }
 
+//PatchSeverity updates the give severity
+func PatchSeverity(Severity models.Severity) error {
+	_, err := Connection.Exec(`UPDATE "Severities" SET "Enabled" = $1, "Name" = $2, "DisplayColor" = $3, "Priority" = $4 WHERE "ID" = $5`, Severity.Enabled, Severity.Name, Severity.DisplayColor, Severity.Priority, Severity.ID)
+	return err
+}
+
 //RemoveSeverity removes a severity
 func RemoveSeverity(Project int64, Severity int) error {
 	//I know that project isn't really needed as severity ids are unique anyway

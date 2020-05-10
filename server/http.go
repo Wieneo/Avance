@@ -39,6 +39,7 @@ func HTTPInit() {
 	router.HandleFunc("/api/v1/project/{[0-9]{*}}/queues", endpoints.GetProjectQueues).Methods("GET")
 	router.HandleFunc("/api/v1/project/{[0-9]{*}}/severities", endpoints.GetSeverities).Methods("GET")
 	router.HandleFunc("/api/v1/project/{[0-9]{*}}/severities", endpoints.CreateSeverity).Methods("POST")
+	router.HandleFunc("/api/v1/project/{[0-9]{*}}/severity/{[0-9]{*}}", endpoints.PatchSeverity).Methods("PATCH")
 	router.HandleFunc("/api/v1/project/{[0-9]{*}}/severity/{[0-9]{*}}", endpoints.DeleteSeverity).Methods("DELETE")
 
 	//Needs to be at the bottom!

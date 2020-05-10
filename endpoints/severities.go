@@ -33,15 +33,15 @@ func GetSeverities(w http.ResponseWriter, r *http.Request) {
 	projectid, _ := strconv.ParseInt(strings.Split(r.URL.String(), "/")[4], 10, 64)
 	project, found, err := db.GetProject(projectid)
 
-	if !found {
-		w.WriteHeader(404)
-		dev.ReportUserError(w, "Project not found")
-		return
-	}
-
 	if err != nil {
 		w.WriteHeader(500)
 		dev.ReportError(err, w, err.Error())
+		return
+	}
+
+	if !found {
+		w.WriteHeader(404)
+		dev.ReportUserError(w, "Project not found")
 		return
 	}
 
@@ -59,14 +59,16 @@ func GetSeverities(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+type severityWebRequest struct {
+	Enabled      bool
+	Name         string
+	DisplayColor string
+	Priority     int
+}
+
 //CreateSeverity creates a severity
 func CreateSeverity(w http.ResponseWriter, r *http.Request) {
-	var req struct {
-		Enabled      bool
-		Name         string
-		DisplayColor string
-		Priority     int
-	}
+	var req severityWebRequest
 
 	projectid, _ := strconv.ParseInt(strings.Split(r.URL.String(), "/")[4], 10, 64)
 
@@ -98,15 +100,15 @@ func CreateSeverity(w http.ResponseWriter, r *http.Request) {
 	}
 
 	project, found, err := db.GetProject(projectid)
-	if !found {
-		w.WriteHeader(404)
-		dev.ReportUserError(w, "Project not found")
-		return
-	}
-
 	if err != nil {
 		w.WriteHeader(500)
 		dev.ReportError(err, w, err.Error())
+		return
+	}
+
+	if !found {
+		w.WriteHeader(404)
+		dev.ReportUserError(w, "Project not found")
 		return
 	}
 
@@ -159,6 +161,104 @@ func CreateSeverity(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+//PatchSeverity updates a severity
+func PatchSeverity(w http.ResponseWriter, r *http.Request) {
+	var req severityWebRequest
+	projectid, _ := strconv.ParseInt(strings.Split(r.URL.String(), "/")[4], 10, 64)
+	severityid, _ := strconv.Atoi(strings.Split(r.URL.String(), "/")[6])
+
+	user, err := utils.GetUser(r, w)
+	if err != nil {
+		w.WriteHeader(500)
+		dev.ReportError(err, w, err.Error())
+		return
+	}
+
+	project, found, err := db.GetProject(projectid)
+	if err != nil {
+		w.WriteHeader(500)
+		dev.ReportError(err, w, err.Error())
+		return
+	}
+
+	if !found {
+		w.WriteHeader(404)
+		dev.ReportUserError(w, "Project not found")
+		return
+	}
+
+	perms, err := perms.GetPermissionsToProject(user, project)
+	if err != nil {
+		w.WriteHeader(500)
+		dev.ReportError(err, w, err.Error())
+		return
+	}
+
+	if perms.CanModifySeverities {
+		rawBytes, err := ioutil.ReadAll(r.Body)
+		if err != nil {
+			w.WriteHeader(500)
+			dev.ReportError(err, w, err.Error())
+			return
+		}
+
+		err = json.Unmarshal(rawBytes, &req)
+		if err != nil {
+			w.WriteHeader(400)
+			dev.ReportUserError(w, "Request is malformed: "+err.Error())
+			return
+		}
+
+		severity, found, err := db.GetSeverity(projectid, severityid)
+		if err != nil {
+			w.WriteHeader(500)
+			dev.ReportError(err, w, err.Error())
+			return
+		}
+
+		if !found {
+			w.WriteHeader(404)
+			dev.ReportUserError(w, "Severity not found")
+			return
+		}
+
+		//Now check if value was specified
+		if len(req.Name) > 0 {
+			severity.Name = req.Name
+		}
+
+		if len(req.DisplayColor) > 0 {
+			severity.DisplayColor = req.DisplayColor
+		}
+
+		//Check for occurence in string (request body) as we cant differenciate if the value was specified or not
+		if strings.Contains(string(rawBytes), "Enabled") {
+			severity.Enabled = req.Enabled
+		}
+
+		if strings.Contains(string(rawBytes), "Priority") {
+			severity.Priority = req.Priority
+		}
+
+		if err := db.PatchSeverity(severity); err != nil {
+			w.WriteHeader(500)
+			dev.ReportError(err, w, err.Error())
+			return
+		}
+
+		json.NewEncoder(w).Encode(struct {
+			Severity string
+		}{
+			fmt.Sprintf("Severity %d was updated", severityid),
+		})
+
+	} else {
+		w.WriteHeader(401)
+		dev.ReportUserError(w, "You are not allowed to patch severities in this project")
+		return
+	}
+}
+
 //DeleteSeverity deletes a severity
 func DeleteSeverity(w http.ResponseWriter, r *http.Request) {
 	projectid, _ := strconv.ParseInt(strings.Split(r.URL.String(), "/")[4], 10, 64)
@@ -172,15 +272,15 @@ func DeleteSeverity(w http.ResponseWriter, r *http.Request) {
 	}
 
 	project, found, err := db.GetProject(projectid)
-	if !found {
-		w.WriteHeader(404)
-		dev.ReportUserError(w, "Project not found")
-		return
-	}
-
 	if err != nil {
 		w.WriteHeader(500)
 		dev.ReportError(err, w, err.Error())
+		return
+	}
+
+	if !found {
+		w.WriteHeader(404)
+		dev.ReportUserError(w, "Project not found")
 		return
 	}
 
