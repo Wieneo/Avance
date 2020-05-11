@@ -42,14 +42,14 @@ func CheckAccessToProject(next http.Handler) http.Handler {
 				return
 			}
 
-			perms, err := GetPermissionsToProject(user, project)
+			allperms, perms, err := GetPermissionsToProject(user, project)
 			if err != nil {
 				w.WriteHeader(500)
 				dev.ReportError(err, w, err.Error())
 				return
 			}
 
-			if perms.CanSee {
+			if perms.CanSee || allperms.Admin {
 				next.ServeHTTP(w, r)
 			} else {
 				w.WriteHeader(401)
@@ -63,15 +63,15 @@ func CheckAccessToProject(next http.Handler) http.Handler {
 }
 
 //GetPermissionsToProject returns the ProjectPermission struct regarding the given user and project
-func GetPermissionsToProject(User models.User, Project models.Project) (*models.ProjectPermission, error) {
+func GetPermissionsToProject(User models.User, Project models.Project) (models.Permissions, *models.ProjectPermission, error) {
 	perms, err := combinePermissions(User)
 	if err != nil {
-		return &models.ProjectPermission{}, err
+		return models.Permissions{}, &models.ProjectPermission{}, err
 	}
 
 	if found, pp := containsProject(Project, perms.AccessTo.Projects); found {
-		return pp, nil
+		return perms, pp, nil
 	}
 
-	return &models.ProjectPermission{}, nil
+	return perms, &models.ProjectPermission{}, nil
 }

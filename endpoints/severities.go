@@ -112,14 +112,14 @@ func CreateSeverity(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	perms, err := perms.GetPermissionsToProject(user, project)
+	allperms, perms, err := perms.GetPermissionsToProject(user, project)
 	if err != nil {
 		w.WriteHeader(500)
 		dev.ReportError(err, w, err.Error())
 		return
 	}
 
-	if perms.CanCreateSeverities {
+	if perms.CanCreateSeverities || allperms.Admin {
 		severities, err := db.GetSeverities(project.ID, true)
 		if err != nil {
 			w.WriteHeader(500)
@@ -187,14 +187,14 @@ func PatchSeverity(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	perms, err := perms.GetPermissionsToProject(user, project)
+	allperms, perms, err := perms.GetPermissionsToProject(user, project)
 	if err != nil {
 		w.WriteHeader(500)
 		dev.ReportError(err, w, err.Error())
 		return
 	}
 
-	if perms.CanModifySeverities {
+	if perms.CanModifySeverities || allperms.Admin {
 		rawBytes, err := ioutil.ReadAll(r.Body)
 		if err != nil {
 			w.WriteHeader(500)
@@ -284,14 +284,14 @@ func DeleteSeverity(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	perms, err := perms.GetPermissionsToProject(user, project)
+	allperms, perms, err := perms.GetPermissionsToProject(user, project)
 	if err != nil {
 		w.WriteHeader(500)
 		dev.ReportError(err, w, err.Error())
 		return
 	}
 
-	if perms.CanRemoveSeverities {
+	if perms.CanRemoveSeverities || allperms.Admin {
 		_, found, err := db.GetSeverity(projectid, severityid)
 		if err != nil {
 			w.WriteHeader(500)
