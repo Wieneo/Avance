@@ -1,8 +1,17 @@
-FROM golang:alpine
-WORKDIR /app
+FROM golang:1.14 AS backend
+WORKDIR /backend
 COPY . .
-RUN apk add --update nodejs nodejs-npm git && rm -rf /var/cache/apk/*
-RUN go get && go build -o tixter-app *.go
-RUN cd frontend/app/ && npm install && npm run build && rm -rf src/
+RUN go get && go build -ldflags "-linkmode external -extldflags -static" -a -o tixter-app *.go
+
+FROM node:14-alpine AS frontend
+WORKDIR /frontend
+COPY ./frontend/app .
+RUN npm install && npm run build && rm -rf src/
+
+FROM scratch
+WORKDIR /app
+COPY --from=backend /backend/tixter-app /app/
+COPY --from=backend /backend/db/migrations /app/db/migrations
+COPY --from=frontend /frontend /app/frontend/app
 EXPOSE 8000
-CMD [ "./tixter-app", "" ]
+CMD [ "/app/tixter-app", "" ]
