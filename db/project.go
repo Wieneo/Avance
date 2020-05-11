@@ -7,25 +7,25 @@ import (
 )
 
 //GetProject returns the project struct to a given projectid
-func GetProject(ProjectID int64) (models.Project, error) {
+func GetProject(ProjectID int64) (models.Project, bool, error) {
 	var Requested models.Project
-	rows, err := Connection.Query(`SELECT * FROM "Projects" WHERE "ID" = $1`, ProjectID)
+	rows, err := Connection.Query(`SELECT "ID", "Name", "Description" FROM "Projects" WHERE "ID" = $1`, ProjectID)
 	if err != nil {
-		return Requested, err
+		return Requested, false, err
 	}
 
 	if !rows.Next() {
-		return Requested, errors.New("Project not found")
+		return Requested, false, errors.New("Project not found")
 	}
 
 	rows.Scan(&Requested.ID, &Requested.Name, &Requested.Description)
-	return Requested, nil
+	return Requested, true, nil
 }
 
 //GetAllProjects returns all projects
 func GetAllProjects() ([]models.Project, error) {
 	AllProjects := make([]models.Project, 0)
-	rows, err := Connection.Query(`SELECT * FROM "Projects"`)
+	rows, err := Connection.Query(`SELECT "ID", "Name", "Description" FROM "Projects"`)
 
 	if err != nil {
 		return make([]models.Project, 0), err
@@ -33,7 +33,7 @@ func GetAllProjects() ([]models.Project, error) {
 
 	for rows.Next() {
 		var SingleProject models.Project
-		rows.Scan(&SingleProject.ID, &SingleProject.Name)
+		rows.Scan(&SingleProject.ID, &SingleProject.Name, &SingleProject.Description)
 		AllProjects = append(AllProjects, SingleProject)
 	}
 
@@ -59,4 +59,21 @@ func QueuesInProject(Project models.Project) ([]models.Queue, error) {
 	rows.Close()
 
 	return Queues, nil
+}
+
+//CreateProject creates a project in the database
+func CreateProject(Name, Description string) (int64, error) {
+	var newID int64
+	err := Connection.QueryRow(`INSERT INTO "Projects" ("Name", "Description") VALUES ($1, $2) RETURNING "ID"`, Name, Description).Scan(&newID)
+	if err != nil {
+		return 0, err
+	}
+
+	return newID, nil
+}
+
+//PatchProject updates the project in the database
+func PatchProject(Project models.Project) error {
+	_, err := Connection.Exec(`UPDATE "Projects" SET "Name" = $1, "Description" = $2 WHERE "ID" = $3`, Project.Name, Project.Description, Project.ID)
+	return err
 }

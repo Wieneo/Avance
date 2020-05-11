@@ -40,6 +40,15 @@ type Permissions struct {
 	}
 }
 
+//Severity is the default Severity struct from the database
+type Severity struct {
+	ID           int
+	Enabled      bool
+	Name         string
+	DisplayColor string
+	Priority     int
+}
+
 /*
 	ALWAYS!! If a new permission is added here! PLEASE add it to perms/combine.go
 */
@@ -53,6 +62,9 @@ type ProjectPermission struct {
 	CanCreateQueues      bool
 	CanModifyQueues      bool
 	CanRemoveQueues      bool
+	CanCreateSeverities  bool
+	CanModifySeverities  bool
+	CanRemoveSeverities  bool
 }
 
 //QueuePermission stores the permissions given to a single queue

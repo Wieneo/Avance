@@ -1,4 +1,4 @@
-package endpoints
+package utils
 
 import (
 	"errors"
@@ -9,26 +9,6 @@ import (
 	"gitlab.gnaucke.dev/tixter/tixter-app/v2/models"
 	"gitlab.gnaucke.dev/tixter/tixter-app/v2/redis"
 )
-
-//GetUser is a shortcut to get the assigned user to a request
-func GetUser(r *http.Request, w http.ResponseWriter) (models.User, error) {
-	userid, err := GetUserID(r)
-	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
-		return models.User{}, err
-	}
-
-	user, err := db.GetUser(userid)
-	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
-		return models.User{}, err
-	}
-
-	return user, nil
-
-}
 
 //GetUserID gets the user id from a web request
 func GetUserID(r *http.Request) (int, error) {
@@ -48,4 +28,24 @@ func GetUserID(r *http.Request) (int, error) {
 		return 0, err
 	}
 	return id, nil
+}
+
+//GetUser is a shortcut to get the assigned user to a request
+func GetUser(r *http.Request, w http.ResponseWriter) (models.User, error) {
+	userid, err := GetUserID(r)
+	if err != nil {
+		w.WriteHeader(500)
+		dev.ReportError(err, w, err.Error())
+		return models.User{}, err
+	}
+
+	user, err := db.GetUser(userid)
+	if err != nil {
+		w.WriteHeader(500)
+		dev.ReportError(err, w, err.Error())
+		return models.User{}, err
+	}
+
+	return user, nil
+
 }
