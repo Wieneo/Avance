@@ -222,22 +222,34 @@ func PatchSeverity(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		somethingChanged := false
+
 		//Now check if value was specified
 		if len(req.Name) > 0 {
 			severity.Name = req.Name
+			somethingChanged = true
 		}
 
 		if len(req.DisplayColor) > 0 {
 			severity.DisplayColor = req.DisplayColor
+			somethingChanged = true
 		}
 
 		//Check for occurence in string (request body) as we cant differenciate if the value was specified or not
 		if strings.Contains(string(rawBytes), "Enabled") {
 			severity.Enabled = req.Enabled
+			somethingChanged = true
 		}
 
 		if strings.Contains(string(rawBytes), "Priority") {
 			severity.Priority = req.Priority
+			somethingChanged = true
+		}
+
+		if !somethingChanged {
+			w.WriteHeader(400)
+			dev.ReportUserError(w, "Nothing changed")
+			return
 		}
 
 		if err := db.PatchSeverity(severity); err != nil {
