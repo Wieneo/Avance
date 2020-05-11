@@ -145,11 +145,13 @@ func deploy() {
 	}
 
 	_, err = CreateUser(models.User{
-		Username:    "Admin",
-		Firstname:   "Admin",
-		Lastname:    "istrator",
-		Mail:        "root@localhost",
-		Permissions: models.Permissions{},
+		Username:  "Admin",
+		Firstname: "Admin",
+		Lastname:  "istrator",
+		Mail:      "root@localhost",
+		Permissions: models.Permissions{
+			Admin: true,
+		},
 	}, "tixter")
 
 	if err != nil {
