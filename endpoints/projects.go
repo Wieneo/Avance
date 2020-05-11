@@ -119,6 +119,93 @@ func CreateProject(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+//ChangeProject updates the given project
+func ChangeProject(w http.ResponseWriter, r *http.Request) {
+	var req projectWebRequest
+	projectid, _ := strconv.ParseInt(strings.Split(r.URL.String(), "/")[4], 10, 64)
+
+	user, err := utils.GetUser(r, w)
+	if err != nil {
+		w.WriteHeader(500)
+		dev.ReportError(err, w, err.Error())
+		return
+	}
+
+	project, found, err := db.GetProject(projectid)
+	if err != nil {
+		w.WriteHeader(500)
+		dev.ReportError(err, w, err.Error())
+		return
+	}
+
+	if !found {
+		w.WriteHeader(404)
+		dev.ReportUserError(w, "Project not found")
+		return
+	}
+
+	allperms, perms, err := perms.GetPermissionsToProject(user, project)
+	if err != nil {
+		w.WriteHeader(500)
+		dev.ReportError(err, w, err.Error())
+		return
+	}
+
+	if perms.CanModify || allperms.Admin {
+		//Parse JSON
+		rawBytes, err := ioutil.ReadAll(r.Body)
+		if err != nil {
+			w.WriteHeader(500)
+			dev.ReportError(err, w, err.Error())
+			return
+		}
+
+		err = json.Unmarshal(rawBytes, &req)
+		if err != nil {
+			w.WriteHeader(400)
+			dev.ReportUserError(w, "Request is malformed: "+err.Error())
+			return
+		}
+
+		somethingChanged := false
+
+		//Data in req variable
+		//Check for occurence in string (request body) as we cant differenciate if the value was specified or not
+		if strings.Contains(string(rawBytes), "Name") {
+			project.Name = req.Name
+			somethingChanged = true
+		}
+
+		if strings.Contains(string(rawBytes), "Description") {
+			project.Description = req.Description
+			somethingChanged = true
+		}
+
+		if !somethingChanged {
+			w.WriteHeader(400)
+			dev.ReportUserError(w, "Nothing changed")
+			return
+		}
+
+		err = db.PatchProject(project)
+		if err != nil {
+			w.WriteHeader(500)
+			dev.ReportError(err, w, err.Error())
+			return
+		}
+
+		json.NewEncoder(w).Encode(struct {
+			Project string
+		}{
+			fmt.Sprintf("Project %d updated", project.ID),
+		})
+	} else {
+		w.WriteHeader(401)
+		dev.ReportUserError(w, "You are not allowed to patch this project")
+		return
+	}
+}
+
 //GetProjectQueues returns all queues a user has access to from one project
 func GetProjectQueues(w http.ResponseWriter, r *http.Request) {
 	if user, err := utils.GetUser(r, w); err == nil {

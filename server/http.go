@@ -37,6 +37,7 @@ func HTTPInit() {
 	//PROJECT APIs
 	router.HandleFunc("/api/v1/projects", endpoints.GetProjects).Methods("GET")
 	router.HandleFunc("/api/v1/projects", endpoints.CreateProject).Methods("POST")
+	router.HandleFunc("/api/v1/project/{[0-9]{*}}", endpoints.ChangeProject).Methods("PATCH")
 	router.HandleFunc("/api/v1/project/{[0-9]{*}}/queues", endpoints.GetProjectQueues).Methods("GET")
 	router.HandleFunc("/api/v1/project/{[0-9]{*}}/severities", endpoints.GetSeverities).Methods("GET")
 	router.HandleFunc("/api/v1/project/{[0-9]{*}}/severities", endpoints.CreateSeverity).Methods("POST")

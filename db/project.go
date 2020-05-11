@@ -71,3 +71,9 @@ func CreateProject(Name, Description string) (int64, error) {
 
 	return newID, nil
 }
+
+//PatchProject updates the project in the database
+func PatchProject(Project models.Project) error {
+	_, err := Connection.Exec(`UPDATE "Projects" SET "Name" = $1, "Description" = $2 WHERE "ID" = $3`, Project.Name, Project.Description, Project.ID)
+	return err
+}
