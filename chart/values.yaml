@@ -50,7 +50,7 @@ ingress:
 prometheus:
   metrics: false
 livenessProbe:
-  path: "/"
+  path: "/api/v1/health"
   initialDelaySeconds: 30
   timeoutSeconds: 15
   scheme: "HTTP"
