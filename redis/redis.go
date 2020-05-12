@@ -41,6 +41,15 @@ func Init() {
 	dev.LogInfo("Connection to redis established")
 }
 
+//Ping returns true if redis is alive
+func Ping() (bool, error) {
+	_, err := connection.Ping().Result()
+	if err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
 //SessionValid return true if the session key is found
 func SessionValid(Session string) bool {
 	key, _ := connection.Get(Session).Result()
