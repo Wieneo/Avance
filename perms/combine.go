@@ -53,6 +53,15 @@ func combinePermissions(User models.User) (models.Permissions, error) {
 				if k.CanRemoveSeverities {
 					project.CanRemoveSeverities = true
 				}
+				if k.CanCreateStatuses {
+					project.CanCreateStatuses = true
+				}
+				if k.CanModifyStatuses {
+					project.CanModifyStatuses = true
+				}
+				if k.CanRemoveStatuses {
+					project.CanRemoveStatuses = true
+				}
 			}
 		}
 
