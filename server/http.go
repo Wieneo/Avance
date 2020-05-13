@@ -39,10 +39,18 @@ func HTTPInit() {
 	router.HandleFunc("/api/v1/projects", endpoints.CreateProject).Methods("POST")
 	router.HandleFunc("/api/v1/project/{[0-9]{*}}", endpoints.ChangeProject).Methods("PATCH")
 	router.HandleFunc("/api/v1/project/{[0-9]{*}}/queues", endpoints.GetProjectQueues).Methods("GET")
+
+	//Severities
 	router.HandleFunc("/api/v1/project/{[0-9]{*}}/severities", endpoints.GetSeverities).Methods("GET")
 	router.HandleFunc("/api/v1/project/{[0-9]{*}}/severities", endpoints.CreateSeverity).Methods("POST")
 	router.HandleFunc("/api/v1/project/{[0-9]{*}}/severity/{[0-9]{*}}", endpoints.PatchSeverity).Methods("PATCH")
 	router.HandleFunc("/api/v1/project/{[0-9]{*}}/severity/{[0-9]{*}}", endpoints.DeleteSeverity).Methods("DELETE")
+
+	//Statuses
+	router.HandleFunc("/api/v1/project/{[0-9]{*}}/statuses", endpoints.GetStatuses).Methods("GET")
+	router.HandleFunc("/api/v1/project/{[0-9]{*}}/statuses", endpoints.CreateStatus).Methods("POST")
+	router.HandleFunc("/api/v1/project/{[0-9]{*}}/status/{[0-9]{*}}", endpoints.PatchStatus).Methods("PATCH")
+	router.HandleFunc("/api/v1/project/{[0-9]{*}}/status/{[0-9]{*}}", endpoints.DeleteStatus).Methods("DELETE")
 
 	//Needs to be at the bottom!
 	router.HandleFunc("/", endpoints.ServeAppFrontend).Methods("GET")

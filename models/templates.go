@@ -49,6 +49,15 @@ type Severity struct {
 	Priority     int
 }
 
+//Status is the default Status struct from the datbabase
+type Status struct {
+	ID             int
+	Enabled        bool
+	Name           string
+	DisplayColor   string
+	TicketsVisible bool
+}
+
 /*
 	ALWAYS!! If a new permission is added here! PLEASE add it to perms/combine.go
 */
@@ -65,6 +74,9 @@ type ProjectPermission struct {
 	CanCreateSeverities  bool
 	CanModifySeverities  bool
 	CanRemoveSeverities  bool
+	CanCreateStatuses    bool
+	CanModifyStatuses    bool
+	CanRemoveStatuses    bool
 }
 
 //QueuePermission stores the permissions given to a single queue
