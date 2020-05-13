@@ -3,6 +3,7 @@ package redis
 import (
 	"errors"
 	"fmt"
+	"math/rand"
 	"strconv"
 	"strings"
 	"time"
@@ -43,7 +44,7 @@ func Init() {
 
 //Ping returns true if redis is alive
 func Ping() (bool, error) {
-	_, err := connection.Ping().Result()
+	_, err := connection.Set("Ping", rand.Intn(100), time.Second).Result()
 	if err != nil {
 		return false, err
 	}
