@@ -3,6 +3,7 @@ package redis
 import (
 	"errors"
 	"fmt"
+	"math/rand"
 	"strconv"
 	"strings"
 	"time"
@@ -39,6 +40,15 @@ func Init() {
 	}
 
 	dev.LogInfo("Connection to redis established")
+}
+
+//Ping returns true if redis is alive
+func Ping() (bool, error) {
+	_, err := connection.Set("Ping", rand.Intn(100), time.Second).Result()
+	if err != nil {
+		return false, err
+	}
+	return true, nil
 }
 
 //SessionValid return true if the session key is found

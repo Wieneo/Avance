@@ -74,6 +74,7 @@ var sitesForUnauthorized = []string{
 	"/js/*",
 	"/css/*",
 	"/api/v1/session",
+	"/api/v1/health",
 }
 
 //authorizationMiddleware gets called at every request to check if user is authenticated
