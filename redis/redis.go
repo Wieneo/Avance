@@ -99,8 +99,13 @@ func SessionToUserID(SessionKey string) (int, error) {
 func refreshSession(Session string) {
 	//Value is just the user id
 	//The user id is contained inside the sessionkey (Example: session_1_as231fsdf413 -> 1 will be the user id)
-	var Value = strings.Split(strings.Split(Session, "session_")[1], "_")[0]
-	if err := connection.Set(Session, Value, time.Hour).Err(); err != nil {
-		dev.LogError(err, "Couldn't refresh session \""+Session+"\" -> ", err.Error())
+	if len(strings.Split(Session, "session_")) == 2 {
+		parts := strings.Split(strings.Split(Session, "session_")[1], "_")
+		if len(parts) > 1 {
+			if err := connection.Expire(Session, time.Hour).Err(); err != nil {
+				dev.LogError(err, "Couldn't refresh session \""+Session+"\" -> ", err.Error())
+			}
+		}
 	}
+
 }
