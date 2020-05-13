@@ -10,7 +10,7 @@
     },
     "Redis":{
         "Host": "localhost",
-        "Port": "6379",
+        "Port": 6379,
         "Database": 0
     }
 }
