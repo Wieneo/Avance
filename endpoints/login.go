@@ -105,12 +105,10 @@ func LogoutUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if redis.SessionValid(session) {
-		if err := redis.DestroySession(session); err != nil {
-			w.WriteHeader(500)
-			dev.ReportError(err, w, err.Error())
-			return
-		}
+	if err := redis.DestroySession(session); err != nil {
+		w.WriteHeader(500)
+		dev.ReportError(err, w, err.Error())
+		return
 	}
 
 	json.NewEncoder(w).Encode(struct {
