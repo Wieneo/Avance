@@ -37,7 +37,7 @@ export default Vue.extend({
     },
     data: function(){
         return {
-        showProjects: false
+            showProjects: false
         }
     }
 })

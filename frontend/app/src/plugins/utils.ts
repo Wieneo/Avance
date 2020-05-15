@@ -25,43 +25,62 @@ export function Utils<AxiosPlugOptions>(Vue: typeof _Vue): void {
         document.cookie = Name + '=' + Value + ';' + expires + ';path=/'
     }
     Vue.prototype.$GetRequest = async (URL: string) => {
-        try {
-            const Result = await Axios.get(URL, {
-                method: 'GET',
-                headers: {
-                    Authorization: Vue.prototype.$GetCookie('session')
+        const resp = await new Promise((resolve) => {
+            const req = new XMLHttpRequest();
+            req.open("GET", URL)
+            req.onreadystatechange = function(evt){
+                if (req.readyState == 4){
+                    //Maybe Session is timed out again
+                    const allSplits = req.responseURL.split("/")
+                    if (req.status == 404 && allSplits[allSplits.length - 1] == "login"){
+                        window.location.href = "/login"
+                    }
+
+                    try{
+                        const obj = JSON.parse(req.response)
+                        if (obj.Error != undefined){
+                            Vue.prototype.$NotifyError(obj.Error)
+                        }
+                        resolve(obj)
+                    }catch(Exception){
+                        console.log("LUL")
+                        resolve(null)
+                    }
                 }
-            })
-            return Result.data
-        } catch (Exception) {
-            // 401 means the session key expired
-            if (Exception.response != null) {
-                return Exception.response.data
             }
-            // ToDo: Display error
-            // console.log('Unknown error happened: ' + Exception)
-            return null
-        }
+            req.send()
+        })
+
+        return resp
     }
     Vue.prototype.$PostRequest = async (URL: string, Data: any) => {
-        try {
-            const Result = await Axios.post(URL, Data, {
-                method: 'POST',
-                headers: {
-                    Authorization: Vue.prototype.$GetCookie('session'),
-                    'Content-Type': 'application/json'
+        const resp = await new Promise((resolve) => {
+            const req = new XMLHttpRequest();
+            req.open("POST", URL)
+            req.onreadystatechange = function(evt){
+                if (req.readyState == 4){
+                    //Maybe Session is timed out again
+                    const allSplits = req.responseURL.split("/")
+                    if (req.status == 404 && allSplits[allSplits.length - 1] == "login"){
+                        window.location.href = "/login"
+                    }
+
+                    try{
+                        const obj = JSON.parse(req.response)
+                        if (obj.Error != undefined){
+                            Vue.prototype.$NotifyError(obj.Error)
+                        }
+                        resolve(obj)
+                    }catch(Exception){
+                        console.log(Exception)
+                        resolve(null)
+                    }
                 }
-            })
-            return Result.data
-        } catch (Exception) {
-            // 401 means the session key expired
-            if (Exception.response != null) {
-                return Exception.response.data
             }
-            // ToDo: Display error
-            // console.log('Unknown error happened: ' + Exception)
-            return null
-        }
+            req.send(JSON.stringify(Data))
+        })
+
+        return resp
     }
     Vue.prototype.$NotifySuccess = (Message: string) => {
         new Noty({

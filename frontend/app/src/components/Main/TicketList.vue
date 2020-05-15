@@ -39,13 +39,30 @@
 
   export default Vue.extend({
     name: 'TicketList',
+    watch:{
+        $route (to, from){
+            if(to.query.project != undefined){
+              this.CurrentProject = to.query.project
+              this.LoadQueue()
+            }
+        }
+    },
      data: function(){
       return {
-          Queues
+        CurrentProject: 0,
+        Queues
       }
     },
     mounted: async function(){
-      this.Queues = (await Vue.prototype.$GetRequest("/api/v1/project/1/queues")).Queues
+      if(this.$route.query.project != undefined){
+        this.CurrentProject = this.$route.query.project
+        this.LoadQueue()
+      }
+    },
+    methods:{
+      LoadQueue: async function(){
+        this.Queues = (await Vue.prototype.$GetRequest("/api/v1/project/" + this.CurrentProject + "/queues")).Queues
+      }
     }
   })
 </script>

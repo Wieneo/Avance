@@ -66,10 +66,19 @@
     },
     mounted: async function(){
       this.Projects = (await Vue.prototype.$GetRequest("/api/v1/projects")).Projects
+      //ToDo: Get to last project
+
+      if(this.$route.query.project == undefined){
+        this.$router.push({ path: '/', query: { project: this.Projects[0].ID } })
+      }
     },
     methods: {
       ChooseProject: function(ProjectID: number){
-        //Switch Project
+        try{
+          this.$router.push({ path: '/', query: { project: ProjectID } })
+        }finally{
+          this.$emit('closeProjects')
+        }
       }
     }
   })
