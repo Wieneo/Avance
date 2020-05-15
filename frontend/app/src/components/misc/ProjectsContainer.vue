@@ -69,13 +69,13 @@
       //ToDo: Get to last project
 
       if(this.$route.query.project == undefined){
-        this.$router.push({ path: '/', query: { project: this.Projects[0].ID } })
+        this.$router.push({ path: '/', query: { project: this.Projects[0].ID.toString() } })
       }
     },
     methods: {
       ChooseProject: function(ProjectID: number){
         try{
-          this.$router.push({ path: '/', query: { project: ProjectID } })
+          this.$router.push({ path: '/', query: { project: ProjectID.toString() } })
         }finally{
           this.$emit('closeProjects')
         }

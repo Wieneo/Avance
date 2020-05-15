@@ -42,8 +42,11 @@
     watch:{
         $route (to, from){
             if(to.query.project != undefined){
-              this.CurrentProject = to.query.project
-              this.LoadQueue()
+              const projectID = parseInt(to.query.project  as string)
+              if (!isNaN(projectID)){
+                this.CurrentProject = projectID
+                this.LoadQueue()
+              }
             }
         }
     },
@@ -55,8 +58,11 @@
     },
     mounted: async function(){
       if(this.$route.query.project != undefined){
-        this.CurrentProject = this.$route.query.project
-        this.LoadQueue()
+        const projectID = parseInt(this.$route.query.project as string)
+        if (!isNaN(projectID)){
+          this.CurrentProject = projectID
+          this.LoadQueue()
+        }
       }
     },
     methods:{
