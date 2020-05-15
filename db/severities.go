@@ -23,6 +23,7 @@ func GetSeverities(Project int64, ShowDisabled bool) ([]models.Severity, error) 
 		severities = append(severities, singleSeverity)
 	}
 
+	rows.Close()
 	return severities, nil
 }
 

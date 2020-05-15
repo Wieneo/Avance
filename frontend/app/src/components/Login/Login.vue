@@ -59,7 +59,7 @@ export default Vue.extend({
     mounted: async function(){
         //Check if session already is valid -> Redirect to main page
         if ((await Vue.prototype.$GetRequest("/api/v1/session")).Authorized){
-            window.location.href = "/"
+            //window.location.href = "/"
         }
     },
     data: function(){

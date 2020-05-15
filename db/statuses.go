@@ -23,6 +23,7 @@ func GetStatuses(Project int64, ShowDisabled bool) ([]models.Status, error) {
 		statuses = append(statuses, singleStatus)
 	}
 
+	rows.Close()
 	return statuses, nil
 }
 

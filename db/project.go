@@ -19,6 +19,7 @@ func GetProject(ProjectID int64) (models.Project, bool, error) {
 	}
 
 	rows.Scan(&Requested.ID, &Requested.Name, &Requested.Description)
+	rows.Close()
 	return Requested, true, nil
 }
 

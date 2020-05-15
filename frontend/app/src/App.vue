@@ -20,6 +20,6 @@ export default Vue.extend({
   components: {
     MainApp,
     Login
-  },
+  }
 });
 </script>
