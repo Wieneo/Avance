@@ -79,7 +79,7 @@ func DestroySession(SessionKey string) error {
 }
 
 //SessionToUserID return the user id stores as value to the session key
-func SessionToUserID(SessionKey string) (int, error) {
+func SessionToUserID(SessionKey string) (int64, error) {
 	key, err := connection.Get(SessionKey).Result()
 	if err != nil {
 		return 0, err
@@ -89,7 +89,7 @@ func SessionToUserID(SessionKey string) (int, error) {
 		return 0, errors.New("No valid user to session key")
 	}
 
-	id, err := strconv.Atoi(key)
+	id, err := strconv.ParseInt(key, 10, 64)
 	if err != nil {
 		return 0, err
 	}

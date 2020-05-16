@@ -29,7 +29,7 @@ func GetSeverities(Project int64, ShowDisabled bool) ([]models.Severity, error) 
 
 //GetSeverity returns the severity struct to the given severityid
 //Throws an error if no severity is found
-func GetSeverity(Project int64, Severity int) (models.Severity, bool, error) {
+func GetSeverity(Project int64, Severity int64) (models.Severity, bool, error) {
 	//I know that project isn't really needed as severity ids are unique anyway
 	//Its just a safety measure ;)
 	var severity models.Severity
@@ -46,9 +46,27 @@ func GetSeverity(Project int64, Severity int) (models.Severity, bool, error) {
 	return severity, false, err
 }
 
+//GetSeverityUNSAFE is a copy of GetSeverity but without the ProjectID needed
+func GetSeverityUNSAFE(Severity int64) (models.Severity, bool, error) {
+	//I know that project isn't really needed as severity ids are unique anyway
+	//Its just a safety measure ;)
+	var severity models.Severity
+	err := Connection.QueryRow(`SELECT "ID", "Enabled", "Name", "DisplayColor", "Priority" FROM "Severities" WHERE "ID" = $1`, Severity).Scan(&severity.ID, &severity.Enabled, &severity.Name, &severity.DisplayColor, &severity.Priority)
+
+	if err == nil {
+		return severity, true, err
+	}
+
+	if err.Error() == "sql: no rows in result set" {
+		return severity, false, nil
+	}
+
+	return severity, false, err
+}
+
 //CreateSeverity creates a severity in the database
-func CreateSeverity(Enabled bool, Name, DisplayColor string, Priority int, Project int64) (int, error) {
-	var newID int
+func CreateSeverity(Enabled bool, Name, DisplayColor string, Priority int, Project int64) (int64, error) {
+	var newID int64
 	err := Connection.QueryRow(`INSERT INTO "Severities" ("Enabled", "Name", "DisplayColor", "Priority", "Project") VALUES ($1, $2, $3, $4, $5) RETURNING "ID"`, Enabled, Name, DisplayColor, Priority, Project).Scan(&newID)
 	if err != nil {
 		return 0, err
@@ -64,7 +82,7 @@ func PatchSeverity(Severity models.Severity) error {
 }
 
 //RemoveSeverity removes a severity
-func RemoveSeverity(Project int64, Severity int) error {
+func RemoveSeverity(Project int64, Severity int64) error {
 	//I know that project isn't really needed as severity ids are unique anyway
 	//Its just a safety measure ;)
 	_, err := Connection.Exec(`DELETE FROM "Severities" WHERE "ID" = $1 AND "Project" = $2`, Severity, Project)

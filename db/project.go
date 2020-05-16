@@ -43,25 +43,6 @@ func GetAllProjects() ([]models.Project, error) {
 	return AllProjects, nil
 }
 
-//QueuesInProject returns all queues from a project
-func QueuesInProject(Project models.Project) ([]models.Queue, error) {
-	Queues := make([]models.Queue, 0)
-	rows, err := Connection.Query(`SELECT "ID", "Name" FROM "Queue" WHERE "Project" = $1`, Project.ID)
-	if err != nil {
-		return make([]models.Queue, 0), err
-	}
-
-	for rows.Next() {
-		var SingleQueue models.Queue
-		rows.Scan(&SingleQueue.ID, &SingleQueue.Name)
-		Queues = append(Queues, SingleQueue)
-	}
-
-	rows.Close()
-
-	return Queues, nil
-}
-
 //CreateProject creates a project in the database
 func CreateProject(Name, Description string) (int64, error) {
 	var newID int64

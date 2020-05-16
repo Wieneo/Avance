@@ -1,5 +1,10 @@
 package models
 
+import (
+	"database/sql"
+	"time"
+)
+
 //User is the default user struct from the database
 type User struct {
 	ID          int64
@@ -42,7 +47,7 @@ type Permissions struct {
 
 //Severity is the default Severity struct from the database
 type Severity struct {
-	ID           int
+	ID           int64
 	Enabled      bool
 	Name         string
 	DisplayColor string
@@ -51,7 +56,7 @@ type Severity struct {
 
 //Status is the default Status struct from the datbabase
 type Status struct {
-	ID             int
+	ID             int64
 	Enabled        bool
 	Name           string
 	DisplayColor   string
@@ -87,4 +92,23 @@ type QueuePermission struct {
 	CanEditTicket        bool
 	CanModify            bool
 	CanChangePermissions bool
+}
+
+//Ticket stores all information about a ticket
+type Ticket struct {
+	ID           int64
+	Title        string
+	Description  string
+	QueueID      int64
+	Queue        Queue
+	OwnerID      sql.NullInt64
+	Owner        User
+	SeverityID   int64
+	Severity     Severity
+	StatusID     int64
+	Status       Status
+	CreatedAt    time.Time
+	LastModified time.Time
+	StalledUntil sql.NullTime
+	Meta         string //Needs to be changed later!
 }

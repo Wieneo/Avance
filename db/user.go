@@ -8,7 +8,7 @@ import (
 )
 
 //GetUser returns the user struct from the database
-func GetUser(UserID int) (models.User, error) {
+func GetUser(UserID int64) (models.User, error) {
 	var Requested models.User
 	var RawPermissions string
 	err := Connection.QueryRow(`SELECT "ID","Username","Mail", "Permissions", "Firstname", "Lastname" FROM "Users" WHERE "ID" = $1`, UserID).Scan(&Requested.ID, &Requested.Username, &Requested.Mail, &RawPermissions, &Requested.Firstname, &Requested.Lastname)

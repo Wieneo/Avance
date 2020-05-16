@@ -32,7 +32,7 @@ export function Utils<AxiosPlugOptions>(Vue: typeof _Vue): void {
                 if (req.readyState == 4){
                     //Maybe Session is timed out again
                     const allSplits = req.responseURL.split("/")
-                    if (req.status == 404 && allSplits[allSplits.length - 1] == "login"){
+                    if (allSplits[allSplits.length - 1] == "login"){
                         window.location.href = "/login"
                     }
 
@@ -43,7 +43,7 @@ export function Utils<AxiosPlugOptions>(Vue: typeof _Vue): void {
                         }
                         resolve(obj)
                     }catch(Exception){
-                        console.log("LUL")
+                        console.log(req)
                         resolve(null)
                     }
                 }
@@ -61,7 +61,7 @@ export function Utils<AxiosPlugOptions>(Vue: typeof _Vue): void {
                 if (req.readyState == 4){
                     //Maybe Session is timed out again
                     const allSplits = req.responseURL.split("/")
-                    if (req.status == 404 && allSplits[allSplits.length - 1] == "login"){
+                    if (allSplits[allSplits.length - 1] == "login"){
                         window.location.href = "/login"
                     }
 

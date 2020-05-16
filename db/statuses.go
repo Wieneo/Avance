@@ -29,7 +29,7 @@ func GetStatuses(Project int64, ShowDisabled bool) ([]models.Status, error) {
 
 //GetStatus returns the status struct to the given statusid
 //Throws an error if no status is found
-func GetStatus(Project int64, Status int) (models.Status, bool, error) {
+func GetStatus(Project int64, Status int64) (models.Status, bool, error) {
 	//I know that project isn't really needed as status ids are unique anyway
 	//Its just a safety measure ;)
 	var status models.Status
@@ -46,9 +46,27 @@ func GetStatus(Project int64, Status int) (models.Status, bool, error) {
 	return status, false, err
 }
 
+//GetStatusUNSAFE is a copy of GetStatus but without the ProjectID given
+func GetStatusUNSAFE(Status int64) (models.Status, bool, error) {
+	//I know that project isn't really needed as status ids are unique anyway
+	//Its just a safety measure ;)
+	var status models.Status
+	err := Connection.QueryRow(`SELECT "ID", "Enabled", "Name", "DisplayColor", "TicketsVisible" FROM "Statuses" WHERE "ID" = $1`, Status).Scan(&status.ID, &status.Enabled, &status.Name, &status.DisplayColor, &status.TicketsVisible)
+
+	if err == nil {
+		return status, true, err
+	}
+
+	if err.Error() == "sql: no rows in result set" {
+		return status, false, nil
+	}
+
+	return status, false, err
+}
+
 //CreateStatus creates a status in the database
-func CreateStatus(Enabled bool, Name, DisplayColor string, TicketsVisible bool, Project int64) (int, error) {
-	var newID int
+func CreateStatus(Enabled bool, Name, DisplayColor string, TicketsVisible bool, Project int64) (int64, error) {
+	var newID int64
 	err := Connection.QueryRow(`INSERT INTO "Statuses" ("Enabled", "Name", "DisplayColor", "TicketsVisible", "Project") VALUES ($1, $2, $3, $4, $5) RETURNING "ID"`, Enabled, Name, DisplayColor, TicketsVisible, Project).Scan(&newID)
 	if err != nil {
 		return 0, err
@@ -64,7 +82,7 @@ func PatchStatus(Status models.Status) error {
 }
 
 //RemoveStatus removes a status
-func RemoveStatus(Project int64, Status int) error {
+func RemoveStatus(Project int64, Status int64) error {
 	//I know that project isn't really needed as status ids are unique anyway
 	//Its just a safety measure ;)
 	_, err := Connection.Exec(`DELETE FROM "Statuses" WHERE "ID" = $1 AND "Project" = $2`, Status, Project)

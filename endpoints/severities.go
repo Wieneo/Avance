@@ -165,7 +165,7 @@ func CreateSeverity(w http.ResponseWriter, r *http.Request) {
 func PatchSeverity(w http.ResponseWriter, r *http.Request) {
 	var req severityWebRequest
 	projectid, _ := strconv.ParseInt(strings.Split(r.URL.String(), "/")[4], 10, 64)
-	severityid, _ := strconv.Atoi(strings.Split(r.URL.String(), "/")[6])
+	severityid, _ := strconv.ParseInt(strings.Split(r.URL.String(), "/")[6], 10, 64)
 
 	user, err := utils.GetUser(r, w)
 	if err != nil {
@@ -274,7 +274,7 @@ func PatchSeverity(w http.ResponseWriter, r *http.Request) {
 //DeleteSeverity deletes a severity
 func DeleteSeverity(w http.ResponseWriter, r *http.Request) {
 	projectid, _ := strconv.ParseInt(strings.Split(r.URL.String(), "/")[4], 10, 64)
-	severityid, _ := strconv.Atoi(strings.Split(r.URL.String(), "/")[6])
+	severityid, _ := strconv.ParseInt(strings.Split(r.URL.String(), "/")[6], 10, 64)
 
 	user, err := utils.GetUser(r, w)
 	if err != nil {

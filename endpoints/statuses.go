@@ -151,7 +151,7 @@ func CreateStatus(w http.ResponseWriter, r *http.Request) {
 func PatchStatus(w http.ResponseWriter, r *http.Request) {
 	var req statusWebRequest
 	projectid, _ := strconv.ParseInt(strings.Split(r.URL.String(), "/")[4], 10, 64)
-	statusid, _ := strconv.Atoi(strings.Split(r.URL.String(), "/")[6])
+	statusid, _ := strconv.ParseInt(strings.Split(r.URL.String(), "/")[6], 10, 64)
 
 	user, err := utils.GetUser(r, w)
 	if err != nil {
@@ -260,7 +260,7 @@ func PatchStatus(w http.ResponseWriter, r *http.Request) {
 //DeleteStatus deletes a status
 func DeleteStatus(w http.ResponseWriter, r *http.Request) {
 	projectid, _ := strconv.ParseInt(strings.Split(r.URL.String(), "/")[4], 10, 64)
-	statusid, _ := strconv.Atoi(strings.Split(r.URL.String(), "/")[6])
+	statusid, _ := strconv.ParseInt(strings.Split(r.URL.String(), "/")[6], 10, 64)
 
 	user, err := utils.GetUser(r, w)
 	if err != nil {

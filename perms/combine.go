@@ -111,6 +111,16 @@ func containsProjectPermission(project models.ProjectPermission, projects []mode
 	return false, nil
 }
 
+func containsQueue(queue models.Queue, queues []models.QueuePermission) (bool, *models.QueuePermission) {
+	for i, k := range queues {
+		if k.QueueID == queue.ID {
+			return true, &queues[i]
+		}
+	}
+
+	return false, nil
+}
+
 func containsQueuePermission(queue models.QueuePermission, queues []models.QueuePermission) (bool, *models.QueuePermission) {
 	for i, k := range queues {
 		if k.QueueID == queue.QueueID {

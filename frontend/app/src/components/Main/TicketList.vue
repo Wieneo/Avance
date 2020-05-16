@@ -1,31 +1,45 @@
 <template>
-    <v-card>
-        <div v-for="queue in Queues" :key="queue.ID">
-            <v-list subheader dense>
-                <v-subheader>{{queue.Name}}</v-subheader>
+    <div>
+      <v-skeleton-loader
+            :loading="LoadingQueues"
+            :transition="scale-transition"
+            type="article@3"
+          >
+        <v-card>
+            <div v-for="queue in Queues" :key="queue.ID">
+                <v-list subheader dense>
+                    <v-subheader>{{queue.Name}}</v-subheader>
 
-                <v-list-item
-                    v-for="index in 5"
-                    :key="index"
-                    @click="console.log('test')">
-                    <v-list-item-avatar>
-                        <v-img src="https://randomuser.me/api/portraits/women/85.jpg"></v-img>
-                    </v-list-item-avatar>
+                    <v-skeleton-loader
+                      :loading="LoadingTickets"
+                      :transition="scale-transition"
+                      type="list-item-avatar-two-line@4"
+                    >
+                    <v-list-item
+                        v-for="index in 5"
+                        :key="index"
+                        @click="console.log('test')">
+                        <v-list-item-avatar>
+                            <v-img src="https://randomuser.me/api/portraits/women/85.jpg"></v-img>
+                        </v-list-item-avatar>
 
-                    <v-list-item-content>
-                        <v-list-item-title>Ticket {{index}}</v-list-item-title>
-                        <v-list-item-subtitle>Open</v-list-item-subtitle>
-                    </v-list-item-content>
+                        <v-list-item-content>
+                            <v-list-item-title>Ticket {{index}}</v-list-item-title>
+                            <v-list-item-subtitle>Open</v-list-item-subtitle>
+                        </v-list-item-content>
 
-                    <v-list-item-icon>
-                        <v-icon>mdi-fire</v-icon>
-                        <v-icon @click="console.log('test2')">mdi-forward</v-icon>
-                    </v-list-item-icon>
-                </v-list-item>
-            </v-list>
-            <v-divider/>
-        </div>
-    </v-card>
+                        <v-list-item-icon>
+                            <v-icon>mdi-fire</v-icon>
+                            <v-icon @click="console.log('test2')">mdi-forward</v-icon>
+                        </v-list-item-icon>
+                    </v-list-item>
+                    </v-skeleton-loader>
+                </v-list>
+                <v-divider/>
+            </div>
+        </v-card>
+      </v-skeleton-loader>
+    </div>
 </template>
 <script lang="ts">
   import Vue from 'vue'
@@ -52,6 +66,8 @@
     },
      data: function(){
       return {
+        LoadingQueues: true,
+        LoadingTickets: true,
         CurrentProject: 0,
         Queues
       }
@@ -68,6 +84,7 @@
     methods:{
       LoadQueue: async function(){
         this.Queues = (await Vue.prototype.$GetRequest("/api/v1/project/" + this.CurrentProject + "/queues")).Queues
+        this.LoadingQueues = false
       }
     }
   })
