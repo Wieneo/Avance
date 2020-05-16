@@ -28,7 +28,7 @@ func GetTicket(TicketID int64) (models.Ticket, bool, error) {
 }
 
 //GetTicketsInQueue returns all tickets in a give queue
-func GetTicketsInQueue(QueueID int64, ShowInvisible bool) ([]models.Ticket, error) {
+func GetTicketsInQueue(QueueID int64) ([]models.Ticket, error) {
 	tickets := make([]models.Ticket, 0)
 	rows, err := Connection.Query(`SELECT "t"."ID", "t"."Title", "t"."Description", "t"."Queue" AS "QueueID", "t"."Owner" AS "OwnerID", "t"."Severity" AS "SeverityID", "t"."Status" AS "StatusID","t"."CreatedAt","t"."LastModified","t"."StalledUntil","t"."Meta" FROM "Tickets" AS "t" WHERE "Queue" = $1`, QueueID)
 	if err != nil {
@@ -39,21 +39,18 @@ func GetTicketsInQueue(QueueID int64, ShowInvisible bool) ([]models.Ticket, erro
 	for rows.Next() {
 		var ticket models.Ticket
 		rows.Scan(&ticket.ID, &ticket.Title, &ticket.Description, &ticket.QueueID, &ticket.OwnerID, &ticket.SeverityID, &ticket.StatusID, &ticket.CreatedAt, &ticket.LastModified, &ticket.StalledUntil, &ticket.Meta)
+		ticket.Queue, _, err = GetQueueUNSAFE(ticket.QueueID)
+		if ticket.OwnerID.Valid {
+			ticket.Owner, err = GetUser(ticket.OwnerID.Int64)
+		}
+		ticket.Severity, _, err = GetSeverityUNSAFE(ticket.SeverityID)
 		ticket.Status, _, err = GetStatusUNSAFE(ticket.StatusID)
 
-		if ticket.Status.TicketsVisible || ShowInvisible {
-			ticket.Queue, _, err = GetQueueUNSAFE(ticket.QueueID)
-			if ticket.OwnerID.Valid {
-				ticket.Owner, err = GetUser(ticket.OwnerID.Int64)
-			}
-			ticket.Severity, _, err = GetSeverityUNSAFE(ticket.SeverityID)
-
-			if err != nil {
-				dev.LogError(err, err.Error())
-				return make([]models.Ticket, 0), err
-			}
-			tickets = append(tickets, ticket)
+		if err != nil {
+			dev.LogError(err, err.Error())
+			return make([]models.Ticket, 0), err
 		}
+		tickets = append(tickets, ticket)
 	}
 
 	return tickets, nil

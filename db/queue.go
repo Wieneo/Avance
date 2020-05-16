@@ -21,7 +21,7 @@ func GetQueue(ProjectID int64, QueueID int64) (models.Queue, bool, error) {
 	return queue, true, nil
 }
 
-//GetQueueUNSAFE returns the queue struct to the given id ignoring the project relationship
+//GetQueueUNSAFE returns the queue struct to the given id without checking if its contained in a project
 func GetQueueUNSAFE(QueueID int64) (models.Queue, bool, error) {
 	var queue models.Queue
 	err := Connection.QueryRow(`SELECT "ID", "Name" FROM "Queue" WHERE "ID" = $1`, QueueID).Scan(&queue.ID, &queue.Name)
