@@ -22,7 +22,7 @@
       if(this.$route.query.ticket != undefined){
         const ticketID = parseInt(this.$route.query.ticket as string)
         if (!isNaN(ticketID)){
-          //LoadTicketInformation
+          this.GetTicket(ticketID)
         }
       }
     },
