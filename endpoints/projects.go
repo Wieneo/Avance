@@ -205,23 +205,3 @@ func ChangeProject(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
-
-//GetProjectQueues returns all queues a user has access to from one project
-func GetProjectQueues(w http.ResponseWriter, r *http.Request) {
-	if user, err := utils.GetUser(r, w); err == nil {
-		//strconv should never throw error because http router expression specifies that only /api/v1/project/[0-9]{*}/queues should be sent here
-		projectid, _ := strconv.ParseInt(strings.Split(r.RequestURI, "/")[4], 10, 64)
-		queues, err := perms.GetVisibleQueuesFromProject(user, projectid)
-		if err != nil {
-			w.WriteHeader(500)
-			dev.ReportError(err, w, err.Error())
-			return
-		}
-
-		json.NewEncoder(w).Encode(struct {
-			Queues []models.Queue
-		}{
-			queues,
-		})
-	}
-}

@@ -18,7 +18,7 @@ func GetTicket(TicketID int64) (models.Ticket, bool, error) {
 		return models.Ticket{}, true, err
 	}
 
-	ticket.Queue, err = GetQueue(ticket.QueueID)
+	ticket.Queue, _, err = GetQueueUNSAFE(ticket.QueueID)
 	if ticket.OwnerID.Valid {
 		ticket.Owner, err = GetUser(ticket.OwnerID.Int64)
 	}
