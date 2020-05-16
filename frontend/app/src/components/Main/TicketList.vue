@@ -12,7 +12,7 @@
                     <v-list-item
                         v-for="ticket in queue.Tickets"
                         :key="ticket.ID"
-                        @click="DisplayTicket(ticket)">
+                        @click="DisplayTicket(ticket.ID)">
                         <v-list-item-avatar>
                             <v-img src="https://randomuser.me/api/portraits/women/85.jpg"></v-img>
                         </v-list-item-avatar>
@@ -23,7 +23,7 @@
                         </v-list-item-content>
 
                         <v-list-item-icon>
-                            <v-icon :style="{ color: ticket.Severity.DisplayColor }">mdi-fire</v-icon>
+                            <v-icon :style="{ color: ticket.Severity.DisplayColor }" :title="ticket.Severity.Name">mdi-fire</v-icon>
                             <v-icon @click="console.log('test2')">mdi-forward</v-icon>
                         </v-list-item-icon>
                     </v-list-item>
@@ -52,8 +52,10 @@
             if(to.query.project != undefined){
               const projectID = parseInt(to.query.project  as string)
               if (!isNaN(projectID)){
-                this.CurrentProject = projectID
-                this.LoadQueues()
+                if (this.CurrentProject != projectID){
+                  this.CurrentProject = projectID
+                  this.LoadQueues()
+                }
               }
             }
         }
@@ -69,8 +71,10 @@
       if(this.$route.query.project != undefined){
         const projectID = parseInt(this.$route.query.project as string)
         if (!isNaN(projectID)){
-          this.CurrentProject = projectID
-          this.LoadQueues()
+          if (this.CurrentProject != projectID){
+            this.CurrentProject = projectID
+            this.LoadQueues()
+          }
         }
       }
     },
@@ -86,8 +90,12 @@
 
         this.LoadingTickets = false
       },
-      DisplayTicket: async function(Ticket: any){
-        console.log(Ticket)
+      DisplayTicket: async function(TicketID: number){
+        try{
+          this.$router.push({ query: Object.assign({}, this.$route.query, { ticket: TicketID }) });
+        }finally{
+          this.$emit('showTicket', TicketID)
+        }
       },
       asyncForEach: async function (array: any, callback: any) {
         for (let index = 0; index < array.length; index++) {
