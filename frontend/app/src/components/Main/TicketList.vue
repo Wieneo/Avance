@@ -1,39 +1,32 @@
 <template>
     <div>
       <v-skeleton-loader
-            :loading="LoadingQueues"
-            :transition="scale-transition"
-            type="article@3"
-          >
+          :loading="LoadingTickets"
+          :transition="scale-transition"
+          type="list-item-avatar-two-line@4"
+        >
         <v-card>
             <div v-for="queue in Queues" :key="queue.ID">
                 <v-list subheader dense>
                     <v-subheader>{{queue.Name}}</v-subheader>
-
-                    <v-skeleton-loader
-                      :loading="LoadingTickets"
-                      :transition="scale-transition"
-                      type="list-item-avatar-two-line@4"
-                    >
                     <v-list-item
-                        v-for="index in 5"
-                        :key="index"
-                        @click="console.log('test')">
+                        v-for="ticket in queue.Tickets"
+                        :key="ticket.ID"
+                        @click="DisplayTicket(ticket)">
                         <v-list-item-avatar>
                             <v-img src="https://randomuser.me/api/portraits/women/85.jpg"></v-img>
                         </v-list-item-avatar>
 
                         <v-list-item-content>
-                            <v-list-item-title>Ticket {{index}}</v-list-item-title>
-                            <v-list-item-subtitle>Open</v-list-item-subtitle>
+                            <v-list-item-title>{{ticket.Title}}</v-list-item-title>
+                            <v-list-item-subtitle :style="{ color: ticket.Status.DisplayColor }">{{ticket.Status.Name}}</v-list-item-subtitle>
                         </v-list-item-content>
 
                         <v-list-item-icon>
-                            <v-icon>mdi-fire</v-icon>
+                            <v-icon :style="{ color: ticket.Severity.DisplayColor }">mdi-fire</v-icon>
                             <v-icon @click="console.log('test2')">mdi-forward</v-icon>
                         </v-list-item-icon>
                     </v-list-item>
-                    </v-skeleton-loader>
                 </v-list>
                 <v-divider/>
             </div>
@@ -47,6 +40,7 @@
   interface Queue{
     ID: number;
     Name: string;
+    Tickets: any[];
   }
 
   const Queues: Queue[] = []
@@ -59,14 +53,13 @@
               const projectID = parseInt(to.query.project  as string)
               if (!isNaN(projectID)){
                 this.CurrentProject = projectID
-                this.LoadQueue()
+                this.LoadQueues()
               }
             }
         }
     },
      data: function(){
       return {
-        LoadingQueues: true,
         LoadingTickets: true,
         CurrentProject: 0,
         Queues
@@ -77,14 +70,29 @@
         const projectID = parseInt(this.$route.query.project as string)
         if (!isNaN(projectID)){
           this.CurrentProject = projectID
-          this.LoadQueue()
+          this.LoadQueues()
         }
       }
     },
     methods:{
-      LoadQueue: async function(){
+      LoadQueues: async function(){
         this.Queues = (await Vue.prototype.$GetRequest("/api/v1/project/" + this.CurrentProject + "/queues")).Queues
-        this.LoadingQueues = false
+        this.LoadTickets()
+      },
+      LoadTickets: async function(){
+        await this.asyncForEach(this.Queues, async (element: any) => {
+          element.Tickets = (await Vue.prototype.$GetRequest("/api/v1/project/" + this.CurrentProject + "/queue/" + element.ID + "/tickets")).Tickets
+        });
+
+        this.LoadingTickets = false
+      },
+      DisplayTicket: async function(Ticket: any){
+        console.log(Ticket)
+      },
+      asyncForEach: async function (array: any, callback: any) {
+        for (let index = 0; index < array.length; index++) {
+          await callback(array[index], index, array);
+        }
       }
     }
   })

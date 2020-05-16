@@ -88,7 +88,18 @@ func GetTicketsFromQueue(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if allperms.Admin || perms.CanSee {
-		tickets, err := db.GetTicketsInQueue(queueid)
+		var showInvisible bool
+
+		if len(r.URL.Query()["showInvisible"]) > 0 {
+			showInvisible, err = strconv.ParseBool(r.URL.Query()["showInvisible"][0])
+			if err != nil {
+				w.WriteHeader(400)
+				dev.ReportUserError(w, "showInvisible Argument is not a boolean")
+				return
+			}
+		}
+
+		tickets, err := db.GetTicketsInQueue(queueid, showInvisible)
 		if err != nil {
 			w.WriteHeader(500)
 			dev.ReportError(err, w, err.Error())
