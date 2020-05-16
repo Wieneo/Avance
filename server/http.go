@@ -52,6 +52,11 @@ func HTTPInit() {
 	router.HandleFunc("/api/v1/project/{[0-9]{*}}/status/{[0-9]{*}}", endpoints.PatchStatus).Methods("PATCH")
 	router.HandleFunc("/api/v1/project/{[0-9]{*}}/status/{[0-9]{*}}", endpoints.DeleteStatus).Methods("DELETE")
 
+	//Queues
+	router.HandleFunc("/api/v1/project/{[0-9]{*}}/queues", endpoints.CreateQueue).Methods("POST")
+	router.HandleFunc("/api/v1/project/{[0-9]{*}}/queue/{[0-9]{*}}", endpoints.PatchQueue).Methods("PATCH")
+	router.HandleFunc("/api/v1/project/{[0-9]{*}}/queue/{[0-9]{*}}", endpoints.DeleteQueue).Methods("DELETE")
+
 	router.HandleFunc("/api/v1/ticket/{[0-9]{*}}", endpoints.GetTicket).Methods("GET")
 
 	//Needs to be at the bottom!
