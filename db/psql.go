@@ -90,7 +90,7 @@ func migrate() {
 		for currentVersion < newestVersion {
 			currentVersion++
 			//Ignore versions that arent mapped
-			if len(migrationsAvailable[currentVersion]) > 0{
+			if len(migrationsAvailable[currentVersion]) > 0 {
 				dev.LogInfo("Applying", migrationsAvailable[currentVersion])
 				rawBytes, err := ioutil.ReadFile(cwd + "/db/migrations/" + migrationsAvailable[currentVersion])
 				if err != nil {
@@ -149,8 +149,8 @@ func deploy() {
 
 	_, err = CreateUser(models.User{
 		Username:  "Admin",
-		Firstname: "Admin",
-		Lastname:  "istrator",
+		Firstname: "The",
+		Lastname:  "Admin",
 		Mail:      "root@localhost",
 		Permissions: models.Permissions{
 			Admin: true,
