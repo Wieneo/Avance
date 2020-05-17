@@ -2,8 +2,7 @@
     <div>
       <v-skeleton-loader
           :loading="LoadingTickets"
-          :transition="scale-transition"
-          type="list-item-avatar-two-line@4"
+          type="list-item-avatar-two-line@5"
         >
         <v-card>
             <div v-for="queue in Queues" :key="queue.ID">

@@ -8,6 +8,7 @@
 <style scoped>
 @import '../node_modules/noty/lib/noty.css';
 @import '../node_modules/noty/lib/themes/metroui.css';
+@import '../public/custom.css';
 </style>
 
 <script lang="ts">
