@@ -21,7 +21,7 @@ func GetQueue(ProjectID int64, QueueID int64) (models.Queue, bool, error) {
 	return queue, true, nil
 }
 
-//GetQueueUNSAFE returns the queue struct to the given id without checking if its contained in a project
+//GetQueueUNSAFE returns the queue struct to the given id ignoring the project relationship
 func GetQueueUNSAFE(QueueID int64) (models.Queue, bool, error) {
 	var queue models.Queue
 	err := Connection.QueryRow(`SELECT "ID", "Name" FROM "Queue" WHERE "ID" = $1`, QueueID).Scan(&queue.ID, &queue.Name)
@@ -53,4 +53,29 @@ func QueuesInProject(Project models.Project) ([]models.Queue, error) {
 	rows.Close()
 
 	return Queues, nil
+}
+
+//CreateQueue creates a queue in the database
+func CreateQueue(Name string, Project int64) (int64, error) {
+	var newID int64
+	err := Connection.QueryRow(`INSERT INTO "Queue" ("Name", "Project") VALUES ($1, $2) RETURNING "ID"`, Name, Project).Scan(&newID)
+	if err != nil {
+		return 0, err
+	}
+
+	return newID, nil
+}
+
+//PatchQueue patches the given Queue
+func PatchQueue(Queue models.Queue) error {
+	_, err := Connection.Exec(`UPDATE "Queue" SET "Name" = $1 WHERE "ID" = $2`, Queue.Name, Queue.ID)
+	return err
+}
+
+//RemoveQueue removes a queue from the database
+func RemoveQueue(Project int64, Queue int64) error {
+	//I know that project isn't really needed as queue ids are unique anyway
+	//Its just a safety measure ;)
+	_, err := Connection.Exec(`DELETE FROM "Queue" WHERE "ID" = $1 AND "Project" = $2`, Queue, Project)
+	return err
 }
