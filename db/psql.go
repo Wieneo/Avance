@@ -90,7 +90,7 @@ func migrate() {
 		for currentVersion < newestVersion {
 			currentVersion++
 			//Ignore versions that arent mapped
-			if len(migrationsAvailable[currentVersion]) > 0{
+			if len(migrationsAvailable[currentVersion]) > 0 {
 				dev.LogInfo("Applying", migrationsAvailable[currentVersion])
 				rawBytes, err := ioutil.ReadFile(cwd + "/db/migrations/" + migrationsAvailable[currentVersion])
 				if err != nil {
@@ -149,13 +149,24 @@ func deploy() {
 
 	_, err = CreateUser(models.User{
 		Username:  "Admin",
-		Firstname: "Admin",
-		Lastname:  "istrator",
+		Firstname: "The",
+		Lastname:  "Admin",
 		Mail:      "root@localhost",
 		Permissions: models.Permissions{
 			Admin: true,
 		},
 	}, "tixter")
+
+	//The following is used to make debugging and developing the APP easier when used with Gitlab Auto DevOPS
+	//Detect if deployed via GITLAB
+	if len(os.Getenv("GITLAB_ENVIRONMENT_NAME")) > 0 {
+		dev.LogInfo("Instance was deployed via Gitlab. Deploying example data")
+		projectid, _ := CreateProject("Auto DevOPS", "Default project created by Gitlab Auto DevOPS")
+		CreateQueue("Development", projectid)
+		CreateStatus(true, "Open", "green", true, projectid)
+		CreateSeverity(true, "Normal", "green", 10, projectid)
+		//ToDo: CreateTicket maybe?
+	}
 
 	if err != nil {
 		dev.LogFatal(err, "Couldn't create administrator!", err.Error())
