@@ -1,6 +1,6 @@
 <template>
     <v-app-bar app>
-        <p>Project</p>
+        <p>{{CurrentProject.Name}}</p>
         <v-spacer></v-spacer>
         <v-btn icon>
             <v-icon @click="logout">mdi-logout</v-icon>
@@ -17,6 +17,28 @@
       logout: async function(){
         await Vue.prototype.$GetRequest("/api/v1/logout")
         window.location.href = "/login"
+      },
+      getProjectInfo: async function(ProjectID: number){
+          if (!isNaN(ProjectID)){
+            this.CurrentProject = (await Vue.prototype.$GetRequest("/api/v1/project/" + ProjectID)).Project
+          }
+      }
+    },
+    data: function(){
+      return {
+        CurrentProject: {}
+      }
+    },
+    watch:{
+        $route (to, from){
+            if(to.query.project != undefined){
+              this.getProjectInfo(parseInt(to.query.project  as string))
+            }
+        }
+    },
+     mounted: async function(){
+      if(this.$route.query.project != undefined){
+        this.getProjectInfo(parseInt(this.$route.query.project  as string))
       }
     }
   })
