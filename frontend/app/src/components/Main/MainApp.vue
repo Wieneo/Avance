@@ -11,7 +11,7 @@
                 <v-col lg="3">
                 <TicketList style="max-height: calc(100vh - 88px); overflow-y: auto" v-on:showTicket="DisplayTicket"/>
                 </v-col>
-                <v-col>
+                <v-col v-if="CurrentTicketID != 0">
                     <v-tabs
                         v-model="tab"
                         background-color="primary"
@@ -24,6 +24,8 @@
                         <v-tab-item><TicketDisplay v-bind:CurrentTicketID="CurrentTicketID"/></v-tab-item>
                         <v-tab-item><ActionDisplay/></v-tab-item>
                     </v-tabs>
+                </v-col>
+                <v-col v-else>
                 </v-col>
             </v-row>
             </v-container>
@@ -56,6 +58,14 @@ export default Vue.extend({
             showProjects: false,
             CurrentTicketID: 0,
         }
+    },
+    mounted: async function(){
+      if(this.$route.query.ticket != undefined){
+        const ticketID = parseInt(this.$route.query.ticket as string)
+        if (!isNaN(ticketID)){
+          this.DisplayTicket(ticketID)
+        }
+      }
     },
     methods:{
         DisplayTicket: function(TicketID: number){
