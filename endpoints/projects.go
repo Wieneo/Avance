@@ -35,6 +35,49 @@ func GetProjects(w http.ResponseWriter, r *http.Request) {
 
 }
 
+//GetSingleProject returns all projects visible to that user
+func GetSingleProject(w http.ResponseWriter, r *http.Request) {
+	user, err := utils.GetUser(r, w)
+	if err != nil {
+		w.WriteHeader(500)
+		dev.ReportError(err, w, err.Error())
+		return
+	}
+
+	projectid, _ := strconv.ParseInt(strings.Split(r.URL.String(), "/")[4], 10, 64)
+	project, found, err := db.GetProject(projectid)
+
+	if err != nil {
+		w.WriteHeader(500)
+		dev.ReportError(err, w, err.Error())
+		return
+	}
+
+	if !found {
+		w.WriteHeader(404)
+		dev.ReportUserError(w, "Project not found")
+		return
+	}
+
+	allperms, perms, err := perms.GetPermissionsToProject(user, project)
+	if err != nil {
+		w.WriteHeader(500)
+		dev.ReportError(err, w, err.Error())
+		return
+	}
+
+	if perms.CanSee || allperms.Admin {
+		json.NewEncoder(w).Encode(struct {
+			Project models.Project
+		}{
+			project,
+		})
+	} else {
+		w.WriteHeader(401)
+		dev.ReportUserError(w, "You don't have access to that project")
+	}
+}
+
 type projectWebRequest struct {
 	Name        string
 	Description string
