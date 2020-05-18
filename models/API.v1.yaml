@@ -8,7 +8,37 @@ info:
     email: contact@gnaucke.com
 servers:
   - url: 'http://localhost:8000'
-paths: {}
+paths:
+  /api/v1/health:
+    get:
+      summary: Instance Health
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Version:
+                    type: string
+                  DB:
+                    type: boolean
+                  Redis:
+                    type: boolean
+                  Errors:
+                    type: array
+                    items:
+                      type: string
+              examples: {}
+        '': {}
+      operationId: get-api-v1-health
+      description: Returns the current health of the instance
+      parameters: []
+      security:
+        - Session Key: []
+      requestBody: {}
 components:
   schemas:
     Project:
@@ -115,3 +145,5 @@ components:
       name: Authorization
       type: apiKey
       in: header
+security:
+  - Session Key: []
