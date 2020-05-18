@@ -1,0 +1,117 @@
+openapi: 3.0.0
+info:
+  title: API
+  version: '1.0'
+  contact:
+    name: Johann Gnaucke
+    url: gitlab.gnaucke.dev/avance/avance-app
+    email: contact@gnaucke.com
+servers:
+  - url: 'http://localhost:8000'
+paths: {}
+components:
+  schemas:
+    Project:
+      title: Project
+      properties:
+        ID:
+          type: integer
+        Name:
+          type: string
+        Description:
+          type: string
+      type: object
+    Queue:
+      title: Queue
+      properties:
+        ID:
+          type: integer
+        Name:
+          type: string
+      type: object
+    Severity:
+      title: Severity
+      properties:
+        ID:
+          type: integer
+        Enabled:
+          type: boolean
+        Name:
+          type: string
+        DisplayColor:
+          type: string
+        Priority:
+          type: integer
+      type: object
+    Status:
+      title: Severity
+      properties:
+        ID:
+          type: integer
+        Enabled:
+          type: boolean
+        Name:
+          type: string
+        DisplayColor:
+          type: string
+        TicketsVisible:
+          type: boolean
+      type: object
+    User:
+      title: User
+      properties:
+        ID:
+          type: integer
+        Username:
+          type: string
+        Mail:
+          type: string
+        Firstname:
+          type: string
+        Lastname:
+          type: string
+      type: object
+    Ticket:
+      title: Ticket
+      type: object
+      properties:
+        ID:
+          type: integer
+        Title:
+          type: string
+        Description:
+          type: string
+        QueueID:
+          type: integer
+        Queue:
+          $ref: '#/components/schemas/Queue'
+        OwnerID:
+          type: integer
+        Owner:
+          $ref: '#/components/schemas/User'
+        SeverityID:
+          type: integer
+        Severity:
+          $ref: '#/components/schemas/Severity'
+        StatusID:
+          type: integer
+        Status:
+          $ref: '#/components/schemas/Status'
+        CreatedAt:
+          type: string
+        LastModified:
+          type: string
+        StalledUntil:
+          type: object
+          properties:
+            Valid:
+              type: boolean
+            Time:
+              type: string
+        Meta:
+          type: string
+  securitySchemes:
+    Session Key:
+      name: Authorization
+      type: apiKey
+      in: header
