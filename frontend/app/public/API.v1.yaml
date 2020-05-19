@@ -998,6 +998,106 @@ paths:
         - Statuses
       security:
         - Session Key: []
+  '/api/v1/project/{projectid}/queue/{queueid}/tickets':
+    parameters:
+      - schema:
+          type: string
+        name: projectid
+        in: path
+        required: true
+      - schema:
+          type: string
+        name: queueid
+        in: path
+        required: true
+    get:
+      summary: Get Tickets in Queue
+      tags:
+        - Queues
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Ticket'
+        '400':
+          description: showInvisible Query Parameter is not a boolean
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Error:
+                    type: string
+        '403':
+          description: "User doesn't have access to the queue / project"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Error:
+                    type: string
+        '404':
+          description: "Specified project / queue wasn't found"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Error:
+                    type: string
+      operationId: get-api-v1-project-projectid-queue-queueid-tickets
+      security:
+        - Session Key: []
+      parameters:
+        - schema:
+            type: boolean
+          in: query
+          name: showInvisible
+          description: If set to true tickets with invisible statuses will also be shown
+  '/api/v1/ticket/{ticketid}':
+    parameters:
+      - schema:
+          type: string
+        name: ticketid
+        in: path
+        required: true
+    get:
+      summary: Get Ticket
+      tags:
+        - Tickets
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ticket'
+        '403':
+          description: "User doesn't have access to the queue, which the ticket is currently in."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Error:
+                    type: string
+        '404':
+          description: "Specified ticket wasn't found"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Error:
+                    type: string
+      operationId: get-api-v1-ticket-ticketid
+      security:
+        - Session Key: []
 components:
   schemas:
     Project:

@@ -45,7 +45,7 @@ func GetTicket(w http.ResponseWriter, r *http.Request) {
 	if allperms.Admin || perms.CanSee {
 		json.NewEncoder(w).Encode(ticket)
 	} else {
-		w.WriteHeader(401)
+		w.WriteHeader(403)
 		dev.ReportUserError(w, "You don't have access to that queue!")
 	}
 }
@@ -103,7 +103,7 @@ func GetTicketsFromQueue(w http.ResponseWriter, r *http.Request) {
 
 		json.NewEncoder(w).Encode(tickets)
 	} else {
-		w.WriteHeader(401)
+		w.WriteHeader(403)
 		dev.ReportUserError(w, "You don't have access to that queue!")
 	}
 }

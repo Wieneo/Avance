@@ -53,7 +53,6 @@ func HTTPInit() {
 	router.HandleFunc("/api/v1/project/{[0-9]{*}}/status/{[0-9]{*}}", endpoints.PatchStatus).Methods("PATCH")
 	router.HandleFunc("/api/v1/project/{[0-9]{*}}/status/{[0-9]{*}}", endpoints.DeleteStatus).Methods("DELETE")
 
-	router.HandleFunc("/api/v1/project/{[0-9]{*}}/queue/{[0-9]{*}}/tickets", endpoints.GetTicketsFromQueue).Methods("GET")
 	//Queues
 	router.HandleFunc("/api/v1/project/{[0-9]{*}}/queues", endpoints.GetProjectQueues).Methods("GET")
 	router.HandleFunc("/api/v1/project/{[0-9]{*}}/queues", endpoints.CreateQueue).Methods("POST")
