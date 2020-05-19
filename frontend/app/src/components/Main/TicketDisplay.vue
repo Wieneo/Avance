@@ -64,7 +64,7 @@
     methods:{
         GetTicket: async function(TicketID: number){
             this.Loading = true
-            this.CurrentTicket = (await Vue.prototype.$GetRequest("/api/v1/ticket/" + TicketID)).Ticket
+            this.CurrentTicket = (await Vue.prototype.$GetRequest("/api/v1/ticket/" + TicketID))
             this.Loading = false
         }
     }

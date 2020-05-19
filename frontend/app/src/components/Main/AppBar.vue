@@ -20,7 +20,7 @@
       },
       getProjectInfo: async function(ProjectID: number){
           if (!isNaN(ProjectID)){
-            this.CurrentProject = (await Vue.prototype.$GetRequest("/api/v1/project/" + ProjectID)).Project
+            this.CurrentProject = (await Vue.prototype.$GetRequest("/api/v1/project/" + ProjectID))
           }
       }
     },

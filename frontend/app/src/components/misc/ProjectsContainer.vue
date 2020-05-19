@@ -65,7 +65,7 @@
       }
     },
     mounted: async function(){
-      this.Projects = (await Vue.prototype.$GetRequest("/api/v1/projects")).Projects
+      this.Projects = (await Vue.prototype.$GetRequest("/api/v1/projects"))
       //ToDo: Get to last project
 
       if(this.$route.query.project == undefined && this.Projects.length > 0){

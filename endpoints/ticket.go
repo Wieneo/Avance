@@ -8,7 +8,6 @@ import (
 
 	"gitlab.gnaucke.dev/tixter/tixter-app/v2/db"
 	"gitlab.gnaucke.dev/tixter/tixter-app/v2/dev"
-	"gitlab.gnaucke.dev/tixter/tixter-app/v2/models"
 	"gitlab.gnaucke.dev/tixter/tixter-app/v2/perms"
 	"gitlab.gnaucke.dev/tixter/tixter-app/v2/utils"
 )
@@ -44,11 +43,7 @@ func GetTicket(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if allperms.Admin || perms.CanSee {
-		json.NewEncoder(w).Encode(struct {
-			Ticket models.Ticket
-		}{
-			ticket,
-		})
+		json.NewEncoder(w).Encode(ticket)
 	} else {
 		w.WriteHeader(401)
 		dev.ReportUserError(w, "You don't have access to that queue!")
@@ -106,11 +101,7 @@ func GetTicketsFromQueue(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		json.NewEncoder(w).Encode(struct {
-			Tickets []models.Ticket
-		}{
-			tickets,
-		})
+		json.NewEncoder(w).Encode(tickets)
 	} else {
 		w.WriteHeader(401)
 		dev.ReportUserError(w, "You don't have access to that queue!")

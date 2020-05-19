@@ -12,7 +12,6 @@ import (
 	"gitlab.gnaucke.dev/tixter/tixter-app/v2/utils"
 
 	"gitlab.gnaucke.dev/tixter/tixter-app/v2/db"
-	"gitlab.gnaucke.dev/tixter/tixter-app/v2/models"
 
 	"gitlab.gnaucke.dev/tixter/tixter-app/v2/dev"
 )
@@ -52,11 +51,7 @@ func GetSeverities(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	json.NewEncoder(w).Encode(struct {
-		Severities []models.Severity
-	}{
-		severities,
-	})
+	json.NewEncoder(w).Encode(severities)
 }
 
 type severityWebRequest struct {
@@ -156,11 +151,7 @@ func CreateSeverity(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		json.NewEncoder(w).Encode(struct {
-			Severity models.Severity
-		}{
-			sev,
-		})
+		json.NewEncoder(w).Encode(sev)
 
 	} else {
 		w.WriteHeader(403)
@@ -266,11 +257,7 @@ func PatchSeverity(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		json.NewEncoder(w).Encode(struct {
-			Severity models.Severity
-		}{
-			severity,
-		})
+		json.NewEncoder(w).Encode(severity)
 
 	} else {
 		w.WriteHeader(403)

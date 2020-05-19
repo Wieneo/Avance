@@ -10,7 +10,6 @@ import (
 
 	"gitlab.gnaucke.dev/tixter/tixter-app/v2/db"
 	"gitlab.gnaucke.dev/tixter/tixter-app/v2/dev"
-	"gitlab.gnaucke.dev/tixter/tixter-app/v2/models"
 	"gitlab.gnaucke.dev/tixter/tixter-app/v2/perms"
 	"gitlab.gnaucke.dev/tixter/tixter-app/v2/utils"
 )
@@ -38,11 +37,7 @@ func GetStatuses(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	json.NewEncoder(w).Encode(struct {
-		Statuses []models.Status
-	}{
-		statuses,
-	})
+	json.NewEncoder(w).Encode(statuses)
 }
 
 type statusWebRequest struct {
@@ -141,11 +136,7 @@ func CreateStatus(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		json.NewEncoder(w).Encode(struct {
-			Status models.Status
-		}{
-			status,
-		})
+		json.NewEncoder(w).Encode(status)
 
 	} else {
 		w.WriteHeader(403)
@@ -251,11 +242,7 @@ func PatchStatus(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		json.NewEncoder(w).Encode(struct {
-			Status string
-		}{
-			fmt.Sprintf("Status %d was updated", statusid),
-		})
+		json.NewEncoder(w).Encode(status)
 
 	} else {
 		w.WriteHeader(401)
