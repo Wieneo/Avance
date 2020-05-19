@@ -131,7 +131,7 @@ paths:
         - Session Key: []
   /api/v1/profile:
     get:
-      summary: Your GET endpoint
+      summary: Profile / User Information
       responses:
         '200':
           description: OK
