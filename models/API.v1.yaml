@@ -80,7 +80,7 @@ paths:
         - Session Management
   /api/v1/session:
     get:
-      summary: Your GET endpoint
+      summary: Check Session
       tags:
         - Session Management
       responses:
@@ -99,7 +99,7 @@ paths:
         - Session Key: []
   /api/v1/logout:
     get:
-      summary: Your GET endpoint
+      summary: Logging Out
       tags:
         - Session Management
       responses:
@@ -972,7 +972,6 @@ paths:
                 properties:
                   Status:
                     type: string
-
               examples:
                 Example:
                   value:
