@@ -4,6 +4,23 @@ import (
 	"gitlab.gnaucke.dev/tixter/tixter-app/v2/models"
 )
 
+//SearchStatus searches for a status and returns the ID, if a status was found and maybe an error
+func SearchStatus(Name string) (int64, bool, error) {
+	var ID int64
+
+	//Ignoring casing
+	err := Connection.QueryRow(`SELECT "ID" FROM "Statuses" WHERE UPPER("Name") = UPPER($1)`, Name).Scan(&ID)
+	if err != nil {
+		if err.Error() == "sql: no rows in result set" {
+			return ID, false, nil
+		}
+
+		return ID, true, err
+	}
+
+	return ID, true, nil
+}
+
 //GetStatuses returns all statuses from the database relating to the given project
 func GetStatuses(Project int64, ShowDisabled bool) ([]models.Status, error) {
 	statuses := make([]models.Status, 0)

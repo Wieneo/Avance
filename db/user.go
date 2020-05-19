@@ -7,6 +7,23 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+//SearchUser searches for a user and returns the ID, if a user was found and maybe an error
+func SearchUser(Name string) (int64, bool, error) {
+	var ID int64
+
+	//Ignoring casing
+	err := Connection.QueryRow(`SELECT "ID" FROM "Users" WHERE UPPER("Username") = UPPER($1)`, Name).Scan(&ID)
+	if err != nil {
+		if err.Error() == "sql: no rows in result set" {
+			return ID, false, nil
+		}
+
+		return ID, true, err
+	}
+
+	return ID, true, nil
+}
+
 //GetUser returns the user struct from the database
 func GetUser(UserID int64) (models.User, error) {
 	var Requested models.User

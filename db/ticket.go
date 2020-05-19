@@ -1,6 +1,9 @@
 package db
 
 import (
+	"database/sql"
+	"time"
+
 	"gitlab.gnaucke.dev/tixter/tixter-app/v2/dev"
 	"gitlab.gnaucke.dev/tixter/tixter-app/v2/models"
 )
@@ -25,6 +28,20 @@ func GetTicket(TicketID int64) (models.Ticket, bool, error) {
 	ticket.Severity, _, err = GetSeverityUNSAFE(ticket.SeverityID)
 	ticket.Status, _, err = GetStatusUNSAFE(ticket.StatusID)
 	return ticket, true, nil
+}
+
+//CreateTicket creates a ticket and returns the new id
+func CreateTicket(Title string, Description string, Queue int64, OwnedByNobody bool, Owner int64, Severity int64, Status int64) (int64, error) {
+	var newID int64
+	var trueOwner sql.NullInt64
+
+	if !OwnedByNobody {
+		trueOwner.Valid = true
+		trueOwner.Int64 = Owner
+	}
+
+	err := Connection.QueryRow(`INSERT INTO "Tickets" ("Title", "Description", "Queue", "Owner", "Severity", "Status", "CreatedAt", "LastModified", "Meta") VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING "ID"`, Title, Description, Queue, trueOwner, Severity, Status, time.Now(), time.Now(), "{}").Scan(&newID)
+	return newID, err
 }
 
 //GetTicketsInQueue returns all tickets in a give queue

@@ -1013,7 +1013,7 @@ paths:
     get:
       summary: Get Tickets in Queue
       tags:
-        - Queues
+        - Tickets
       responses:
         '200':
           description: OK
@@ -1059,6 +1059,56 @@ paths:
           in: query
           name: showInvisible
           description: If set to true tickets with invisible statuses will also be shown
+    post:
+      summary: Create Tickets
+      operationId: post-api-v1-project-projectid-queue-queueid-tickets
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ticket'
+        '400':
+          description: JSON Body is malformed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Error:
+                    type: string
+        '403':
+          description: User is not allowed to create tickets in that queue
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Error:
+                    type: string
+        '404':
+          description: Specified project / queue / owner / status / severities not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Error:
+                    type: string
+        '406':
+          description: Specified Title / Status / Severity was empty
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Error:
+                    type: string
+      security:
+        - Session Key: []
+      tags:
+        - Tickets
   '/api/v1/ticket/{ticketid}':
     parameters:
       - schema:

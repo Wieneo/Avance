@@ -2,6 +2,7 @@ package endpoints
 
 import (
 	"encoding/json"
+	"io/ioutil"
 	"net/http"
 	"strconv"
 	"strings"
@@ -106,4 +107,145 @@ func GetTicketsFromQueue(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(403)
 		dev.ReportUserError(w, "You don't have access to that queue!")
 	}
+}
+
+type ticketWebRequest struct {
+	Title       string
+	Description string
+	Owner       string //Username instead of ID
+	Severity    string //Name instead of ID
+	Status      string //Name instead of ID
+}
+
+//CreateTicketsInQueue returns all tickets in a given queue
+func CreateTicketsInQueue(w http.ResponseWriter, r *http.Request) {
+	projectid, _ := strconv.ParseInt(strings.Split(r.RequestURI, "/")[4], 10, 64)
+	queueid, _ := strconv.ParseInt(strings.Split(r.URL.String(), "/")[6], 10, 64)
+
+	queue, found, err := db.GetQueue(projectid, queueid)
+	if err != nil {
+		w.WriteHeader(500)
+		dev.ReportError(err, w, err.Error())
+		return
+	}
+
+	if !found {
+		w.WriteHeader(404)
+		dev.ReportUserError(w, "Project/Queue not found")
+		return
+	}
+
+	user, err := utils.GetUser(r, w)
+	if err != nil {
+		w.WriteHeader(500)
+		dev.ReportError(err, w, err.Error())
+		return
+	}
+
+	allperms, perms, err := perms.GetPermissionsToQueue(user, queue)
+	if err != nil {
+		w.WriteHeader(500)
+		dev.ReportError(err, w, err.Error())
+		return
+	}
+
+	if !allperms.Admin && !perms.CanCreateTicket {
+		w.WriteHeader(403)
+		dev.ReportUserError(w, "You are not allowed to create tickets in that queue.")
+		return
+	}
+
+	var req ticketWebRequest
+
+	rawBytes, _ := ioutil.ReadAll(r.Body)
+	err = json.Unmarshal(rawBytes, &req)
+	if err != nil {
+		w.WriteHeader(400)
+		dev.ReportUserError(w, "JSON body is malformed")
+		return
+	}
+
+	//Check if all required fields are filled
+	if utils.IsEmpty(req.Title) {
+		w.WriteHeader(406)
+		dev.ReportUserError(w, "Title can't be empty")
+		return
+	}
+
+	if utils.IsEmpty(req.Status) {
+		w.WriteHeader(406)
+		dev.ReportUserError(w, "Status can't be empty")
+		return
+	}
+
+	if utils.IsEmpty(req.Severity) {
+		w.WriteHeader(406)
+		dev.ReportUserError(w, "Severity can't be empty")
+		return
+	}
+
+	var ownerID int64
+	ownedByNobody := true
+
+	//If owner is not specified -> Nobody is the owner
+	//This is checked again in the database part
+	if !utils.IsEmpty(req.Owner) {
+		ownerID, found, err = db.SearchUser(req.Owner)
+		if err != nil {
+			w.WriteHeader(500)
+			dev.ReportError(err, w, err.Error())
+			return
+		}
+
+		if !found {
+			w.WriteHeader(404)
+			dev.ReportUserError(w, "Owner "+req.Owner+" couldn't be found")
+			return
+		}
+
+		ownedByNobody = false
+	}
+
+	statusid, found, err := db.SearchStatus(req.Status)
+	if err != nil {
+		w.WriteHeader(500)
+		dev.ReportError(err, w, err.Error())
+		return
+	}
+
+	if !found {
+		w.WriteHeader(404)
+		dev.ReportUserError(w, "Status "+req.Status+" couldn't be found")
+		return
+	}
+
+	severityid, found, err := db.SearchSeverity(req.Severity)
+	if err != nil {
+		w.WriteHeader(500)
+		dev.ReportError(err, w, err.Error())
+		return
+	}
+
+	if !found {
+		w.WriteHeader(404)
+		dev.ReportUserError(w, "Severity "+req.Severity+" couldn't be found")
+		return
+	}
+
+	//Now everything should be ok
+	id, err := db.CreateTicket(req.Title, req.Description, queueid, ownedByNobody, ownerID, severityid, statusid)
+	if err != nil {
+		w.WriteHeader(500)
+		dev.ReportError(err, w, err.Error())
+		return
+	}
+
+	ticket, found, err := db.GetTicket(id)
+	if err != nil || !found {
+		w.WriteHeader(500)
+		dev.ReportError(err, w, err.Error())
+		return
+	}
+
+	json.NewEncoder(w).Encode(ticket)
 }
