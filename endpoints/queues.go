@@ -60,7 +60,7 @@ func CreateQueue(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if len(req.Name) == 0 {
-		w.WriteHeader(400)
+		w.WriteHeader(406)
 		dev.ReportUserError(w, "Name can't be empty")
 		return
 	}
@@ -109,7 +109,7 @@ func CreateQueue(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if found {
-			w.WriteHeader(400)
+			w.WriteHeader(409)
 			dev.ReportUserError(w, "A queue with that name already exists")
 			return
 		}
@@ -121,14 +121,22 @@ func CreateQueue(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		queue, found, err := db.GetQueue(id, projectid)
+		//If queue isnt found here something went horribly wrong -> ReportError
+		if err != nil || !found {
+			w.WriteHeader(500)
+			dev.ReportError(err, w, err.Error())
+			return
+		}
+
 		json.NewEncoder(w).Encode(struct {
-			Queue string
+			Queue models.Queue
 		}{
-			fmt.Sprintf("Queue %d created", id),
+			queue,
 		})
 
 	} else {
-		w.WriteHeader(401)
+		w.WriteHeader(403)
 		dev.ReportUserError(w, "You are not allowed to create queues in this project")
 		return
 	}
@@ -204,7 +212,7 @@ func PatchQueue(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if !somethingChanged {
-			w.WriteHeader(400)
+			w.WriteHeader(406)
 			dev.ReportUserError(w, "Nothing changed")
 			return
 		}
@@ -216,9 +224,9 @@ func PatchQueue(w http.ResponseWriter, r *http.Request) {
 		}
 
 		json.NewEncoder(w).Encode(struct {
-			Queue string
+			Queue models.Queue
 		}{
-			fmt.Sprintf("Queue %d was updated", queueid),
+			queue,
 		})
 
 	} else {
@@ -287,7 +295,7 @@ func DeleteQueue(w http.ResponseWriter, r *http.Request) {
 			fmt.Sprintf("Queue %d deleted", queueid),
 		})
 	} else {
-		w.WriteHeader(401)
+		w.WriteHeader(403)
 		dev.ReportUserError(w, "You are not allowed to delete queues in this project")
 		return
 	}

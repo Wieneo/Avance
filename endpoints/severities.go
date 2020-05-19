@@ -87,7 +87,7 @@ func CreateSeverity(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if len(req.Name) == 0 || len(req.DisplayColor) == 0 {
-		w.WriteHeader(400)
+		w.WriteHeader(406)
 		dev.ReportUserError(w, "Name / DisplayColor can't be empty")
 		return
 	}
@@ -136,7 +136,7 @@ func CreateSeverity(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if found {
-			w.WriteHeader(400)
+			w.WriteHeader(409)
 			dev.ReportUserError(w, "A severity with that name already exists")
 			return
 		}
@@ -148,14 +148,22 @@ func CreateSeverity(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		sev, found, err := db.GetSeverity(projectid, id)
+		//If severity isnt found here something went horribly wrong -> ReportError
+		if err != nil || !found {
+			w.WriteHeader(500)
+			dev.ReportError(err, w, err.Error())
+			return
+		}
+
 		json.NewEncoder(w).Encode(struct {
-			Severity string
+			Severity models.Severity
 		}{
-			fmt.Sprintf("Severity %d created", id),
+			sev,
 		})
 
 	} else {
-		w.WriteHeader(401)
+		w.WriteHeader(403)
 		dev.ReportUserError(w, "You are not allowed to create severities in this project")
 		return
 	}
@@ -247,7 +255,7 @@ func PatchSeverity(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if !somethingChanged {
-			w.WriteHeader(400)
+			w.WriteHeader(406)
 			dev.ReportUserError(w, "Nothing changed")
 			return
 		}
@@ -259,13 +267,13 @@ func PatchSeverity(w http.ResponseWriter, r *http.Request) {
 		}
 
 		json.NewEncoder(w).Encode(struct {
-			Severity string
+			Severity models.Severity
 		}{
-			fmt.Sprintf("Severity %d was updated", severityid),
+			severity,
 		})
 
 	} else {
-		w.WriteHeader(401)
+		w.WriteHeader(403)
 		dev.ReportUserError(w, "You are not allowed to patch severities in this project")
 		return
 	}
@@ -330,7 +338,7 @@ func DeleteSeverity(w http.ResponseWriter, r *http.Request) {
 			fmt.Sprintf("Severity %d deleted", severityid),
 		})
 	} else {
-		w.WriteHeader(401)
+		w.WriteHeader(403)
 		dev.ReportUserError(w, "You are not allowed to delete severities in this project")
 		return
 	}

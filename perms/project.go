@@ -52,7 +52,7 @@ func CheckAccessToProject(next http.Handler) http.Handler {
 			if perms.CanSee || allperms.Admin {
 				next.ServeHTTP(w, r)
 			} else {
-				w.WriteHeader(401)
+				w.WriteHeader(403)
 				dev.ReportUserError(w, "You dont have access to that project")
 				return
 			}

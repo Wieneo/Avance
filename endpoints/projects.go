@@ -2,7 +2,6 @@ package endpoints
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strconv"
@@ -132,7 +131,7 @@ func CreateProject(w http.ResponseWriter, r *http.Request) {
 			}
 
 			if found {
-				w.WriteHeader(401)
+				w.WriteHeader(403)
 				dev.ReportUserError(w, "Project with that name already exists")
 				return
 			}
@@ -144,10 +143,18 @@ func CreateProject(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
+			project, found, err := db.GetProject(id)
+			//If the project is not found something went horribly wrong -> ReportError here
+			if err != nil || !found {
+				w.WriteHeader(500)
+				dev.ReportError(err, w, err.Error())
+				return
+			}
+
 			json.NewEncoder(w).Encode(struct {
-				Project string
+				Project models.Project
 			}{
-				fmt.Sprintf("Project %d created", id),
+				project,
 			})
 
 		} else {
@@ -225,7 +232,7 @@ func ChangeProject(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if !somethingChanged {
-			w.WriteHeader(400)
+			w.WriteHeader(406)
 			dev.ReportUserError(w, "Nothing changed")
 			return
 		}
@@ -238,12 +245,12 @@ func ChangeProject(w http.ResponseWriter, r *http.Request) {
 		}
 
 		json.NewEncoder(w).Encode(struct {
-			Project string
+			Project models.Project
 		}{
-			fmt.Sprintf("Project %d updated", project.ID),
+			project,
 		})
 	} else {
-		w.WriteHeader(401)
+		w.WriteHeader(403)
 		dev.ReportUserError(w, "You are not allowed to patch this project")
 		return
 	}

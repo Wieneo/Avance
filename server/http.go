@@ -40,7 +40,6 @@ func HTTPInit() {
 
 	router.HandleFunc("/api/v1/project/{[0-9]{*}}", endpoints.GetSingleProject).Methods("GET")
 	router.HandleFunc("/api/v1/project/{[0-9]{*}}", endpoints.ChangeProject).Methods("PATCH")
-	router.HandleFunc("/api/v1/project/{[0-9]{*}}/queues", endpoints.GetProjectQueues).Methods("GET")
 
 	//Severities
 	router.HandleFunc("/api/v1/project/{[0-9]{*}}/severities", endpoints.GetSeverities).Methods("GET")
@@ -55,6 +54,7 @@ func HTTPInit() {
 	router.HandleFunc("/api/v1/project/{[0-9]{*}}/status/{[0-9]{*}}", endpoints.DeleteStatus).Methods("DELETE")
 
 	//Queues
+	router.HandleFunc("/api/v1/project/{[0-9]{*}}/queues", endpoints.GetProjectQueues).Methods("GET")
 	router.HandleFunc("/api/v1/project/{[0-9]{*}}/queues", endpoints.CreateQueue).Methods("POST")
 	router.HandleFunc("/api/v1/project/{[0-9]{*}}/queue/{[0-9]{*}}", endpoints.PatchQueue).Methods("PATCH")
 	router.HandleFunc("/api/v1/project/{[0-9]{*}}/queue/{[0-9]{*}}", endpoints.DeleteQueue).Methods("DELETE")

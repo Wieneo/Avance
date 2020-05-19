@@ -73,7 +73,7 @@ func CreateStatus(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if len(req.Name) == 0 || len(req.DisplayColor) == 0 {
-		w.WriteHeader(400)
+		w.WriteHeader(406)
 		dev.ReportUserError(w, "Name / DisplayColor can't be empty")
 		return
 	}
@@ -122,7 +122,7 @@ func CreateStatus(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if found {
-			w.WriteHeader(400)
+			w.WriteHeader(409)
 			dev.ReportUserError(w, "A status with that name already exists")
 			return
 		}
@@ -134,14 +134,21 @@ func CreateStatus(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		status, found, err := db.GetStatus(projectid, id)
+		if err != nil || !found {
+			w.WriteHeader(500)
+			dev.ReportError(err, w, err.Error())
+			return
+		}
+
 		json.NewEncoder(w).Encode(struct {
-			Status string
+			Status models.Status
 		}{
-			fmt.Sprintf("Status %d created", id),
+			status,
 		})
 
 	} else {
-		w.WriteHeader(401)
+		w.WriteHeader(403)
 		dev.ReportUserError(w, "You are not allowed to create statuses in this project")
 		return
 	}

@@ -39,6 +39,966 @@ paths:
       security:
         - Session Key: []
       requestBody: {}
+  /api/v1/login:
+    post:
+      summary: Logging In
+      operationId: post-api-v1-login
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  SessionKey:
+                    type: string
+                    description: ''
+        '401':
+          description: |-
+            Unauthorized
+            Username and Password don't match
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Error:
+                    type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                Username:
+                  type: string
+                Password:
+                  type: string
+        description: ''
+      tags:
+        - Session Management
+  /api/v1/session:
+    get:
+      summary: Your GET endpoint
+      tags:
+        - Session Management
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Authorized:
+                    type: boolean
+      operationId: get-api-v1-session
+      description: Use this endpoint to check wheter your session key is valid or not.
+      security:
+        - Session Key: []
+  /api/v1/logout:
+    get:
+      summary: Your GET endpoint
+      tags:
+        - Session Management
+      responses:
+        '200':
+          description: OK
+          headers: {}
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Result:
+                    type: string
+                    description: 'This is always "Session destroyed"'
+        '404':
+          description: |-
+            Not Found
+            Session Key already was invalid or expired
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Error:
+                    type: string
+      operationId: get-api-v1-logout
+      description: This invalidates your session key.
+      security:
+        - Session Key: []
+  /api/v1/profile:
+    get:
+      summary: Your GET endpoint
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+      operationId: get-api-v1-profile
+      security:
+        - Session Key: []
+  /api/v1/projects:
+    get:
+      summary: Get all projects
+      tags:
+        - Projects
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Project'
+      operationId: get-api-v1-projects
+      security:
+        - Session Key: []
+      description: Returns all projects the user is able to see.
+    post:
+      summary: Create Projects
+      operationId: post-api-v1-projects
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
+        '400':
+          description: 'JSON is malformed OR "Name" property is empty.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Error:
+                    type: string
+        '401':
+          description: User is not allowed to create projects.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Error:
+                    type: string
+        '409':
+          description: Project with that name already exists
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Error:
+                    type: string
+      description: Creates a project if the user is permitted to do so.
+      security:
+        - Session Key: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                Name:
+                  type: string
+                Description:
+                  type: string
+              required:
+                - Name
+                - Description
+            examples:
+              Example:
+                value:
+                  Name: My Project
+                  Description: My amazing project
+      tags:
+        - Projects
+  '/api/v1/project/{projectid}':
+    parameters:
+      - schema:
+          type: string
+        name: projectid
+        in: path
+        required: true
+    get:
+      summary: Get information about a project
+      tags:
+        - Projects
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
+        '401':
+          description: User is not allowed to view project.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Error:
+                    type: string
+        '404':
+          description: Project was not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Error:
+                    type: string
+      operationId: get-api-v1-project-projectid
+      description: ''
+      security:
+        - Session Key: []
+    patch:
+      summary: Update Project
+      operationId: patch-api-v1-project-projectid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
+        '400':
+          description: JSON Body is malformed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Error:
+                    type: string
+        '403':
+          description: User is not allowed to update project.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Error:
+                    type: string
+        '404':
+          description: Project was not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Error:
+                    type: string
+        '406':
+          description: The request changes nothing.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Error:
+                    type: string
+      description: ''
+      security:
+        - Session Key: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                Name:
+                  type: string
+                Description:
+                  type: string
+        description: Body CAN specify Name or Description. Body MUST specify one of those properties.
+      tags:
+        - Projects
+  '/api/v1/project/{projectid}/queues':
+    parameters:
+      - schema:
+          type: string
+        name: projectid
+        in: path
+        required: true
+    get:
+      summary: Get queues in a project
+      tags:
+        - Queues
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Queue'
+        '403':
+          description: "User doesn't have access to project"
+      operationId: get-api-v1-project-projectid-queues
+      security:
+        - Session Key: []
+    post:
+      summary: Create Queue
+      operationId: post-api-v1-project-projectid-queues
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Queue'
+        '400':
+          description: JSON is malformed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Error:
+                    type: string
+        '403':
+          description: User is not allowed to create queues
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Error:
+                    type: string
+        '404':
+          description: "Specified project wasn't found"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Error:
+                    type: string
+        '406':
+          description: '"Name" property was empty.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Error:
+                    type: string
+        '409':
+          description: Queue with that name already exists
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Error:
+                    type: string
+      description: ''
+      security:
+        - Session Key: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties: {}
+      tags:
+        - Queues
+  '/api/v1/project{projectid}/queue/{queueid}':
+    parameters:
+      - schema:
+          type: string
+        name: projectid
+        in: path
+        required: true
+      - schema:
+          type: string
+        name: queueid
+        in: path
+        required: true
+    patch:
+      summary: Update Queue
+      operationId: patch-api-v1-project-projectid-queue-queueid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Queue'
+        '400':
+          description: JSON Body is malformed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Error:
+                    type: string
+        '404':
+          description: "Specified project / queue wasn't found"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Error:
+                    type: string
+        '406':
+          description: "Request doesn't change anything"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Error:
+                    type: string
+      security:
+        - Session Key: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                Name:
+                  type: string
+              required:
+                - Name
+      tags:
+        - Queues
+    delete:
+      summary: ''
+      operationId: delete-api-v1-project-projectid-queue-queueid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Queue:
+                    type: string
+              examples:
+                Example:
+                  value:
+                    Queue: Queue 1 deleted
+        '403':
+          description: User is not allowed to delete queues
+        '404':
+          description: "Specified project / queue wasn't found"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Error:
+                    type: string
+      security:
+        - Session Key: []
+      tags:
+        - Queues
+  '/api/v1/project/{projectid}/severities':
+    parameters:
+      - schema:
+          type: string
+        name: projectid
+        in: path
+        required: true
+    get:
+      summary: Get Severities
+      tags:
+        - Severities
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Severity'
+        '400':
+          description: "showDisabled Query Parameter isn't a boolean"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Error:
+                    type: string
+        '403':
+          description: "User doesn't have access to project"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Error:
+                    type: string
+        '404':
+          description: "Specified project wasn't found"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Error:
+                    type: string
+      operationId: get-api-v1-project-projectid-severities
+      parameters:
+        - schema:
+            type: boolean
+          in: query
+          name: showDisabled
+          description: Defines if disabled severties should be returned
+      security:
+        - Session Key: []
+    post:
+      summary: Create Severities
+      operationId: post-api-v1-project-projectid-severities
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Severity'
+        '400':
+          description: JSON Body is malformed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Error:
+                    type: string
+        '403':
+          description: User is not allowed to create severities
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Error:
+                    type: string
+        '404':
+          description: "Specified project wasn't found"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Error:
+                    type: string
+        '406':
+          description: '"Name" / "DisplayColor" property is empty'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Error:
+                    type: string
+        '409':
+          description: Severity with that name already exists
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Error:
+                    type: string
+      tags:
+        - Severities
+      security:
+        - Session Key: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                Enabled:
+                  type: boolean
+                Name:
+                  type: string
+                DisplayColor:
+                  type: string
+                Priority:
+                  type: integer
+  '/api/v1/project/{projectid}/statuses':
+    parameters:
+      - schema:
+          type: string
+        name: projectid
+        in: path
+        required: true
+    get:
+      summary: Get Statuses
+      tags:
+        - Statuses
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Status'
+        '400':
+          description: "showDisabled Query Parameter isn't a boolean"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Error:
+                    type: string
+        '403':
+          description: "User doesn't have access to project"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Error:
+                    type: string
+        '404':
+          description: "Specified project wasn't found"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Error:
+                    type: string
+      operationId: get-api-v1-project-projectid-statuses
+      parameters:
+        - schema:
+            type: boolean
+          in: query
+          name: showDisabled
+          description: Defines if disabled statuses should be returned
+      security:
+        - Session Key: []
+    post:
+      summary: Create Statuses
+      operationId: post-api-v1-project-projectid-statuses
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Status'
+        '400':
+          description: JSON Body is malformed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Error:
+                    type: string
+        '403':
+          description: User is not allowed to create statuses
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Error:
+                    type: string
+        '404':
+          description: "Specified project wasn't found"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Error:
+                    type: string
+        '406':
+          description: '"Name" / "DisplayColor" property is empty'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Error:
+                    type: string
+        '409':
+          description: Status with that name already exists
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Error:
+                    type: string
+      tags:
+        - Statuses
+      security:
+        - Session Key: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                Enabled:
+                  type: boolean
+                Name:
+                  type: string
+                DisplayColor:
+                  type: string
+                TicketsVisible:
+                  type: boolean
+  '/api/v1/project/{projectid}/severity/{severityid}':
+    parameters:
+      - schema:
+          type: string
+        name: projectid
+        in: path
+        required: true
+      - schema:
+          type: string
+        name: severityid
+        in: path
+        required: true
+    patch:
+      summary: ''
+      operationId: patch-api-v1-project-projectid-severity-severityid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Severity'
+        '400':
+          description: JSON Body is malformed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Error:
+                    type: string
+        '403':
+          description: User is not allowed to update severity
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Error:
+                    type: string
+        '404':
+          description: "Specified project / severity wasn't found"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Error:
+                    type: string
+        '406':
+          description: Request changes nothing.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Error:
+                    type: string
+      description: ''
+      security:
+        - Session Key: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                Enabled:
+                  type: boolean
+                Name:
+                  type: string
+                DisplayColor:
+                  type: string
+                Priority:
+                  type: integer
+      tags:
+        - Severities
+    delete:
+      summary: Delete Severities
+      operationId: delete-api-v1-project-projectid-severity-severityid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Severity:
+                    type: string
+              examples:
+                Example:
+                  value:
+                    Severity: Severity 1 deleted
+        '403':
+          description: User is not allowed to delete severities
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Error:
+                    type: string
+        '404':
+          description: "Specified project / severity wasn't found"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Error:
+                    type: string
+      tags:
+        - Severities
+      security:
+        - Session Key: []
+  '/api/v1/project/{projectid}/status/{statusid}':
+    parameters:
+      - schema:
+          type: string
+        name: projectid
+        in: path
+        required: true
+      - schema:
+          type: string
+        name: statusid
+        in: path
+        required: true
+    patch:
+      summary: ''
+      operationId: patch-api-v1-project-projectid-status-statusid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Status'
+        '400':
+          description: JSON Body is malformed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Error:
+                    type: string
+        '403':
+          description: User is not allowed to update status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Error:
+                    type: string
+        '404':
+          description: "Specified project / status wasn't found"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Error:
+                    type: string
+        '406':
+          description: Request changes nothing.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Error:
+                    type: string
+      description: ''
+      security:
+        - Session Key: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                Enabled:
+                  type: boolean
+                Name:
+                  type: string
+                DisplayColor:
+                  type: string
+                TicketsVisible:
+                  type: boolean
+      tags:
+        - Statuses
+    delete:
+      summary: Delete Statuses
+      operationId: delete-api-v1-project-projectid-status-statusid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Status:
+                    type: string
+
+              examples:
+                Example:
+                  value:
+                    Status: Status 1 deleted
+        '403':
+          description: User is not allowed to delete statuses
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Error:
+                    type: string
+        '404':
+          description: "Specified project / status wasn't found"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Error:
+                    type: string
+      tags:
+        - Statuses
+      security:
+        - Session Key: []
 components:
   schemas:
     Project:
