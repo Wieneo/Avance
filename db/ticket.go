@@ -28,7 +28,7 @@ func GetTicket(TicketID int64) (models.Ticket, bool, error) {
 }
 
 //GetTicketsInQueue returns all tickets in a give queue
-func GetTicketsInQueue(QueueID int64) ([]models.Ticket, error) {
+func GetTicketsInQueue(QueueID int64, ShowInvisible bool) ([]models.Ticket, error) {
 	tickets := make([]models.Ticket, 0)
 	rows, err := Connection.Query(`SELECT "t"."ID", "t"."Title", "t"."Description", "t"."Queue" AS "QueueID", "t"."Owner" AS "OwnerID", "t"."Severity" AS "SeverityID", "t"."Status" AS "StatusID","t"."CreatedAt","t"."LastModified","t"."StalledUntil","t"."Meta" FROM "Tickets" AS "t" WHERE "Queue" = $1`, QueueID)
 	if err != nil {
