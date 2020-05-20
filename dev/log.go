@@ -46,5 +46,5 @@ func LogDebug(Message ...interface{}) {
 }
 
 func dateForLog() string {
-	return fmt.Sprint(time.Now().Year(), "-", time.Now().Month(), "-", time.Now().Day(), " ", time.Now().Hour(), ":", time.Now().Minute())
+	return fmt.Sprint(time.Now().Year(), "-", time.Now().Month(), "-", time.Now().Day(), " ", time.Now().Hour(), ":", time.Now().Minute(), ":", time.Now().Second())
 }
