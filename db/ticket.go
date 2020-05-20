@@ -31,16 +31,22 @@ func GetTicket(TicketID int64) (models.Ticket, bool, error) {
 }
 
 //CreateTicket creates a ticket and returns the new id
-func CreateTicket(Title string, Description string, Queue int64, OwnedByNobody bool, Owner int64, Severity int64, Status int64) (int64, error) {
+func CreateTicket(Title string, Description string, Queue int64, OwnedByNobody bool, Owner int64, Severity int64, Status int64, IsStalled bool, StalledUntil string) (int64, error) {
 	var newID int64
 	var trueOwner sql.NullInt64
+	var trueStall sql.NullString
 
 	if !OwnedByNobody {
 		trueOwner.Valid = true
 		trueOwner.Int64 = Owner
 	}
 
-	err := Connection.QueryRow(`INSERT INTO "Tickets" ("Title", "Description", "Queue", "Owner", "Severity", "Status", "CreatedAt", "LastModified", "Meta") VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING "ID"`, Title, Description, Queue, trueOwner, Severity, Status, time.Now(), time.Now(), "{}").Scan(&newID)
+	if IsStalled {
+		trueStall.Valid = true
+		trueStall.String = StalledUntil
+	}
+
+	err := Connection.QueryRow(`INSERT INTO "Tickets" ("Title", "Description", "Queue", "Owner", "Severity", "Status", "CreatedAt", "LastModified", "StalledUntil", "Meta") VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING "ID"`, Title, Description, Queue, trueOwner, Severity, Status, time.Now(), time.Now(), trueStall, "{}").Scan(&newID)
 	return newID, err
 }
 

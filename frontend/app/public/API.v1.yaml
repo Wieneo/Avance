@@ -1109,6 +1109,29 @@ paths:
         - Session Key: []
       tags:
         - Tickets
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                Title:
+                  type: string
+                Description:
+                  type: string
+                Owner:
+                  type: string
+                  description: Username
+                Severity:
+                  type: string
+                Status:
+                  type: string
+                StalledUntil:
+                  type: string
+              required:
+                - Title
+                - Severity
+                - Status
   '/api/v1/ticket/{ticketid}':
     parameters:
       - schema:

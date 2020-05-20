@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"gitlab.gnaucke.dev/tixter/tixter-app/v2/db"
 	"gitlab.gnaucke.dev/tixter/tixter-app/v2/dev"
@@ -110,11 +111,12 @@ func GetTicketsFromQueue(w http.ResponseWriter, r *http.Request) {
 }
 
 type ticketWebRequest struct {
-	Title       string
-	Description string
-	Owner       string //Username instead of ID
-	Severity    string //Name instead of ID
-	Status      string //Name instead of ID
+	Title        string
+	Description  string
+	Owner        string //Username instead of ID
+	Severity     string //Name instead of ID
+	Status       string //Name instead of ID
+	StalledUntil string
 }
 
 //CreateTicketsInQueue returns all tickets in a given queue
@@ -232,8 +234,21 @@ func CreateTicketsInQueue(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	isStalled := false
+
+	if !utils.IsEmpty(req.StalledUntil) {
+		_, err := time.Parse("2006-01-02T15:04:05.000Z", req.StalledUntil)
+		if err != nil {
+			w.WriteHeader(406)
+			dev.ReportUserError(w, "StalledUntil isn't a valid date/time")
+			return
+		}
+
+		isStalled = true
+	}
+
 	//Now everything should be ok
-	id, err := db.CreateTicket(req.Title, req.Description, queueid, ownedByNobody, ownerID, severityid, statusid)
+	id, err := db.CreateTicket(req.Title, req.Description, queueid, ownedByNobody, ownerID, severityid, statusid, isStalled, req.StalledUntil)
 	if err != nil {
 		w.WriteHeader(500)
 		dev.ReportError(err, w, err.Error())
