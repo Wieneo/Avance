@@ -31,9 +31,8 @@ type Project struct {
 
 //Queue is the default Queue struct from the database
 type Queue struct {
-	ID      int64
-	Name    string
-	Project Project
+	ID   int64
+	Name string
 }
 
 //Permissions should store all permissions regarding a user or a group

@@ -9,7 +9,6 @@ import (
 
 	"gitlab.gnaucke.dev/tixter/tixter-app/v2/db"
 	"gitlab.gnaucke.dev/tixter/tixter-app/v2/dev"
-	"gitlab.gnaucke.dev/tixter/tixter-app/v2/models"
 	"gitlab.gnaucke.dev/tixter/tixter-app/v2/perms"
 	"gitlab.gnaucke.dev/tixter/tixter-app/v2/utils"
 )
@@ -25,11 +24,7 @@ func GetProjects(w http.ResponseWriter, r *http.Request) {
 		}
 
 		w.WriteHeader(200)
-		json.NewEncoder(w).Encode(struct {
-			Projects []models.Project
-		}{
-			projects,
-		})
+		json.NewEncoder(w).Encode(projects)
 	}
 
 }
@@ -66,11 +61,7 @@ func GetSingleProject(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if perms.CanSee || allperms.Admin {
-		json.NewEncoder(w).Encode(struct {
-			Project models.Project
-		}{
-			project,
-		})
+		json.NewEncoder(w).Encode(project)
 	} else {
 		w.WriteHeader(401)
 		dev.ReportUserError(w, "You don't have access to that project")
@@ -151,11 +142,7 @@ func CreateProject(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			json.NewEncoder(w).Encode(struct {
-				Project models.Project
-			}{
-				project,
-			})
+			json.NewEncoder(w).Encode(project)
 
 		} else {
 			w.WriteHeader(401)
@@ -244,11 +231,7 @@ func ChangeProject(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		json.NewEncoder(w).Encode(struct {
-			Project models.Project
-		}{
-			project,
-		})
+		json.NewEncoder(w).Encode(project)
 	} else {
 		w.WriteHeader(403)
 		dev.ReportUserError(w, "You are not allowed to patch this project")

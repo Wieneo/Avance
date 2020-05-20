@@ -10,7 +10,6 @@ import (
 
 	"gitlab.gnaucke.dev/tixter/tixter-app/v2/db"
 	"gitlab.gnaucke.dev/tixter/tixter-app/v2/dev"
-	"gitlab.gnaucke.dev/tixter/tixter-app/v2/models"
 	"gitlab.gnaucke.dev/tixter/tixter-app/v2/perms"
 	"gitlab.gnaucke.dev/tixter/tixter-app/v2/utils"
 )
@@ -27,11 +26,7 @@ func GetProjectQueues(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		json.NewEncoder(w).Encode(struct {
-			Queues []models.Queue
-		}{
-			queues,
-		})
+		json.NewEncoder(w).Encode(queues)
 	}
 }
 
@@ -129,11 +124,7 @@ func CreateQueue(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		json.NewEncoder(w).Encode(struct {
-			Queue models.Queue
-		}{
-			queue,
-		})
+		json.NewEncoder(w).Encode(queue)
 
 	} else {
 		w.WriteHeader(403)
@@ -223,11 +214,7 @@ func PatchQueue(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		json.NewEncoder(w).Encode(struct {
-			Queue models.Queue
-		}{
-			queue,
-		})
+		json.NewEncoder(w).Encode(queue)
 
 	} else {
 		w.WriteHeader(401)

@@ -6,9 +6,9 @@ import (
 )
 
 //GetQueue returns the queue struct to the given id
-func GetQueue(QueueID int64, Project int64) (models.Queue, bool, error) {
+func GetQueue(ProjectID int64, QueueID int64) (models.Queue, bool, error) {
 	var queue models.Queue
-	err := Connection.QueryRow(`SELECT "ID", "Name" FROM "Queue" WHERE "ID" = $1 AND "Project" = $2`, QueueID, Project).Scan(&queue.ID, &queue.Name)
+	err := Connection.QueryRow(`SELECT "ID", "Name" FROM "Queue" WHERE "ID" = $1 AND "Project" = $2`, QueueID, ProjectID).Scan(&queue.ID, &queue.Name)
 	if err != nil {
 		if err.Error() == "sql: no rows in result set" {
 			return models.Queue{}, false, nil
@@ -21,7 +21,7 @@ func GetQueue(QueueID int64, Project int64) (models.Queue, bool, error) {
 	return queue, true, nil
 }
 
-//GetQueueUNSAFE returns the queue struct to the given id ignoring the project relationship
+//GetQueueUNSAFE returns the queue struct to the given id without checking if its contained in a project
 func GetQueueUNSAFE(QueueID int64) (models.Queue, bool, error) {
 	var queue models.Queue
 	err := Connection.QueryRow(`SELECT "ID", "Name" FROM "Queue" WHERE "ID" = $1`, QueueID).Scan(&queue.ID, &queue.Name)
@@ -29,7 +29,6 @@ func GetQueueUNSAFE(QueueID int64) (models.Queue, bool, error) {
 		if err.Error() == "sql: no rows in result set" {
 			return models.Queue{}, false, nil
 		}
-
 		dev.LogError(err, err.Error())
 		return models.Queue{}, true, err
 	}
@@ -79,4 +78,16 @@ func RemoveQueue(Project int64, Queue int64) error {
 	//Its just a safety measure ;)
 	_, err := Connection.Exec(`DELETE FROM "Queue" WHERE "ID" = $1 AND "Project" = $2`, Queue, Project)
 	return err
+}
+
+//GetProjectFromQueue returns the project the queue is assigned to
+func GetProjectFromQueue(QueueID int64) (models.Project, error) {
+	var projectID int64
+	err := Connection.QueryRow(`SELECT "Project" FROM "Queue" WHERE "ID" = $1`, QueueID).Scan(&projectID)
+	if err != nil {
+		return models.Project{}, err
+	}
+
+	project, _, err := GetProject(projectID)
+	return project, err
 }

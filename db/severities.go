@@ -4,6 +4,23 @@ import (
 	"gitlab.gnaucke.dev/tixter/tixter-app/v2/models"
 )
 
+//SearchSeverity searches for a severity and returns the ID, if a severity was found and maybe an error
+func SearchSeverity(Name string) (int64, bool, error) {
+	var ID int64
+
+	//Ignoring casing
+	err := Connection.QueryRow(`SELECT "ID" FROM "Severities" WHERE UPPER("Name") = UPPER($1)`, Name).Scan(&ID)
+	if err != nil {
+		if err.Error() == "sql: no rows in result set" {
+			return ID, false, nil
+		}
+
+		return ID, true, err
+	}
+
+	return ID, true, nil
+}
+
 //GetSeverities returns all severities from the database relating to the given project
 func GetSeverities(Project int64, ShowDisabled bool) ([]models.Severity, error) {
 	severities := make([]models.Severity, 0)

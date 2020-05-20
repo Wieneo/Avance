@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"gitlab.gnaucke.dev/tixter/tixter-app/v2/models"
 	"gitlab.gnaucke.dev/tixter/tixter-app/v2/utils"
 
 	"gitlab.gnaucke.dev/tixter/tixter-app/v2/dev"
@@ -19,9 +18,5 @@ func GetProfile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	json.NewEncoder(w).Encode(struct {
-		models.User
-	}{
-		user,
-	})
+	json.NewEncoder(w).Encode(user)
 }
