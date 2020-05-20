@@ -1366,6 +1366,45 @@ paths:
         - Session Key: []
       tags:
         - Tickets
+  '/api/v1/ticket/{ticketid}':
+    parameters:
+      - schema:
+          type: string
+        name: ticketid
+        in: path
+        required: true
+    get:
+      summary: Get Ticket
+      tags:
+        - Tickets
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ticket'
+        '403':
+          description: "User doesn't have access to the queue / project, which the ticket is currently in."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Error:
+                    type: string
+        '404':
+          description: "Specified ticket wasn't found"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Error:
+                    type: string
+      operationId: get-api-v1-ticket-ticketid
+      security:
+        - Session Key: []
 components:
   schemas:
     Project:

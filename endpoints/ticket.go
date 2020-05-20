@@ -15,8 +15,70 @@ import (
 	"gitlab.gnaucke.dev/tixter/tixter-app/v2/utils"
 )
 
-//GetTicket returns the serialized ticket to the user
+//GetTicket returns the requested ticket
 func GetTicket(w http.ResponseWriter, r *http.Request) {
+	ticketid, _ := strconv.ParseInt(strings.Split(r.URL.String(), "/")[4], 10, 64)
+
+	ticket, found, err := db.GetTicket(ticketid)
+	if err != nil {
+		w.WriteHeader(500)
+		dev.ReportError(err, w, err.Error())
+		return
+	}
+
+	if !found {
+		w.WriteHeader(404)
+		dev.ReportUserError(w, "Ticket not found")
+		return
+	}
+
+	user, err := utils.GetUser(r, w)
+	if err != nil {
+		w.WriteHeader(500)
+		dev.ReportError(err, w, err.Error())
+		return
+	}
+
+	project, err := db.GetProjectFromQueue(ticket.Queue.ID)
+	if err != nil {
+		w.WriteHeader(500)
+		dev.ReportError(err, w, err.Error())
+		return
+	}
+
+	allperms, pperms, err := perms.GetPermissionsToProject(user, project)
+	if err != nil {
+		w.WriteHeader(500)
+		dev.ReportError(err, w, err.Error())
+		return
+	}
+
+	if !allperms.Admin {
+		if !pperms.CanSee {
+			w.WriteHeader(403)
+			dev.ReportUserError(w, "You don't have access to that project!")
+			return
+		}
+
+		_, qperms, err := perms.GetPermissionsToQueue(user, ticket.Queue)
+		if err != nil {
+			w.WriteHeader(500)
+			dev.ReportError(err, w, err.Error())
+			return
+		}
+
+		if !qperms.CanSee {
+			w.WriteHeader(403)
+			dev.ReportUserError(w, "You don't have access to that queue!")
+			return
+		}
+	}
+
+	json.NewEncoder(w).Encode(ticket)
+}
+
+//GetTicketFullPath returns the serialized ticket to the user
+func GetTicketFullPath(w http.ResponseWriter, r *http.Request) {
 	projectid, _ := strconv.ParseInt(strings.Split(r.RequestURI, "/")[4], 10, 64)
 	queueid, _ := strconv.ParseInt(strings.Split(r.URL.String(), "/")[6], 10, 64)
 	ticketid, _ := strconv.ParseInt(strings.Split(r.URL.String(), "/")[8], 10, 64)

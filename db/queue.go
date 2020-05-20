@@ -79,3 +79,15 @@ func RemoveQueue(Project int64, Queue int64) error {
 	_, err := Connection.Exec(`DELETE FROM "Queue" WHERE "ID" = $1 AND "Project" = $2`, Queue, Project)
 	return err
 }
+
+//GetProjectFromQueue returns the project the queue is assigned to
+func GetProjectFromQueue(QueueID int64) (models.Project, error) {
+	var projectID int64
+	err := Connection.QueryRow(`SELECT "Project" FROM "Queue" WHERE "ID" = $1`, QueueID).Scan(&projectID)
+	if err != nil {
+		return models.Project{}, err
+	}
+
+	project, _, err := GetProject(projectID)
+	return project, err
+}
