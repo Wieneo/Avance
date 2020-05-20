@@ -477,7 +477,7 @@ paths:
       tags:
         - Queues
     delete:
-      summary: ''
+      summary: Delete Queues
       operationId: delete-api-v1-project-projectid-queue-queueid
       responses:
         '200':
@@ -779,7 +779,7 @@ paths:
         in: path
         required: true
     patch:
-      summary: ''
+      summary: Update Severities
       operationId: patch-api-v1-project-projectid-severity-severityid
       responses:
         '200':
@@ -895,7 +895,7 @@ paths:
         in: path
         required: true
     patch:
-      summary: ''
+      summary: Update Statuses
       operationId: patch-api-v1-project-projectid-status-statusid
       responses:
         '200':
