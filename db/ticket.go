@@ -50,6 +50,21 @@ func CreateTicket(Title string, Description string, Queue int64, OwnedByNobody b
 	return newID, err
 }
 
+//PatchTicket patches the given ticket
+func PatchTicket(Ticket models.Ticket) error {
+	_, err := Connection.Exec(`UPDATE "Tickets" SET "Title" = $1, "Description" = $2, "Queue" = $3, "Owner" = $4, "Severity" = $5, "Status" = $6, "StalledUntil" = $7, "Meta" = $8 WHERE "ID" = $9`, Ticket.Title, Ticket.Description, Ticket.QueueID, Ticket.OwnerID, Ticket.SeverityID, Ticket.StatusID, Ticket.StalledUntil, Ticket.Meta, Ticket.ID)
+	if err != nil {
+		return err
+	}
+	return TicketWasModified(Ticket.ID)
+}
+
+//TicketWasModified refreshes the last modified column of a ticket
+func TicketWasModified(TicketID int64) error {
+	_, err := Connection.Exec(`UPDATE "Tickets" SET "LastModified" = $1 WHERE "ID" = $2`, time.Now(), TicketID)
+	return err
+}
+
 //GetTicketsInQueue returns all tickets in a give queue
 func GetTicketsInQueue(QueueID int64, ShowInvisible bool) ([]models.Ticket, error) {
 	tickets := make([]models.Ticket, 0)

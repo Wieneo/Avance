@@ -119,7 +119,7 @@ type ticketWebRequest struct {
 	StalledUntil string
 }
 
-//CreateTicketsInQueue returns all tickets in a given queue
+//CreateTicketsInQueue creates a ticket
 func CreateTicketsInQueue(w http.ResponseWriter, r *http.Request) {
 	projectid, _ := strconv.ParseInt(strings.Split(r.RequestURI, "/")[4], 10, 64)
 	queueid, _ := strconv.ParseInt(strings.Split(r.URL.String(), "/")[6], 10, 64)
@@ -257,6 +257,163 @@ func CreateTicketsInQueue(w http.ResponseWriter, r *http.Request) {
 
 	ticket, found, err := db.GetTicket(id)
 	if err != nil || !found {
+		w.WriteHeader(500)
+		dev.ReportError(err, w, err.Error())
+		return
+	}
+
+	json.NewEncoder(w).Encode(ticket)
+}
+
+//PatchTicketsInQueue patches a ticket
+func PatchTicketsInQueue(w http.ResponseWriter, r *http.Request) {
+	projectid, _ := strconv.ParseInt(strings.Split(r.RequestURI, "/")[4], 10, 64)
+	queueid, _ := strconv.ParseInt(strings.Split(r.URL.String(), "/")[6], 10, 64)
+	ticketid, _ := strconv.ParseInt(strings.Split(r.URL.String(), "/")[8], 10, 64)
+
+	queue, found, err := db.GetQueue(projectid, queueid)
+	if err != nil {
+		w.WriteHeader(500)
+		dev.ReportError(err, w, err.Error())
+		return
+	}
+
+	if !found {
+		w.WriteHeader(404)
+		dev.ReportUserError(w, "Project/Queue not found")
+		return
+	}
+
+	user, err := utils.GetUser(r, w)
+	if err != nil {
+		w.WriteHeader(500)
+		dev.ReportError(err, w, err.Error())
+		return
+	}
+
+	allperms, perms, err := perms.GetPermissionsToQueue(user, queue)
+	if err != nil {
+		w.WriteHeader(500)
+		dev.ReportError(err, w, err.Error())
+		return
+	}
+
+	if !allperms.Admin && !perms.CanEditTicket {
+		w.WriteHeader(403)
+		dev.ReportUserError(w, "You are not allowed to patch tickets in that queue.")
+		return
+	}
+
+	var req ticketWebRequest
+
+	rawBytes, _ := ioutil.ReadAll(r.Body)
+	err = json.Unmarshal(rawBytes, &req)
+	if err != nil {
+		w.WriteHeader(400)
+		dev.ReportUserError(w, "JSON body is malformed")
+		return
+	}
+
+	ticket, found, err := db.GetTicket(ticketid)
+	if err != nil {
+		w.WriteHeader(500)
+		dev.ReportError(err, w, err.Error())
+		return
+	}
+
+	if !found {
+		w.WriteHeader(404)
+		dev.ReportUserError(w, "Ticket not found")
+		return
+	}
+
+	somethingChanged := false
+
+	if !utils.IsEmpty(req.Title) && req.Title != ticket.Title {
+		ticket.Title = req.Title
+		somethingChanged = true
+	}
+
+	if !utils.IsEmpty(req.Description) && req.Description != ticket.Description {
+		ticket.Description = req.Description
+		somethingChanged = true
+	}
+
+	if !utils.IsEmpty(req.Owner) && req.Owner != ticket.Owner.Username {
+		ownerID, found, err := db.SearchUser(req.Owner)
+		if err != nil {
+			w.WriteHeader(500)
+			dev.ReportError(err, w, err.Error())
+			return
+		}
+
+		if !found {
+			w.WriteHeader(404)
+			dev.ReportUserError(w, "Owner "+req.Owner+" couldn't be found")
+			return
+		}
+
+		ticket.OwnerID.Valid = true
+		ticket.OwnerID.Int64 = ownerID
+		somethingChanged = true
+	}
+
+	if !utils.IsEmpty(req.Status) && req.Status != ticket.Status.Name {
+		statusid, found, err := db.SearchStatus(req.Status)
+		if err != nil {
+			w.WriteHeader(500)
+			dev.ReportError(err, w, err.Error())
+			return
+		}
+
+		if !found {
+			w.WriteHeader(404)
+			dev.ReportUserError(w, "Status "+req.Status+" couldn't be found")
+			return
+		}
+
+		ticket.StatusID = statusid
+		somethingChanged = true
+	}
+
+	if !utils.IsEmpty(req.Severity) && req.Severity != ticket.Severity.Name {
+		severityid, found, err := db.SearchSeverity(req.Severity)
+		if err != nil {
+			w.WriteHeader(500)
+			dev.ReportError(err, w, err.Error())
+			return
+		}
+
+		if !found {
+			w.WriteHeader(404)
+			dev.ReportUserError(w, "Severity "+req.Severity+" couldn't be found")
+			return
+		}
+
+		ticket.SeverityID = severityid
+		somethingChanged = true
+	}
+
+	if !utils.IsEmpty(req.StalledUntil) && req.StalledUntil != ticket.StalledUntil.Time.Format("2006-01-02T15:04:05.000Z") {
+		t, err := time.Parse("2006-01-02T15:04:05.000Z", req.StalledUntil)
+		if err != nil {
+			w.WriteHeader(406)
+			dev.ReportUserError(w, "StalledUntil isn't a valid date/time")
+			return
+		}
+
+		ticket.StalledUntil.Time = t
+		ticket.StalledUntil.Valid = true
+		somethingChanged = true
+	}
+
+	if !somethingChanged {
+		w.WriteHeader(406)
+		dev.ReportUserError(w, "Nothing changed!")
+		return
+	}
+
+	if db.PatchTicket(ticket) != nil {
 		w.WriteHeader(500)
 		dev.ReportError(err, w, err.Error())
 		return
