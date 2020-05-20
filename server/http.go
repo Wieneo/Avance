@@ -62,6 +62,10 @@ func HTTPInit() {
 	router.HandleFunc("/api/v1/project/{[0-9]{*}}/queue/{[0-9]{*}}/tickets", endpoints.GetTicketsFromQueue).Methods("GET")
 	router.HandleFunc("/api/v1/project/{[0-9]{*}}/queue/{[0-9]{*}}/tickets", endpoints.CreateTicketsInQueue).Methods("POST")
 	router.HandleFunc("/api/v1/project/{[0-9]{*}}/queue/{[0-9]{*}}/ticket/{[0-9]{*}}", endpoints.PatchTicketsInQueue).Methods("PATCH")
+
+	router.HandleFunc("/api/v1/project/{[0-9]{*}}/queue/{[0-9]{*}}/ticket/{[0-9]{*}}/owner", endpoints.DeletePropertyFromTicket).Methods("DELETE")
+	router.HandleFunc("/api/v1/project/{[0-9]{*}}/queue/{[0-9]{*}}/ticket/{[0-9]{*}}/stalleduntil", endpoints.DeletePropertyFromTicket).Methods("DELETE")
+
 	router.HandleFunc("/api/v1/ticket/{[0-9]{*}}", endpoints.GetTicket).Methods("GET")
 
 	//Needs to be at the bottom!

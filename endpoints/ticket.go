@@ -1,6 +1,7 @@
 package endpoints
 
 import (
+	"database/sql"
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
@@ -413,7 +414,91 @@ func PatchTicketsInQueue(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if db.PatchTicket(ticket) != nil {
+	ticket, err = db.PatchTicket(ticket)
+	if err != nil {
+		w.WriteHeader(500)
+		dev.ReportError(err, w, err.Error())
+		return
+	}
+
+	json.NewEncoder(w).Encode(ticket)
+}
+
+//DeletePropertyFromTicket removes owner / stalleduntil from ticket
+func DeletePropertyFromTicket(w http.ResponseWriter, r *http.Request) {
+	projectid, _ := strconv.ParseInt(strings.Split(r.RequestURI, "/")[4], 10, 64)
+	queueid, _ := strconv.ParseInt(strings.Split(r.URL.String(), "/")[6], 10, 64)
+	ticketid, _ := strconv.ParseInt(strings.Split(r.URL.String(), "/")[8], 10, 64)
+
+	queue, found, err := db.GetQueue(projectid, queueid)
+	if err != nil {
+		w.WriteHeader(500)
+		dev.ReportError(err, w, err.Error())
+		return
+	}
+
+	if !found {
+		w.WriteHeader(404)
+		dev.ReportUserError(w, "Project/Queue not found")
+		return
+	}
+
+	user, err := utils.GetUser(r, w)
+	if err != nil {
+		w.WriteHeader(500)
+		dev.ReportError(err, w, err.Error())
+		return
+	}
+
+	allperms, perms, err := perms.GetPermissionsToQueue(user, queue)
+	if err != nil {
+		w.WriteHeader(500)
+		dev.ReportError(err, w, err.Error())
+		return
+	}
+
+	if !allperms.Admin && !perms.CanEditTicket {
+		w.WriteHeader(403)
+		dev.ReportUserError(w, "You are not allowed to patch tickets in that queue.")
+		return
+	}
+
+	ticket, found, err := db.GetTicket(ticketid)
+	if err != nil {
+		w.WriteHeader(500)
+		dev.ReportError(err, w, err.Error())
+		return
+	}
+
+	if !found {
+		w.WriteHeader(404)
+		dev.ReportUserError(w, "Ticket not found")
+		return
+	}
+
+	if strings.Split(r.RequestURI, "/")[9] == "owner" {
+		if !ticket.OwnerID.Valid {
+			w.WriteHeader(406)
+			dev.ReportUserError(w, "Nothing changed!")
+			return
+		}
+
+		ticket.OwnerID.Valid = false
+		ticket.OwnerID.Int64 = 0
+
+	} else if strings.Split(r.RequestURI, "/")[9] == "stalleduntil" {
+		if !ticket.StalledUntil.Valid {
+			w.WriteHeader(406)
+			dev.ReportUserError(w, "Nothing changed!")
+			return
+		}
+
+		var newStalled sql.NullTime
+		ticket.StalledUntil = newStalled
+	}
+
+	ticket, err = db.PatchTicket(ticket)
+	if err != nil {
 		w.WriteHeader(500)
 		dev.ReportError(err, w, err.Error())
 		return

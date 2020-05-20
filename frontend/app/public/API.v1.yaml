@@ -1255,6 +1255,124 @@ paths:
                   type: string
                 StalledUntil:
                   type: string
+      tags:
+        - Tickets
+  '/api/v1/project/{projectid}/queue/{queueid}/ticket/{ticketid}/owner':
+    parameters:
+      - schema:
+          type: string
+        name: projectid
+        in: path
+        required: true
+      - schema:
+          type: string
+        name: queueid
+        in: path
+        required: true
+      - schema:
+          type: string
+        name: ticketid
+        in: path
+        required: true
+    delete:
+      summary: Remove Owner
+      operationId: delete-api-v1-project-projectid-queue-queueid-ticket-ticketid-owner
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ticket'
+        '403':
+          description: User is not allowed to edit tickets
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Error:
+                    type: string
+        '404':
+          description: Project / Queue / Ticket not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Error:
+                    type: string
+        '406':
+          description: Request changes nothing about the ticket
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Error:
+                    type: string
+      security:
+        - Session Key: []
+      tags:
+        - Tickets
+  '/api/v1/project/{projectid}/queue/{queueid}/ticket/{ticketid}/stalleduntil':
+    parameters:
+      - schema:
+          type: string
+        name: projectid
+        in: path
+        required: true
+      - schema:
+          type: string
+        name: queueid
+        in: path
+        required: true
+      - schema:
+          type: string
+        name: ticketid
+        in: path
+        required: true
+    delete:
+      summary: Remove StalledUntil date
+      operationId: delete-api-v1-project-projectid-queue-queueid-ticket-ticketid-owner
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ticket'
+        '403':
+          description: User is not allowed to edit tickets
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Error:
+                    type: string
+        '404':
+          description: Project / Queue / Ticket not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Error:
+                    type: string
+        '406':
+          description: Request changes nothing about the ticket
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Error:
+                    type: string
+      security:
+        - Session Key: []
+      tags:
+        - Tickets
 components:
   schemas:
     Project:
