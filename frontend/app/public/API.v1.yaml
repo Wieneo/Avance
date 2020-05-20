@@ -1132,8 +1132,18 @@ paths:
                 - Title
                 - Severity
                 - Status
-  '/api/v1/ticket/{ticketid}':
+  '/api/v1/project/{projectid}/queue/{queueid}/ticket/{ticketid}':
     parameters:
+      - schema:
+          type: string
+        name: projectid
+        in: path
+        required: true
+      - schema:
+          type: string
+        name: queueid
+        in: path
+        required: true
       - schema:
           type: string
         name: ticketid
@@ -1171,23 +1181,6 @@ paths:
       operationId: get-api-v1-ticket-ticketid
       security:
         - Session Key: []
-  '/api/v1/project/{projectid}/queue/{queueid}/ticket/{ticketid}':
-    parameters:
-      - schema:
-          type: string
-        name: projectid
-        in: path
-        required: true
-      - schema:
-          type: string
-        name: queueid
-        in: path
-        required: true
-      - schema:
-          type: string
-        name: ticketid
-        in: path
-        required: true
     patch:
       summary: Update Ticket
       operationId: patch-api-v1-project-projectid-queue-queueid-ticket-ticketid

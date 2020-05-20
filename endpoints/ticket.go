@@ -17,8 +17,11 @@ import (
 
 //GetTicket returns the serialized ticket to the user
 func GetTicket(w http.ResponseWriter, r *http.Request) {
-	ticketid, _ := strconv.ParseInt(strings.Split(r.URL.String(), "/")[4], 10, 64)
-	ticket, found, err := db.GetTicket(ticketid)
+	projectid, _ := strconv.ParseInt(strings.Split(r.RequestURI, "/")[4], 10, 64)
+	queueid, _ := strconv.ParseInt(strings.Split(r.URL.String(), "/")[6], 10, 64)
+	ticketid, _ := strconv.ParseInt(strings.Split(r.URL.String(), "/")[8], 10, 64)
+
+	queue, found, err := db.GetQueue(projectid, queueid)
 	if err != nil {
 		w.WriteHeader(500)
 		dev.ReportError(err, w, err.Error())
@@ -27,7 +30,7 @@ func GetTicket(w http.ResponseWriter, r *http.Request) {
 
 	if !found {
 		w.WriteHeader(404)
-		dev.ReportUserError(w, "Ticket not found")
+		dev.ReportUserError(w, "Project/Queue not found")
 		return
 	}
 
@@ -38,7 +41,7 @@ func GetTicket(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	allperms, perms, err := perms.GetPermissionsToQueue(user, ticket.Queue)
+	allperms, perms, err := perms.GetPermissionsToQueue(user, queue)
 	if err != nil {
 		w.WriteHeader(500)
 		dev.ReportError(err, w, err.Error())
@@ -46,6 +49,19 @@ func GetTicket(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if allperms.Admin || perms.CanSee {
+		ticket, found, err := db.GetTicket(ticketid)
+		if err != nil {
+			w.WriteHeader(500)
+			dev.ReportError(err, w, err.Error())
+			return
+		}
+
+		if !found {
+			w.WriteHeader(404)
+			dev.ReportUserError(w, "Ticket not found")
+			return
+		}
+
 		json.NewEncoder(w).Encode(ticket)
 	} else {
 		w.WriteHeader(403)
