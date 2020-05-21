@@ -1,0 +1,20 @@
+BEGIN;
+CREATE TABLE public."Relations"
+(
+    "ID" bigint NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 9223372036854775807 CACHE 1 ),
+    "Ticket1" bigint NOT NULL,
+    "Ticket2" bigint NOT NULL,
+    "Type" int NOT NULL,
+    CONSTRAINT "PK_ID" PRIMARY KEY ("ID"),
+    CONSTRAINT "FK_Ticket1" FOREIGN KEY ("Ticket1")
+        REFERENCES public."Tickets" ("ID") MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE CASCADE,
+    CONSTRAINT "FK_Ticket2" FOREIGN KEY ("Ticket2")
+        REFERENCES public."Tickets" ("ID") MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE CASCADE
+)
+
+TABLESPACE pg_default;
+END;
