@@ -35,6 +35,9 @@ func GetTicket(TicketID int64, ResolveRelations bool) (models.Ticket, bool, erro
 			return models.Ticket{}, true, err
 		}
 		ticket.Relations = relations
+	} else {
+		//Prevent Relations from being NULL
+		ticket.Relations = make([]models.Relation, 0)
 	}
 	return ticket, true, nil
 }
@@ -54,6 +57,8 @@ func GetTicketRelations(TicketID int64) ([]models.Relation, error) {
 		var ticket1, ticket2 int64
 		var relationType models.RelationType
 		rows.Scan(&singleRelation.ID, &ticket1, &ticket2, &relationType)
+
+		//GetTicket is used with false ResolveRelations property to prevent possibly resolving hundrets of ticket relations
 
 		if ticket1 == TicketID {
 			ticket, _, err := GetTicket(ticket2, false)
@@ -176,6 +181,12 @@ func GetTicketsInQueue(QueueID int64, ShowInvisible bool) ([]models.Ticket, erro
 			dev.LogError(err, err.Error())
 			return make([]models.Ticket, 0), err
 		}
+
+		//Relations are not resolved on purpose to save on time & ressources
+		//ALso i don't see the point in having relations here
+		//Prevent Relations from being NULL
+		ticket.Relations = make([]models.Relation, 0)
+
 		tickets = append(tickets, ticket)
 	}
 
