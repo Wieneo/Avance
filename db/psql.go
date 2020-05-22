@@ -51,6 +51,29 @@ func migrate() {
 		if strings.Contains(err.Error(), "does not exist") {
 			deploy()
 			migrate()
+
+			userid, _ := CreateUser(models.User{
+				Username:  "Admin",
+				Firstname: "The",
+				Lastname:  "Admin",
+				Mail:      "root@localhost",
+				Permissions: models.Permissions{
+					Admin: true,
+				},
+			}, "tixter")
+
+			//The following is used to make debugging and developing the APP easier when used with Gitlab Auto DevOPS
+			//Detect if deployed via GITLAB
+			if len(os.Getenv("GITLAB_ENVIRONMENT_NAME")) > 0 {
+				dev.LogInfo("Instance was deployed via Gitlab. Deploying example data")
+				projectid, _ := CreateProject("Auto DevOPS", "Default project created by Gitlab Auto DevOPS")
+				qid, _ := CreateQueue("Development", projectid)
+				statusid, _ := CreateStatus(true, "Open", "green", true, projectid)
+				severityid, _ := CreateSeverity(true, "Normal", "green", 10, projectid)
+				CreateTicket("Pipeline broken", "My pipeline is broken!", qid, true, 0, severityid, statusid, false, "")
+				CreateTicket("Create User", "Please create a user for my new staff member!", qid, false, userid, severityid, statusid, false, "")
+				//ToDo: CreateTicket maybe?
+			}
 			return
 		}
 
@@ -145,27 +168,6 @@ func deploy() {
 	_, err = Connection.Exec(`INSERT INTO "Version" VALUES ('0')`)
 	if err != nil {
 		dev.LogFatal(err, "Couldn't set schema version:", err.Error())
-	}
-
-	_, err = CreateUser(models.User{
-		Username:  "Admin",
-		Firstname: "The",
-		Lastname:  "Admin",
-		Mail:      "root@localhost",
-		Permissions: models.Permissions{
-			Admin: true,
-		},
-	}, "tixter")
-
-	//The following is used to make debugging and developing the APP easier when used with Gitlab Auto DevOPS
-	//Detect if deployed via GITLAB
-	if len(os.Getenv("GITLAB_ENVIRONMENT_NAME")) > 0 {
-		dev.LogInfo("Instance was deployed via Gitlab. Deploying example data")
-		projectid, _ := CreateProject("Auto DevOPS", "Default project created by Gitlab Auto DevOPS")
-		CreateQueue("Development", projectid)
-		CreateStatus(true, "Open", "green", true, projectid)
-		CreateSeverity(true, "Normal", "green", 10, projectid)
-		//ToDo: CreateTicket maybe?
 	}
 
 	if err != nil {
