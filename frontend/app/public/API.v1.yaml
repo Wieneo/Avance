@@ -1405,6 +1405,165 @@ paths:
       operationId: get-api-v1-ticket-ticketid
       security:
         - Session Key: []
+  '/api/v1/project/{projectid}/queue/{queueid}/ticket/{ticketid}/relations':
+    parameters:
+      - schema:
+          type: string
+        name: projectid
+        in: path
+        required: true
+      - schema:
+          type: string
+        name: queueid
+        in: path
+        required: true
+      - schema:
+          type: string
+        name: ticketid
+        in: path
+        required: true
+    post:
+      summary: Add Relation
+      operationId: post-api-v1-project-projectid-queue-queueid-ticket-ticketid-relations
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Relation:
+                    type: integer
+                    description: Returns the relation ID
+                required:
+                  - Relation
+        '400':
+          description: |-
+            JSON Body malformed.
+            Maybe RelationType is not a number?
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Error:
+                    type: string
+        '403':
+          description: User is not allowed to edit tickets
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Error:
+                    type: string
+        '404':
+          description: "Specified Project / Queue / Ticket wasn't found"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Error:
+                    type: string
+        '406':
+          description: Relation already exists / Relation would result in loop
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Error:
+                    type: string
+      tags:
+        - Tickets
+      description: ''
+      security:
+        - Session Key: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                OtherTicket:
+                  type: integer
+                RelationType:
+                  type: integer
+                  description: |-
+                    RelationType can be one of the following numbers:
+                    0: References
+                    1: ReferencedBy
+                    2: ParentOf
+                    3: ChildOf
+              required:
+                - OtherTicket
+                - RelationType
+  '/api/v1/project/{projectid}/queue/{queueid}/ticket/{ticketid}/relation/{relationid}':
+    parameters:
+      - schema:
+          type: string
+        name: projectid
+        in: path
+        required: true
+      - schema:
+          type: string
+        name: queueid
+        in: path
+        required: true
+      - schema:
+          type: string
+        name: ticketid
+        in: path
+        required: true
+      - schema:
+          type: string
+        name: relationid
+        in: path
+        required: true
+    get:
+      summary: Your GET endpoint
+      tags: []
+      responses: {}
+      operationId: get-api-v1-project-projectid-queue-queueid-ticket-ticketid-relation-relationid
+    delete:
+      summary: Delete Relation
+      operationId: delete-api-v1-project-projectid-queue-queueid-ticket-ticketid-relation-relationid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Relation:
+                    type: string
+              examples:
+                Example:
+                  value:
+                    Relation: Relation 1 deleted
+        '403':
+          description: User is not allowed to edit tickets
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Error:
+                    type: string
+        '404':
+          description: "Specified Project / Queue / Ticket / Relation wasn't found"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Error:
+                    type: string
+      security:
+        - Session Key: []
 components:
   schemas:
     Project:

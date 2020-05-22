@@ -111,13 +111,13 @@ func CreateRelation(w http.ResponseWriter, r *http.Request) {
 	for _, k := range ticket.Relations {
 		//Cant be parent and child
 		if (relation.RelationType == models.ParentOf && k.OtherTicket.ID == relation.OtherTicket && k.Type == models.ChildOf) || (relation.RelationType == models.ChildOf && k.OtherTicket.ID == relation.OtherTicket && k.Type == models.ParentOf) {
-			w.WriteHeader(400)
+			w.WriteHeader(406)
 			dev.ReportUserError(w, "Can't be parent and child")
 			return
 		}
 
 		if relation.OtherTicket == k.OtherTicket.ID && relation.RelationType == k.Type {
-			w.WriteHeader(400)
+			w.WriteHeader(406)
 			dev.ReportUserError(w, "Relation already exists")
 			return
 		}
