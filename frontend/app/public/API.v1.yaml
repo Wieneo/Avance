@@ -1522,11 +1522,6 @@ paths:
         name: relationid
         in: path
         required: true
-    get:
-      summary: Your GET endpoint
-      tags: []
-      responses: {}
-      operationId: get-api-v1-project-projectid-queue-queueid-ticket-ticketid-relation-relationid
     delete:
       summary: Delete Relation
       operationId: delete-api-v1-project-projectid-queue-queueid-ticket-ticketid-relation-relationid
@@ -1564,6 +1559,8 @@ paths:
                     type: string
       security:
         - Session Key: []
+      tags:
+        - Tickets
 components:
   schemas:
     Project:
