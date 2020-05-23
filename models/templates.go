@@ -110,4 +110,27 @@ type Ticket struct {
 	LastModified time.Time
 	StalledUntil sql.NullTime
 	Meta         string //Needs to be changed later!
+	Relations    []Relation
+}
+
+//RelationType stores the type of relation between tickets
+type RelationType int
+
+const (
+	//References is set if a ticket references another ticket
+	References RelationType = iota
+	//ReferencedBy is set if another ticket references the ticket
+	ReferencedBy
+	//ParentOf is set if the ticket is a parent
+	ParentOf
+	//ChildOf is set if the ticket is a child
+	ChildOf
+)
+
+//Relation stores the relation between two tickets
+//Should be stored like "Ticket which contains the relation $TYPE the other ticket from the struct"
+type Relation struct {
+	ID          int64
+	OtherTicket Ticket
+	Type        RelationType
 }

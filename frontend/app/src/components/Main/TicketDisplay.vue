@@ -32,6 +32,21 @@
                   </p>
                 </v-col>
               </v-row>
+              <v-row>
+                <v-col lg="3"></v-col>
+                <v-col lg="3"></v-col>
+                <v-col lg="3"></v-col>
+                <v-col>
+                  <hr>
+                  <div v-for="relation in CurrentTicket.Relations" :key="relation.ID" @click="GoToTicket(relation.OtherTicket.ID)">
+                    <span class="TicketDisplayProperty" v-if="relation.Type == 0" title="References"><v-icon>mdi-arrow-right</v-icon></span>
+                    <span class="TicketDisplayProperty" v-if="relation.Type == 1" title="Referenced By"><v-icon>mdi-arrow-left</v-icon></span>
+                    <span class="TicketDisplayProperty" v-if="relation.Type == 2" title="Parent of"><v-icon>mdi-human-female</v-icon></span>
+                    <span  class="TicketDisplayProperty" v-if="relation.Type == 3" title="Child of"><v-icon>mdi-human-child</v-icon></span>
+                    <a class="TicketDisplayPropertyText">[{{relation.OtherTicket.ID}}] {{relation.OtherTicket.Title}}</a>
+                  </div>
+                </v-col>
+              </v-row>
             </v-card>
          </v-skeleton-loader>
     </div>
@@ -66,6 +81,14 @@
             this.Loading = true
             this.CurrentTicket = (await Vue.prototype.$GetRequest("/api/v1/ticket/" + TicketID))
             this.Loading = false
+        },
+        GoToTicket: async function(TicketID: number){
+          try{
+            this.$router.push({ query: Object.assign({}, this.$route.query, { ticket: TicketID }) });
+            this.GetTicket(TicketID)
+          }finally{
+            //Do nothing
+          }
         }
     }
   })

@@ -9,7 +9,7 @@ import (
 )
 
 //GetTicket returns the populated ticket struct from models
-func GetTicket(TicketID int64) (models.Ticket, bool, error) {
+func GetTicket(TicketID int64, ResolveRelations bool) (models.Ticket, bool, error) {
 	var ticket models.Ticket
 	err := Connection.QueryRow(`SELECT "t"."ID", "t"."Title", "t"."Description", "t"."Queue" AS "QueueID", "t"."Owner" AS "OwnerID", "t"."Severity" AS "SeverityID", "t"."Status" AS "StatusID","t"."CreatedAt","t"."LastModified","t"."StalledUntil","t"."Meta" FROM "Tickets" AS "t" WHERE "ID" = $1`, TicketID).Scan(&ticket.ID, &ticket.Title, &ticket.Description, &ticket.QueueID, &ticket.OwnerID, &ticket.SeverityID, &ticket.StatusID, &ticket.CreatedAt, &ticket.LastModified, &ticket.StalledUntil, &ticket.Meta)
 	if err != nil {
@@ -27,6 +27,17 @@ func GetTicket(TicketID int64) (models.Ticket, bool, error) {
 	}
 	ticket.Severity, _, err = GetSeverityUNSAFE(ticket.SeverityID)
 	ticket.Status, _, err = GetStatusUNSAFE(ticket.StatusID)
+
+	if ResolveRelations {
+		relations, err := GetTicketRelations(TicketID)
+		if err != nil {
+			return models.Ticket{}, true, err
+		}
+		ticket.Relations = relations
+	} else {
+		//Prevent Relations from being NULL
+		ticket.Relations = make([]models.Relation, 0)
+	}
 	return ticket, true, nil
 }
 
@@ -60,7 +71,7 @@ func PatchTicket(Ticket models.Ticket) (models.Ticket, error) {
 		return models.Ticket{}, err
 	}
 
-	ticket, _, err := GetTicket(Ticket.ID)
+	ticket, _, err := GetTicket(Ticket.ID, true)
 	if err != nil {
 		return models.Ticket{}, err
 	}
@@ -96,6 +107,12 @@ func GetTicketsInQueue(QueueID int64, ShowInvisible bool) ([]models.Ticket, erro
 			dev.LogError(err, err.Error())
 			return make([]models.Ticket, 0), err
 		}
+
+		//Relations are not resolved on purpose to save on time & ressources
+		//ALso i don't see the point in having relations here
+		//Prevent Relations from being NULL
+		ticket.Relations = make([]models.Relation, 0)
+
 		tickets = append(tickets, ticket)
 	}
 

@@ -19,7 +19,7 @@ import (
 func GetTicket(w http.ResponseWriter, r *http.Request) {
 	ticketid, _ := strconv.ParseInt(strings.Split(r.URL.String(), "/")[4], 10, 64)
 
-	ticket, found, err := db.GetTicket(ticketid)
+	ticket, found, err := db.GetTicket(ticketid, true)
 	if err != nil {
 		w.WriteHeader(500)
 		dev.ReportError(err, w, err.Error())
@@ -111,7 +111,7 @@ func GetTicketFullPath(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if allperms.Admin || perms.CanSee {
-		ticket, found, err := db.GetTicket(ticketid)
+		ticket, found, err := db.GetTicket(ticketid, true)
 		if err != nil {
 			w.WriteHeader(500)
 			dev.ReportError(err, w, err.Error())
@@ -334,7 +334,7 @@ func CreateTicketsInQueue(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ticket, found, err := db.GetTicket(id)
+	ticket, found, err := db.GetTicket(id, true)
 	if err != nil || !found {
 		w.WriteHeader(500)
 		dev.ReportError(err, w, err.Error())
@@ -393,7 +393,7 @@ func PatchTicketsInQueue(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ticket, found, err := db.GetTicket(ticketid)
+	ticket, found, err := db.GetTicket(ticketid, true)
 	if err != nil {
 		w.WriteHeader(500)
 		dev.ReportError(err, w, err.Error())
@@ -541,7 +541,7 @@ func DeletePropertyFromTicket(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ticket, found, err := db.GetTicket(ticketid)
+	ticket, found, err := db.GetTicket(ticketid, true)
 	if err != nil {
 		w.WriteHeader(500)
 		dev.ReportError(err, w, err.Error())
