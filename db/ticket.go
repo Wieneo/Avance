@@ -29,15 +29,20 @@ func GetTicket(TicketID int64, ResolveRelations bool) (models.Ticket, bool, erro
 	ticket.Status, _, err = GetStatusUNSAFE(ticket.StatusID)
 
 	if ResolveRelations {
-		relations, err := GetTicketRelations(TicketID)
+		ticket.Relations, err = GetTicketRelations(TicketID)
 		if err != nil {
 			return models.Ticket{}, true, err
 		}
-		ticket.Relations = relations
 	} else {
 		//Prevent Relations from being NULL
 		ticket.Relations = make([]models.Relation, 0)
 	}
+
+	ticket.Actions, err = GetActions(ticket.ID)
+	if err != nil {
+		return models.Ticket{}, true, err
+	}
+
 	return ticket, true, nil
 }
 
@@ -112,6 +117,10 @@ func GetTicketsInQueue(QueueID int64, ShowInvisible bool) ([]models.Ticket, erro
 		//ALso i don't see the point in having relations here
 		//Prevent Relations from being NULL
 		ticket.Relations = make([]models.Relation, 0)
+
+		//Actions are not resolved on to save on time & ressources
+		//Prevent Relations from being NUL
+		ticket.Actions = make([]models.Action, 0)
 
 		tickets = append(tickets, ticket)
 	}
