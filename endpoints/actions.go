@@ -54,7 +54,7 @@ func CreateAction(w http.ResponseWriter, r *http.Request) {
 
 	if !allperms.Admin && !perms.CanEditTicket {
 		w.WriteHeader(403)
-		dev.ReportUserError(w, "You are not allowed to patch tickets in that queue.")
+		dev.ReportUserError(w, "You are not allowed to edit tickets in that queue.")
 		return
 	}
 

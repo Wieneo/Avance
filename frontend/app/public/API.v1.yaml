@@ -1561,6 +1561,95 @@ paths:
         - Session Key: []
       tags:
         - Tickets
+  '/api/v1/project/{projectid}/queue/{queueid}/ticket/{ticketid}/actions':
+    parameters:
+      - schema:
+          type: string
+        name: projectid
+        in: path
+        required: true
+      - schema:
+          type: string
+        name: queueid
+        in: path
+        required: true
+      - schema:
+          type: string
+        name: ticketid
+        in: path
+        required: true
+    post:
+      summary: Add Actions (Comments / Answers)
+      operationId: post-api-v1-project-projectid-queue-queueid-ticket-ticketid-actions
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Action:
+                    type: integer
+                    description: Returns the ID of the action
+        '400':
+          description: JSON Body is malformed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Error:
+                    type: string
+        '403':
+          description: User is not allowed to edit tickets in that queue
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Error:
+                    type: string
+        '404':
+          description: "Specified Project / Queue / Ticket wasn't found"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Error:
+                    type: string
+        '406':
+          description: 'Content property is empty / Another type than 0 (Answer) or 1 (Comment) was specified '
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Error:
+                    type: string
+      security:
+        - Session Key: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                Type:
+                  type: integer
+                  description: |-
+                    Type can be one of the following numbers:
+                    0 = Answer
+                    1 = Comment
+                Content:
+                  type: string
+              required:
+                - Type
+                - Content
+      description: ''
+      tags:
+        - Tickets
 components:
   schemas:
     Project:
