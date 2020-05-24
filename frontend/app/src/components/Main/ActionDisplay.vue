@@ -1,6 +1,8 @@
 <template>
-    <div>
-        
+    <div style="margin-top: 5px;">
+        <v-skeleton-loader :loading="TicketLoading" transition="fade-transition" type="list-item-three-line">
+          <p>Actions</p>
+        </v-skeleton-loader>
     </div>
 </template>
 <script lang="ts">
