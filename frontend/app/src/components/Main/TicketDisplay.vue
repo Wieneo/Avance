@@ -1,23 +1,26 @@
 <template>
     <div>
-         <v-skeleton-loader
-          :loading="Loading"
-          transition="fade-transition"
-          type="article"
-        >
-            <v-card>
-              <v-row>
-                <v-col>
+            <v-card style="height: calc(100vh - 88px); overflow-y: auto; overflow-x: hidden; max-width: 100%;" flat tile>
+              <v-row style="margin: 0; padding: 0;">
+                <v-col style="margin: 0; padding: 0;">
+                  <div style="height: 40px; background-color: #1976d2;">&nbsp;</div>
+                </v-col>
+              </v-row>
+              <v-skeleton-loader
+                :loading="Loading"
+                transition="fade-transition"
+                type="article"
+              >
+              <v-row style="margin-top: 0px; padding-top: 0px;">
+                <v-col style="margin-top: 0px; padding-top: 0px;">
                   <v-card-title>{{CurrentTicket.Title}}</v-card-title>
                   <v-card-subtitle>{{CurrentTicket.Description}}</v-card-subtitle>
-                </v-col>
-                <v-col lg="3">
+                  <v-card-text>
                   <p title="ID" class="TicketDisplayProperty"><v-icon>mdi-pound-box-outline</v-icon><span class="TicketDisplayPropertyText">{{CurrentTicket.ID}}</span></p>
                   <p title="Queue" class="TicketDisplayProperty"><v-icon>mdi-tray-full</v-icon><span class="TicketDisplayPropertyText">{{CurrentTicket.Queue.Name}}</span></p>
                   <p title="Status" class="TicketDisplayProperty"><v-icon>mdi-circle-outline</v-icon><span class="TicketDisplayPropertyText" :style="{ color: CurrentTicket.Status.DisplayColor }">{{CurrentTicket.Status.Name}}</span></p>
                   <p title="Severity" class="TicketDisplayProperty"><v-icon>mdi-fire</v-icon><span class="TicketDisplayPropertyText" :style="{ color: CurrentTicket.Severity.DisplayColor }">{{CurrentTicket.Severity.Name}}</span></p>
-                </v-col>
-                <v-col lg="3">
+
                   <p title="Owner" class="TicketDisplayProperty">
                     <v-icon>mdi-account-circle-outline</v-icon>
                     <span v-if="CurrentTicket.OwnerID.Valid" class="TicketDisplayPropertyText">{{CurrentTicket.Owner.Username}} ({{CurrentTicket.Owner.Firstname}} {{CurrentTicket.Owner.Lastname}})</span>
@@ -30,25 +33,25 @@
                     <span v-if="CurrentTicket.StalledUntil.Valid" class="TicketDisplayPropertyText">{{CurrentTicket.StalledUntil.Time}}</span>
                     <span v-else class="TicketDisplayPropertyText">None</span>
                   </p>
-                </v-col>
-              </v-row>
-              <v-row>
-                <v-col lg="3"></v-col>
-                <v-col lg="3"></v-col>
-                <v-col lg="3"></v-col>
-                <v-col>
-                  <hr>
-                  <div v-for="relation in CurrentTicket.Relations" :key="relation.ID" @click="GoToTicket(relation.OtherTicket.ID)">
-                    <span class="TicketDisplayProperty" v-if="relation.Type == 0" title="References"><v-icon>mdi-arrow-right</v-icon></span>
-                    <span class="TicketDisplayProperty" v-if="relation.Type == 1" title="Referenced By"><v-icon>mdi-arrow-left</v-icon></span>
-                    <span class="TicketDisplayProperty" v-if="relation.Type == 2" title="Parent of"><v-icon>mdi-human-female</v-icon></span>
-                    <span  class="TicketDisplayProperty" v-if="relation.Type == 3" title="Child of"><v-icon>mdi-human-child</v-icon></span>
-                    <a class="TicketDisplayPropertyText">[{{relation.OtherTicket.ID}}] {{relation.OtherTicket.Title}}</a>
+                  <div style="margin-top: 10px;" v-if="CurrentTicket.Relations.length > 0">
+                    <hr style="margin-bottom: 3px;">
+                    <div v-for="relation in CurrentTicket.Relations" :key="relation.ID" @click="GoToTicket(relation.OtherTicket.ID)">
+                      <span class="TicketDisplayProperty" v-if="relation.Type == 0" title="References"><v-icon>mdi-arrow-right</v-icon></span>
+                      <span class="TicketDisplayProperty" v-if="relation.Type == 1" title="Referenced By"><v-icon>mdi-arrow-left</v-icon></span>
+                      <span class="TicketDisplayProperty" v-if="relation.Type == 2" title="Parent of"><v-icon>mdi-human-female</v-icon></span>
+                      <span  class="TicketDisplayProperty" v-if="relation.Type == 3" title="Child of"><v-icon>mdi-human-child</v-icon></span>
+                      <a class="TicketDisplayPropertyText">[{{relation.OtherTicket.ID}}] {{relation.OtherTicket.Title}}</a>
+                    </div>
                   </div>
+                  <div style="margin-top: 10px;">
+                    <hr style="margin-bottom: 3px;">
+                    Recipients || PLACEHOLDER
+                  </div>
+                  </v-card-text>
                 </v-col>
               </v-row>
+              </v-skeleton-loader>
             </v-card>
-         </v-skeleton-loader>
     </div>
 </template>
 <script lang="ts">
