@@ -7,7 +7,7 @@
   import Vue from 'vue'
 
    export default Vue.extend({
-    name: 'ActionDisplay',
+    name: 'TimelineDisplay',
     props: ["CurrentTicket", "TicketLoading"],
   })
 </script>

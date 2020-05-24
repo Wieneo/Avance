@@ -7,7 +7,7 @@
                 </v-col>
               </v-row>
               <v-skeleton-loader
-                :loading="Loading"
+                :loading="TicketLoading"
                 transition="fade-transition"
                 type="article"
               >
@@ -78,36 +78,11 @@
 
   export default Vue.extend({
     name: 'TicketDisplay',
-    mounted: async function(){
-      if(this.$route.query.ticket != undefined){
-        const ticketID = parseInt(this.$route.query.ticket as string)
-        if (!isNaN(ticketID)){
-          this.GetTicket(ticketID)
-        }
-      }
-    },
-    props: ["CurrentTicketID"],
-    data: function(){
-      return {
-        CurrentTicket: {},
-        Loading: true
-      }
-    },
-    watch: {
-        CurrentTicketID: function (val) {
-            this.GetTicket(val)
-        }
-    },
+    props: ["CurrentTicket", "TicketLoading"],
     methods:{
-        GetTicket: async function(TicketID: number){
-            this.Loading = true
-            this.CurrentTicket = (await Vue.prototype.$GetRequest("/api/v1/ticket/" + TicketID))
-            this.Loading = false
-        },
-        GoToTicket: async function(TicketID: number){
+      GoToTicket: async function(TicketID: number){
           try{
             this.$router.push({ query: Object.assign({}, this.$route.query, { ticket: TicketID }) });
-            this.GetTicket(TicketID)
           }finally{
             //Do nothing
           }

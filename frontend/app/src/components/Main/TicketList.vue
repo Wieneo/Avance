@@ -93,7 +93,7 @@
         try{
           this.$router.push({ query: Object.assign({}, this.$route.query, { ticket: TicketID }) });
         }finally{
-          this.$emit('showTicket', TicketID)
+          //Do Nothing
         }
       },
       asyncForEach: async function (array: any, callback: any) {
