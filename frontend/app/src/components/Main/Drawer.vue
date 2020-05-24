@@ -53,7 +53,13 @@
     Firstname:   string;
     Lastname:    string;
   }
-  let UserInfo: User
+  const UserInfo: User = {
+      ID: 0,
+      Username: "Loading",
+      Firstname: "Please",
+      Lastname: "Wait",
+      Mail: "Loading"
+  }
 
   export default Vue.extend({
     name: 'Drawer',

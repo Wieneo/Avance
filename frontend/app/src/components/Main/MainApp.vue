@@ -9,23 +9,24 @@
             <ProjectsContainer v-bind:showProjects="showProjects" v-on:closeProjects="showProjects = false"/>
             <v-row no-gutters>
                 <v-col lg="3">
-                <TicketList style="max-height: calc(100vh - 88px); overflow-y: auto" v-on:showTicket="DisplayTicket"/>
+                <TicketList style="max-height: calc(100vh - 88px); overflow-y: auto"/>
                 </v-col>
                 <v-col v-if="CurrentTicketID != 0">
-                    <v-tabs
+                     <v-tabs
                         v-model="tab"
                         background-color="primary"
                         dark
                         height="40px"
                     >
-                        <v-tab><v-icon left>mdi-account</v-icon>General</v-tab>
+                        <v-tab><v-icon left>mdi-account</v-icon>Interactions</v-tab>
                         <v-tab><v-icon left>mdi-history</v-icon>Actions</v-tab>
 
-                        <v-tab-item><TicketDisplay v-bind:CurrentTicketID="CurrentTicketID"/></v-tab-item>
-                        <v-tab-item><ActionDisplay/></v-tab-item>
+                        <v-tab-item><ActionDisplay v-bind:CurrentTicket="CurrentTicket" v-bind:TicketLoading="TicketLoading"/></v-tab-item>
+                        <v-tab-item><TimelineDisplay v-bind:CurrentTicket="CurrentTicket" v-bind:TicketLoading="TicketLoading"/></v-tab-item>
                     </v-tabs>
                 </v-col>
-                <v-col v-else>
+                <v-col lg="2" v-if="CurrentTicketID != 0">
+                   <TicketDisplay v-bind:CurrentTicket="CurrentTicket" v-bind:TicketLoading="TicketLoading"/>
                 </v-col>
             </v-row>
             </v-container>
@@ -41,6 +42,7 @@ import ProjectsContainer from '../misc/ProjectsContainer.vue';
 import TicketList from './TicketList.vue';
 import TicketDisplay from './TicketDisplay.vue';
 import ActionDisplay from './ActionDisplay.vue';
+import TimelineDisplay from './TimelineDisplay.vue';
 
 
 export default Vue.extend({
@@ -51,25 +53,41 @@ export default Vue.extend({
         ProjectsContainer,
         TicketList,
         TicketDisplay,
-        ActionDisplay
+        ActionDisplay,
+        TimelineDisplay
     },
     data: function(){
         return {
             showProjects: false,
+            CurrentTicket: {},
             CurrentTicketID: 0,
+            TicketLoading: false
         }
     },
     mounted: async function(){
-      if(this.$route.query.ticket != undefined){
-        const ticketID = parseInt(this.$route.query.ticket as string)
-        if (!isNaN(ticketID)){
-          this.DisplayTicket(ticketID)
+      this.HandleRouteChange()
+    },
+    watch:{
+        $route (to, from){
+            this.HandleRouteChange()
         }
-      }
     },
     methods:{
-        DisplayTicket: function(TicketID: number){
-            this.CurrentTicketID = TicketID
+        HandleRouteChange: function(){
+            if(this.$route.query.ticket != undefined){
+                const ticketID = parseInt(this.$route.query.ticket as string)
+                if (!isNaN(ticketID)){
+                    if (this.CurrentTicketID != ticketID){
+                        this.GetTicket(ticketID)
+                        this.CurrentTicketID = ticketID
+                    }
+                }
+            }
+        },
+        GetTicket: async function(TicketID: number){
+            this.TicketLoading = true
+            this.CurrentTicket = (await Vue.prototype.$GetRequest("/api/v1/ticket/" + TicketID))
+            this.TicketLoading = false
         }
     }
 })
