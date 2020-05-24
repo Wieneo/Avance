@@ -40,7 +40,26 @@
                       <span class="TicketDisplayProperty" v-if="relation.Type == 1" title="Referenced By"><v-icon>mdi-arrow-left</v-icon></span>
                       <span class="TicketDisplayProperty" v-if="relation.Type == 2" title="Parent of"><v-icon>mdi-human-female</v-icon></span>
                       <span  class="TicketDisplayProperty" v-if="relation.Type == 3" title="Child of"><v-icon>mdi-human-child</v-icon></span>
-                      <a class="TicketDisplayPropertyText">[{{relation.OtherTicket.ID}}] {{relation.OtherTicket.Title}}</a>
+
+                      <v-menu :offset-x=true :offset-y=true :open-on-hover=true :nudge-width="200">
+                        <template v-slot:activator="{ on }">
+                          <a v-on="on">{{relation.OtherTicket.Title}}</a>
+                        </template>
+                        <v-card style="text-align: center; overflow-y: hidden;">
+                          <v-card-title primary-title class="justify-center">{{relation.OtherTicket.Title}}</v-card-title>
+                          <v-card-subtitle>{{relation.OtherTicket.Description}}</v-card-subtitle>
+                          <p title="ID" class="TicketDisplayProperty"><v-icon>mdi-pound-box-outline</v-icon><span class="TicketDisplayPropertyText">{{relation.OtherTicket.ID}}</span></p>
+                          <p title="Queue" class="TicketDisplayProperty"><v-icon>mdi-tray-full</v-icon><span class="TicketDisplayPropertyText">{{relation.OtherTicket.Queue.Name}}</span></p>
+                          <p title="Status" class="TicketDisplayProperty"><v-icon>mdi-circle-outline</v-icon><span class="TicketDisplayPropertyText" :style="{ color: relation.OtherTicket.Status.DisplayColor }">{{relation.OtherTicket.Status.Name}}</span></p>
+                          <p title="Severity" class="TicketDisplayProperty"><v-icon>mdi-fire</v-icon><span class="TicketDisplayPropertyText" :style="{ color: relation.OtherTicket.Severity.DisplayColor }">{{relation.OtherTicket.Severity.Name}}</span></p>
+                          <p title="Owner" class="TicketDisplayProperty">
+                            <v-icon>mdi-account-circle-outline</v-icon>
+                            <span v-if="relation.OtherTicket.OwnerID.Valid" class="TicketDisplayPropertyText">{{relation.OtherTicket.Owner.Username}} ({{relation.OtherTicket.Owner.Firstname}} {{relation.OtherTicket.Owner.Lastname}})</span>
+                            <span v-else class="TicketDisplayPropertyText">Nobody</span>
+                          </p>
+                        </v-card>
+                      </v-menu>
+
                     </div>
                   </div>
                   <div style="margin-top: 10px;">
