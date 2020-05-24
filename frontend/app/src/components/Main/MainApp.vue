@@ -11,7 +11,7 @@
                 <v-col lg="3">
                 <TicketList style="max-height: calc(100vh - 88px); overflow-y: auto"/>
                 </v-col>
-                <v-col>
+                <v-col v-if="CurrentTicketID != 0">
                      <v-tabs
                         v-model="tab"
                         background-color="primary"
@@ -25,7 +25,7 @@
                         <v-tab-item><TimelineDisplay v-bind:CurrentTicket="CurrentTicket" v-bind:TicketLoading="TicketLoading"/></v-tab-item>
                     </v-tabs>
                 </v-col>
-                <v-col lg="2">
+                <v-col lg="2" v-if="CurrentTicketID != 0">
                    <TicketDisplay v-bind:CurrentTicket="CurrentTicket" v-bind:TicketLoading="TicketLoading"/>
                 </v-col>
             </v-row>
