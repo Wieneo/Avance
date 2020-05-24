@@ -70,9 +70,10 @@ func migrate() {
 				qid, _ := CreateQueue("Development", projectid)
 				statusid, _ := CreateStatus(true, "Open", "green", true, projectid)
 				severityid, _ := CreateSeverity(true, "Normal", "green", 10, projectid)
-				CreateTicket("Pipeline broken", "My pipeline is broken!", qid, true, 0, severityid, statusid, false, "")
-				CreateTicket("Create User", "Please create a user for my new staff member!", qid, false, userid, severityid, statusid, false, "")
-				//ToDo: CreateTicket maybe?
+				ticket1, _ := CreateTicket("Pipeline broken", "My pipeline is broken!", qid, true, 0, severityid, statusid, false, "")
+				ticket2, _ := CreateTicket("Create User", "Please create a user for my new staff member!", qid, false, userid, severityid, statusid, false, "")
+				AddRelation(ticket1, ticket2, models.ParentOf)
+				AddRelation(ticket2, ticket1, models.ReferencedBy)
 			}
 			return
 		}
