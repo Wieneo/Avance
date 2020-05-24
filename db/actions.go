@@ -9,7 +9,7 @@ import (
 //GetActions returns all actions associated with a ticket
 func GetActions(TicketID int64) ([]models.Action, error) {
 	actions := make([]models.Action, 0)
-	rows, err := Connection.Query(`SELECT "ID", "Type", "Title", "Content", "IssuedAt", "IssuedBy" FROM "Actions" WHERE "Ticket" = $1`, TicketID)
+	rows, err := Connection.Query(`SELECT "ID", "Type", "Title", "Content", "IssuedAt", "IssuedBy" FROM "Actions" WHERE "Ticket" = $1 ORDER BY "ID" DESC`, TicketID)
 	if err != nil {
 		return actions, err
 	}

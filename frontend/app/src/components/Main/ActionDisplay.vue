@@ -1,8 +1,8 @@
 <template>
     <div style="margin-top: 5px;">
-        <v-skeleton-loader :loading="TicketLoading" transition="fade-transition" type="list-item-three-line">
-          <p>Actions</p>
-        </v-skeleton-loader>
+        <v-card v-for="action in CurrentTicket.Actions" :key="action.ID">
+          <v-card-title>{{action.Title}}</v-card-title>
+        </v-card>
     </div>
 </template>
 <script lang="ts">
