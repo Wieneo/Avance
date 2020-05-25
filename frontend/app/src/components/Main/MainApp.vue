@@ -21,8 +21,8 @@
                         <v-tab><v-icon left>mdi-account</v-icon>Interactions</v-tab>
                         <v-tab><v-icon left>mdi-history</v-icon>Actions</v-tab>
 
-                        <v-tab-item><ActionDisplay v-bind:CurrentTicket="CurrentTicket" v-bind:TicketLoading="TicketLoading"/></v-tab-item>
-                        <v-tab-item><TimelineDisplay v-bind:CurrentTicket="CurrentTicket" v-bind:TicketLoading="TicketLoading"/></v-tab-item>
+                        <v-tab-item class="overflow-y-auto" style="max-height: calc(100vh - 130px);"><ActionDisplay v-bind:CurrentTicket="CurrentTicket" v-bind:TicketLoading="TicketLoading"/></v-tab-item>
+                        <v-tab-item class="overflow-y-auto" style="max-height: calc(100vh - 130px);"><TimelineDisplay v-bind:CurrentTicket="CurrentTicket" v-bind:TicketLoading="TicketLoading"/></v-tab-item>
                     </v-tabs>
                 </v-col>
                 <v-col lg="2" v-if="CurrentTicketID != 0">
@@ -78,8 +78,8 @@ export default Vue.extend({
                 const ticketID = parseInt(this.$route.query.ticket as string)
                 if (!isNaN(ticketID)){
                     if (this.CurrentTicketID != ticketID){
-                        this.CurrentTicketID = ticketID
                         this.GetTicket(ticketID)
+                        this.CurrentTicketID = ticketID
                     }
                 }
             }

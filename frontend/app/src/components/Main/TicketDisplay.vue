@@ -11,7 +11,7 @@
                 transition="fade-transition"
                 type="article"
               >
-              <v-row style="margin-top: 0px; padding-top: 0px;">
+              <v-row style="margin-top: 0px; padding-top: 0px; max-height: calc(100vh - 88px);" class="overflow-y-auto">
                 <v-col style="margin-top: 0px; padding-top: 0px;">
                   <v-card-title>{{CurrentTicket.Title}}</v-card-title>
                   <v-card-subtitle>{{CurrentTicket.Description}}</v-card-subtitle>

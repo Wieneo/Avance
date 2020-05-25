@@ -7,10 +7,13 @@ import MainApp from './components/Main/MainApp.vue'
 import Login from './components/Login/Login.vue'
 import {Utils} from './plugins/utils'
 
+import Moment from 'vue-moment'
+
 Vue.config.productionTip = false
 
 Vue.use(VueRouter)
 Vue.use(Utils)
+Vue.use(Moment);
 
 const router = new VueRouter({
   mode: 'history',
