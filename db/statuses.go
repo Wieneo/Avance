@@ -5,11 +5,11 @@ import (
 )
 
 //SearchStatus searches for a status and returns the ID, if a status was found and maybe an error
-func SearchStatus(Name string) (int64, bool, error) {
+func SearchStatus(Project int64, Name string) (int64, bool, error) {
 	var ID int64
 
 	//Ignoring casing
-	err := Connection.QueryRow(`SELECT "ID" FROM "Statuses" WHERE UPPER("Name") = UPPER($1)`, Name).Scan(&ID)
+	err := Connection.QueryRow(`SELECT "ID" FROM "Statuses" WHERE UPPER("Name") = UPPER($1) AND "Project" = $2`, Name, Project).Scan(&ID)
 	if err != nil {
 		if err.Error() == "sql: no rows in result set" {
 			return ID, false, nil

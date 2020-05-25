@@ -287,7 +287,7 @@ func CreateTicketsInQueue(w http.ResponseWriter, r *http.Request) {
 		ownedByNobody = false
 	}
 
-	statusid, found, err := db.SearchStatus(req.Status)
+	statusid, found, err := db.SearchStatus(projectid, req.Status)
 	if err != nil {
 		w.WriteHeader(500)
 		dev.ReportError(err, w, err.Error())
@@ -300,7 +300,7 @@ func CreateTicketsInQueue(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	severityid, found, err := db.SearchSeverity(req.Severity)
+	severityid, found, err := db.SearchSeverity(projectid, req.Severity)
 	if err != nil {
 		w.WriteHeader(500)
 		dev.ReportError(err, w, err.Error())
@@ -438,7 +438,7 @@ func PatchTicketsInQueue(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if !utils.IsEmpty(req.Status) && req.Status != ticket.Status.Name {
-		statusid, found, err := db.SearchStatus(req.Status)
+		statusid, found, err := db.SearchStatus(projectid, req.Status)
 		if err != nil {
 			w.WriteHeader(500)
 			dev.ReportError(err, w, err.Error())
@@ -456,7 +456,7 @@ func PatchTicketsInQueue(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if !utils.IsEmpty(req.Severity) && req.Severity != ticket.Severity.Name {
-		severityid, found, err := db.SearchSeverity(req.Severity)
+		severityid, found, err := db.SearchSeverity(projectid, req.Severity)
 		if err != nil {
 			w.WriteHeader(500)
 			dev.ReportError(err, w, err.Error())

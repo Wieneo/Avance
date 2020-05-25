@@ -5,11 +5,11 @@ import (
 )
 
 //SearchSeverity searches for a severity and returns the ID, if a severity was found and maybe an error
-func SearchSeverity(Name string) (int64, bool, error) {
+func SearchSeverity(Project int64, Name string) (int64, bool, error) {
 	var ID int64
 
 	//Ignoring casing
-	err := Connection.QueryRow(`SELECT "ID" FROM "Severities" WHERE UPPER("Name") = UPPER($1)`, Name).Scan(&ID)
+	err := Connection.QueryRow(`SELECT "ID" FROM "Severities" WHERE UPPER("Name") = UPPER($1) AND "Project" = $2`, Name, Project).Scan(&ID)
 	if err != nil {
 		if err.Error() == "sql: no rows in result set" {
 			return ID, false, nil
