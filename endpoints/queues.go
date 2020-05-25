@@ -116,7 +116,7 @@ func CreateQueue(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		queue, found, err := db.GetQueue(id, projectid)
+		queue, found, err := db.GetQueue(projectid, id)
 		//If queue isnt found here something went horribly wrong -> ReportError
 		if err != nil || !found {
 			w.WriteHeader(500)
