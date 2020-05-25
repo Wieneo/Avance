@@ -8,7 +8,7 @@
             <template v-slot:activator="{ on }">
                     <v-list-item class="px-2">
                     <v-list-item-avatar>
-                        <v-img src="https://randomuser.me/api/portraits/women/85.jpg" v-on="on" @click="ShowUserMenu = true" style="cursor: pointer;"></v-img>
+                        <v-img class="ProfilePicture" src="https://randomuser.me/api/portraits/women/85.jpg" v-on="on" @click="ShowUserMenu = true" style="cursor: pointer;" ></v-img>
                     </v-list-item-avatar>
                 </v-list-item>
             </template>
