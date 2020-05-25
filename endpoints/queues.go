@@ -181,7 +181,7 @@ func PatchQueue(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		queue, found, err := db.GetQueue(queueid, projectid)
+		queue, found, err := db.GetQueue(projectid, queueid)
 		if err != nil {
 			w.WriteHeader(500)
 			dev.ReportError(err, w, err.Error())
@@ -256,7 +256,7 @@ func DeleteQueue(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if perms.CanRemoveQueues || allperms.Admin {
-		_, found, err := db.GetQueue(queueid, projectid)
+		_, found, err := db.GetQueue(projectid, queueid)
 		if err != nil {
 			w.WriteHeader(500)
 			dev.ReportError(err, w, err.Error())
