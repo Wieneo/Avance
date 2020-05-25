@@ -78,8 +78,8 @@ export default Vue.extend({
                 const ticketID = parseInt(this.$route.query.ticket as string)
                 if (!isNaN(ticketID)){
                     if (this.CurrentTicketID != ticketID){
-                        this.GetTicket(ticketID)
                         this.CurrentTicketID = ticketID
+                        this.GetTicket(ticketID)
                     }
                 }
             }
