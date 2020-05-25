@@ -34,7 +34,5 @@ CREATE TABLE public."Tickets"
 
 TABLESPACE pg_default;
 
-ALTER TABLE public."Tickets"
-    OWNER to tixter;
 
 END;

@@ -21,7 +21,7 @@ SET default_tablespace = '';
 SET default_table_access_method = heap;
 
 --
--- Name: Groups; Type: TABLE; Schema: public; Owner: tixter
+-- Name: Groups; Type: TABLE; Schema: public; 
 --
 
 CREATE TABLE public."Groups" (
@@ -31,10 +31,9 @@ CREATE TABLE public."Groups" (
 );
 
 
-ALTER TABLE public."Groups" OWNER TO tixter;
 
 --
--- Name: Groups_ID_seq; Type: SEQUENCE; Schema: public; Owner: tixter
+-- Name: Groups_ID_seq; Type: SEQUENCE; Schema: public; 
 --
 
 ALTER TABLE public."Groups" ALTER COLUMN "ID" ADD GENERATED ALWAYS AS IDENTITY (
@@ -48,7 +47,7 @@ ALTER TABLE public."Groups" ALTER COLUMN "ID" ADD GENERATED ALWAYS AS IDENTITY (
 
 
 --
--- Name: Projects; Type: TABLE; Schema: public; Owner: tixter
+-- Name: Projects; Type: TABLE; Schema: public; 
 --
 
 CREATE TABLE public."Projects" (
@@ -58,10 +57,8 @@ CREATE TABLE public."Projects" (
 );
 
 
-ALTER TABLE public."Projects" OWNER TO tixter;
-
 --
--- Name: Projects_ID_seq; Type: SEQUENCE; Schema: public; Owner: tixter
+-- Name: Projects_ID_seq; Type: SEQUENCE; Schema: public; 
 --
 
 ALTER TABLE public."Projects" ALTER COLUMN "ID" ADD GENERATED ALWAYS AS IDENTITY (
@@ -75,7 +72,7 @@ ALTER TABLE public."Projects" ALTER COLUMN "ID" ADD GENERATED ALWAYS AS IDENTITY
 
 
 --
--- Name: Queue; Type: TABLE; Schema: public; Owner: tixter
+-- Name: Queue; Type: TABLE; Schema: public; 
 --
 
 CREATE TABLE public."Queue" (
@@ -85,10 +82,8 @@ CREATE TABLE public."Queue" (
 );
 
 
-ALTER TABLE public."Queue" OWNER TO tixter;
-
 --
--- Name: Queue_ID_seq; Type: SEQUENCE; Schema: public; Owner: tixter
+-- Name: Queue_ID_seq; Type: SEQUENCE; Schema: public; 
 --
 
 ALTER TABLE public."Queue" ALTER COLUMN "ID" ADD GENERATED ALWAYS AS IDENTITY (
@@ -102,7 +97,7 @@ ALTER TABLE public."Queue" ALTER COLUMN "ID" ADD GENERATED ALWAYS AS IDENTITY (
 
 
 --
--- Name: Users; Type: TABLE; Schema: public; Owner: tixter
+-- Name: Users; Type: TABLE; Schema: public; 
 --
 
 CREATE TABLE public."Users" (
@@ -116,10 +111,9 @@ CREATE TABLE public."Users" (
 );
 
 
-ALTER TABLE public."Users" OWNER TO tixter;
 
 --
--- Name: Users_ID_seq; Type: SEQUENCE; Schema: public; Owner: tixter
+-- Name: Users_ID_seq; Type: SEQUENCE; Schema: public; 
 --
 
 ALTER TABLE public."Users" ALTER COLUMN "ID" ADD GENERATED ALWAYS AS IDENTITY (
@@ -133,7 +127,7 @@ ALTER TABLE public."Users" ALTER COLUMN "ID" ADD GENERATED ALWAYS AS IDENTITY (
 
 
 --
--- Name: Version; Type: TABLE; Schema: public; Owner: tixter
+-- Name: Version; Type: TABLE; Schema: public; 
 --
 
 CREATE TABLE public."Version" (
@@ -141,10 +135,9 @@ CREATE TABLE public."Version" (
 );
 
 
-ALTER TABLE public."Version" OWNER TO tixter;
 
 --
--- Name: map_User_Group; Type: TABLE; Schema: public; Owner: tixter
+-- Name: map_User_Group; Type: TABLE; Schema: public; 
 --
 
 CREATE TABLE public."map_User_Group" (
@@ -154,10 +147,9 @@ CREATE TABLE public."map_User_Group" (
 );
 
 
-ALTER TABLE public."map_User_Group" OWNER TO tixter;
 
 --
--- Name: map_User_Group_ID_seq; Type: SEQUENCE; Schema: public; Owner: tixter
+-- Name: map_User_Group_ID_seq; Type: SEQUENCE; Schema: public; 
 --
 
 ALTER TABLE public."map_User_Group" ALTER COLUMN "ID" ADD GENERATED ALWAYS AS IDENTITY (
@@ -171,7 +163,7 @@ ALTER TABLE public."map_User_Group" ALTER COLUMN "ID" ADD GENERATED ALWAYS AS ID
 
 
 --
--- Name: Groups Groups_pkey; Type: CONSTRAINT; Schema: public; Owner: tixter
+-- Name: Groups Groups_pkey; Type: CONSTRAINT; Schema: public; 
 --
 
 ALTER TABLE ONLY public."Groups"
@@ -179,7 +171,7 @@ ALTER TABLE ONLY public."Groups"
 
 
 --
--- Name: Projects Projects_pkey; Type: CONSTRAINT; Schema: public; Owner: tixter
+-- Name: Projects Projects_pkey; Type: CONSTRAINT; Schema: public; 
 --
 
 ALTER TABLE ONLY public."Projects"
@@ -187,7 +179,7 @@ ALTER TABLE ONLY public."Projects"
 
 
 --
--- Name: Queue Queue_pkey; Type: CONSTRAINT; Schema: public; Owner: tixter
+-- Name: Queue Queue_pkey; Type: CONSTRAINT; Schema: public; 
 --
 
 ALTER TABLE ONLY public."Queue"
@@ -195,7 +187,7 @@ ALTER TABLE ONLY public."Queue"
 
 
 --
--- Name: Users Users_pkey; Type: CONSTRAINT; Schema: public; Owner: tixter
+-- Name: Users Users_pkey; Type: CONSTRAINT; Schema: public; 
 --
 
 ALTER TABLE ONLY public."Users"
@@ -203,7 +195,7 @@ ALTER TABLE ONLY public."Users"
 
 
 --
--- Name: map_User_Group map_User_Group_pkey; Type: CONSTRAINT; Schema: public; Owner: tixter
+-- Name: map_User_Group map_User_Group_pkey; Type: CONSTRAINT; Schema: public; 
 --
 
 ALTER TABLE ONLY public."map_User_Group"
@@ -211,14 +203,14 @@ ALTER TABLE ONLY public."map_User_Group"
 
 
 --
--- Name: None; Type: INDEX; Schema: public; Owner: tixter
+-- Name: None; Type: INDEX; Schema: public; 
 --
 
 CREATE INDEX "None" ON public."Queue" USING btree ("Project");
 
 
 --
--- Name: map_User_Group FK_GroupID_Group; Type: FK CONSTRAINT; Schema: public; Owner: tixter
+-- Name: map_User_Group FK_GroupID_Group; Type: FK CONSTRAINT; Schema: public; 
 --
 
 ALTER TABLE ONLY public."map_User_Group"
@@ -226,7 +218,7 @@ ALTER TABLE ONLY public."map_User_Group"
 
 
 --
--- Name: Queue FK_Queue_Projekt; Type: FK CONSTRAINT; Schema: public; Owner: tixter
+-- Name: Queue FK_Queue_Projekt; Type: FK CONSTRAINT; Schema: public; 
 --
 
 ALTER TABLE ONLY public."Queue"
@@ -234,7 +226,7 @@ ALTER TABLE ONLY public."Queue"
 
 
 --
--- Name: map_User_Group FK_UserID_User; Type: FK CONSTRAINT; Schema: public; Owner: tixter
+-- Name: map_User_Group FK_UserID_User; Type: FK CONSTRAINT; Schema: public; 
 --
 
 ALTER TABLE ONLY public."map_User_Group"
