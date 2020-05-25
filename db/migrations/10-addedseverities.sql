@@ -15,7 +15,5 @@ CREATE TABLE public."Severities"
 
 TABLESPACE pg_default;
 
-ALTER TABLE public."Severities"
-    OWNER to tixter;
 
 END;
