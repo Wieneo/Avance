@@ -40,6 +40,18 @@ func GetUser(UserID int64) (models.User, error) {
 	return Requested, nil
 }
 
+//PatchUser patches the given user. It DOES NOT update permissions and the password
+func PatchUser(User models.User) error {
+	_, err := Connection.Exec(`UPDATE "Users" SET "Username" = $1, "Firstname" = $2, "Lastname" = $3, "Mail" = $4 WHERE "ID" = $5`, User.Username, User.Firstname, User.Lastname, User.Mail, User.ID)
+	return err
+}
+
+//UpdatePassword updates the current password of the user
+func UpdatePassword(UserID int64, Hash string) error {
+	_, err := Connection.Exec(`UPDATE "Users" SET "Password" = $1 WHERE "ID" = $2`, Hash, UserID)
+	return err
+}
+
 //GetGroups returns all groups from a user
 func GetGroups(User models.User) ([]models.Group, error) {
 	Groups := make([]models.Group, 0)
