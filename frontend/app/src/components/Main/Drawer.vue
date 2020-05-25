@@ -18,7 +18,7 @@
                     <v-card style="text-align: center; overflow-y: hidden;" flat>
                         <v-card-title primary-title class="justify-center">{{UserInfo.Firstname}} {{UserInfo.Lastname}}</v-card-title>
                         <v-card-subtitle>{{UserInfo.Username}}</v-card-subtitle>
-                        <v-card-text class="TicketDisplayProperty"><v-btn class="ma-2" outlined color="green"><v-icon>mdi-circle</v-icon> Online</v-btn></v-card-text>
+                        <v-card-text class="TicketDisplayProperty"><v-btn class="ma-2" outlined color="green"><v-icon style="margin-right: 10px;">mdi-circle</v-icon> Online</v-btn></v-card-text>
                     </v-card>
                 </v-col>
                 <v-btn icon>
