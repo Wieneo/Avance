@@ -1,2 +1,2 @@
-Johann Gnaucke (wieneo)
+Johann Gnaucke (wieneo)  
 Leopold Lamprecht
