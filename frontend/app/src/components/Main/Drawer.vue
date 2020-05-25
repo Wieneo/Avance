@@ -118,7 +118,7 @@
             ShowEditMenu: false,
             rules: [
                 value => !!value || 'Required.',
-            ],
+            ] as ((value: any) => true | "Required.")[],
         }
     },
     watch:{
