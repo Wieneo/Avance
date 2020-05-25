@@ -4,11 +4,29 @@
     <v-navigation-drawer permanent mini-variant app
     >
         <v-list>
-        <v-list-item class="px-2">
-            <v-list-item-avatar>
-            <v-img src="https://randomuser.me/api/portraits/women/85.jpg"></v-img>
-            </v-list-item-avatar>
-        </v-list-item>
+        <v-menu :offset-x=true :nudge-width="300" :close-on-content-click="false" v-model="ShowUserMenu" >
+            <template v-slot:activator="{ on }">
+                    <v-list-item class="px-2">
+                    <v-list-item-avatar>
+                        <v-img src="https://randomuser.me/api/portraits/women/85.jpg" v-on="on" @click="ShowUserMenu = true" style="cursor: pointer;"></v-img>
+                    </v-list-item-avatar>
+                </v-list-item>
+            </template>
+            <v-container style="background-color: white;">
+            <v-row>
+                <v-col style="min-width: 300px; max-width: 300px;">
+                    <v-card style="text-align: center; overflow-y: hidden;" flat>
+                        <v-card-title primary-title class="justify-center">{{UserInfo.Firstname}} {{UserInfo.Lastname}}</v-card-title>
+                        <v-card-subtitle>{{UserInfo.Username}}</v-card-subtitle>
+                        <v-card-text class="TicketDisplayProperty"><v-btn class="ma-2" outlined color="green"><v-icon>mdi-circle</v-icon> Online</v-btn></v-card-text>
+                    </v-card>
+                </v-col>
+                <v-btn icon>
+                    <v-icon>mdi-cog</v-icon>
+                </v-btn>
+            </v-row>
+            </v-container>
+        </v-menu>
         </v-list>
 
         <v-divider>
@@ -58,7 +76,8 @@
     name: 'Drawer',
     data: function(){
         return {
-            UserInfo
+            UserInfo,
+            ShowUserMenu: false
         }
     },
     mounted: async function(){
