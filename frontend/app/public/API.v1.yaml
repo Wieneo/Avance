@@ -142,6 +142,57 @@ paths:
       operationId: get-api-v1-profile
       security:
         - Session Key: []
+      tags:
+        - Profile
+    patch:
+      summary: Update Profile
+      operationId: patch-api-v1-profile
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: JSON Body is malformed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Error:
+                    type: string
+        '406':
+          description: Request changes nothing about the user
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Error:
+                    type: string
+      security:
+        - Session Key: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                Username:
+                  type: string
+                Firstname:
+                  type: string
+                Lastname:
+                  type: string
+                Mail:
+                  type: string
+                Password:
+                  type: string
+        description: ''
+      tags:
+        - Profile
   /api/v1/projects:
     get:
       summary: Get all projects

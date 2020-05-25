@@ -77,7 +77,7 @@ func PatchProfile(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if !somethingChanged {
-		w.WriteHeader(400)
+		w.WriteHeader(406)
 		dev.ReportUserError(w, "Nothing changed!")
 		return
 	}
