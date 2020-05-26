@@ -82,6 +82,35 @@ export function Utils<AxiosPlugOptions>(Vue: typeof _Vue): void {
 
         return resp
     }
+    Vue.prototype.$Request = async (Method: string, URL: string, Data: any) => {
+        const resp = await new Promise((resolve) => {
+            const req = new XMLHttpRequest();
+            req.open(Method, URL)
+            req.onreadystatechange = function(evt){
+                if (req.readyState == 4){
+                    //Maybe Session is timed out again
+                    const allSplits = req.responseURL.split("/")
+                    if (allSplits[allSplits.length - 1] == "login"){
+                        window.location.href = "/login"
+                    }
+
+                    try{
+                        const obj = JSON.parse(req.response)
+                        if (obj.Error != undefined){
+                            Vue.prototype.$NotifyError(obj.Error)
+                        }
+                        resolve(obj)
+                    }catch(Exception){
+                        console.log(Exception)
+                        resolve(null)
+                    }
+                }
+            }
+            req.send(JSON.stringify(Data))
+        })
+
+        return resp
+    }
     Vue.prototype.$NotifySuccess = (Message: string) => {
         new Noty({
             type: "success",
