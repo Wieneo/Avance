@@ -111,7 +111,32 @@ type Ticket struct {
 	StalledUntil sql.NullTime
 	Meta         string //Needs to be changed later!
 	Relations    []Relation
+	Actions      []Action
 }
+
+//Action stores a single update about a ticket
+type Action struct {
+	ID       int64
+	Type     ActionType
+	Title    string
+	Content  string
+	IssuedAt time.Time
+	IssuedBy User
+}
+
+//ActionType defines to type of an action to be a comment / answer / etc...
+type ActionType int
+
+const (
+	//Answer is set when a answer is issued
+	Answer ActionType = iota
+	//Comment is set when a comment is issued
+	Comment
+	//PropertyUpdate gets set if properties of the ticket got changed
+	PropertyUpdate
+	//Unspecific is a generic type
+	Unspecific
+)
 
 //RelationType stores the type of relation between tickets
 type RelationType int

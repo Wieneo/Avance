@@ -11,7 +11,7 @@
                 transition="fade-transition"
                 type="article"
               >
-              <v-row style="margin-top: 0px; padding-top: 0px;">
+              <v-row style="margin-top: 0px; padding-top: 0px; max-height: calc(100vh - 88px);" class="overflow-y-auto">
                 <v-col style="margin-top: 0px; padding-top: 0px;">
                   <v-card-title>{{CurrentTicket.Title}}</v-card-title>
                   <v-card-subtitle>{{CurrentTicket.Description}}</v-card-subtitle>
@@ -26,8 +26,8 @@
                     <span v-if="CurrentTicket.OwnerID.Valid" class="TicketDisplayPropertyText">{{CurrentTicket.Owner.Username}} ({{CurrentTicket.Owner.Firstname}} {{CurrentTicket.Owner.Lastname}})</span>
                     <span v-else class="TicketDisplayPropertyText">Nobody</span>
                   </p>
-                  <p title="Created" class="TicketDisplayProperty"><v-icon>mdi-plus</v-icon><span class="TicketDisplayPropertyText">{{CurrentTicket.CreatedAt}}</span></p>
-                  <p title="Last Modified" class="TicketDisplayProperty"><v-icon>mdi-update</v-icon><span class="TicketDisplayPropertyText">{{CurrentTicket.LastModified}}</span></p>
+                  <p title="Created" class="TicketDisplayProperty"><v-icon>mdi-plus</v-icon><span class="TicketDisplayPropertyText">{{CurrentTicket.CreatedAt | moment("dddd, MM/DD/YYYY HH:mm:ss")}}</span></p>
+                  <p title="Last Modified" class="TicketDisplayProperty"><v-icon>mdi-update</v-icon><span class="TicketDisplayPropertyText">{{CurrentTicket.LastModified | moment("dddd, MM/DD/YYYY HH:mm:ss")}}</span></p>
                   <p title="Stalled Until" class="TicketDisplayProperty">
                     <v-icon>mdi-calendar-range</v-icon>
                     <span v-if="CurrentTicket.StalledUntil.Valid" class="TicketDisplayPropertyText">{{CurrentTicket.StalledUntil.Time}}</span>
