@@ -2,8 +2,8 @@
     <v-app-bar app>
         <p>{{CurrentProject.Name}}</p>
         <v-spacer></v-spacer>
-        <v-btn icon>
-            <v-icon @click="logout">mdi-logout</v-icon>
+        <v-btn icon @click="logout">
+            <v-icon>mdi-logout</v-icon>
         </v-btn>
     </v-app-bar>
 </template>
