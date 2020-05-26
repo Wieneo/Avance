@@ -79,7 +79,7 @@ func UpdateProfilePicture(w http.ResponseWriter, r *http.Request) {
 	}
 
 	defer tempFile.Close()
-	println(handler.Filename)
+	
 	fileType := ""
 	for _, k := range models.GetAllowedImageFormates() {
 		if strings.HasSuffix(handler.Filename, k) {
