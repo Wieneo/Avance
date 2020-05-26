@@ -61,6 +61,7 @@ export default Vue.extend({
             showProjects: false,
             CurrentTicket: {},
             CurrentTicketID: 0,
+            CurrentProjectID: 0,
             TicketLoading: false
         }
     },
@@ -80,6 +81,17 @@ export default Vue.extend({
                     if (this.CurrentTicketID != ticketID){
                         this.GetTicket(ticketID)
                         this.CurrentTicketID = ticketID
+                    }
+                }
+            }
+
+            if(this.$route.query.project != undefined){
+                const projectID = parseInt(this.$route.query.project as string)
+                if (!isNaN(projectID)){
+                    if (this.CurrentProjectID != projectID){
+                        this.CurrentProjectID = projectID
+                        this.CurrentTicketID = 0
+                        this.CurrentTicket = {}
                     }
                 }
             }
