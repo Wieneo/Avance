@@ -33,6 +33,7 @@ func HTTPInit() {
 	router.HandleFunc("/api/v1/logout", endpoints.LogoutUser).Methods("GET")
 
 	router.HandleFunc("/api/v1/profile", endpoints.GetProfile).Methods("GET")
+	router.HandleFunc("/api/v1/user/{[0-9]{*}}/avatar", endpoints.GetProfilePicture).Methods("GET")
 
 	//PROJECT APIs
 	router.HandleFunc("/api/v1/projects", endpoints.GetProjects).Methods("GET")

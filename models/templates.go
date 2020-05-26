@@ -5,6 +5,13 @@ import (
 	"time"
 )
 
+///Constants
+
+//GetAllowedImageFormates defines what Image formates a Prfile Picture is allowed to be
+func GetAllowedImageFormates() []string {
+	return []string{"png", "jpg", "jpeg", "gif"}
+}
+
 //User is the default user struct from the database
 type User struct {
 	ID          int64
