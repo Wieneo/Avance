@@ -87,13 +87,15 @@
     Mail:        string;
     Firstname:   string;
     Lastname:    string;
+    Password:    string;
   }
   const UserInfo: User = {
       ID: 0,
       Username: "Loading",
       Firstname: "Please",
       Lastname: "Wait",
-      Mail: "Loading"
+      Mail: "Loading",
+      Password: ""
   }
 
   //Initialize seperately so we don't create a reference
@@ -102,7 +104,8 @@
       Username: "Loading",
       Firstname: "Please",
       Lastname: "Wait",
-      Mail: "Loading"
+      Mail: "Loading",
+      Password: ""
   }
 
   export default Vue.extend({
@@ -141,6 +144,15 @@
     },
     methods:{
         SaveChanges: async function(){
+            if (this.NewPassword1.trim().length > 0){
+                if (this.NewPassword1 == this.NewPassword2){
+                    this.ChangedProfileInfo.Password = this.NewPassword1
+                }else{
+                    Vue.prototype.$NotifyError("Passwords don't match")
+                    return
+                }
+            }
+
             this.Loading = true
             const newinfo = await Vue.prototype.$Request("PATCH", "/api/v1/profile", this.ChangedProfileInfo)
             if (newinfo.Error == undefined){
