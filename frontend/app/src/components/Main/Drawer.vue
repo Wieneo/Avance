@@ -20,7 +20,7 @@
                         <v-card-text class="TicketDisplayProperty"><v-btn class="ma-2" outlined color="green"><v-icon style="margin-right: 10px;">mdi-circle</v-icon> Online</v-btn></v-card-text>
                     </v-card>
                 </v-col>
-                <v-btn icon @click="ShowEditMenu = true">
+                <v-btn icon @click="ShowEditMenu = true; ShowUserMenu = false">
                     <v-icon>mdi-cog</v-icon>
                 </v-btn>
             </v-row>
@@ -70,7 +70,7 @@
                 <v-card-actions>
                 <v-spacer></v-spacer>
                 <v-btn color="orange darken-1" text @click="ShowEditMenu = false">Abort</v-btn>
-                <v-btn color="green darken-1" text @click="ShowEditMenu = false">Save</v-btn>
+                <v-btn color="green darken-1" text @click="SaveChanges" :loading="Loading">Save</v-btn>
                 </v-card-actions>
             </v-card>
         </v-dialog>
@@ -110,6 +110,7 @@
 
     data: function(){
         return {
+            Loading: false,
             UserInfo,
             ChangedProfileInfo,
             NewPassword1: "",
@@ -137,6 +138,17 @@
         //Assign so we dont create a reference here
         Object.assign(this.UserInfo, data);
         Object.assign(this.ChangedProfileInfo, data);
+    },
+    methods:{
+        SaveChanges: async function(){
+            this.Loading = true
+            const newinfo = await Vue.prototype.$Request("PATCH", "/api/v1/profile", this.ChangedProfileInfo)
+            if (newinfo.Error == undefined){
+                this.UserInfo = newinfo as User
+                this.ShowEditMenu = false
+            }
+            this.Loading = false
+        }
     }
   })
 </script>
