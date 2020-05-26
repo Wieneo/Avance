@@ -127,7 +127,7 @@
             if (!to){
                 //CleanUP Form
                 console.log("Resetting Inputs from Profile Edit")
-                this.ChangedProfileInfo = this.UserInfo
+                Object.assign(this.ChangedProfileInfo, this.UserInfo)
                 this.NewPassword1 = ""
                 this.NewPassword2 = ""
             }
@@ -144,7 +144,7 @@
             this.Loading = true
             const newinfo = await Vue.prototype.$Request("PATCH", "/api/v1/profile", this.ChangedProfileInfo)
             if (newinfo.Error == undefined){
-                this.UserInfo = newinfo as User
+                Object.assign(this.UserInfo, newinfo)
                 this.ShowEditMenu = false
             }
             this.Loading = false
