@@ -28,6 +28,8 @@ func HTTPInit() {
 
 	router.HandleFunc("/api/v1/health", endpoints.GetInstanceHealth).Methods("GET")
 	router.HandleFunc("/api/v1/session", serveSessionInfo).Methods("GET")
+	router.HandleFunc("/api/v1/ping", servePong).Methods("GET")
+
 	router.HandleFunc("/api/v1/login", endpoints.LoginUser).Methods("POST")
 
 	router.HandleFunc("/api/v1/logout", endpoints.LogoutUser).Methods("GET")
@@ -111,6 +113,7 @@ var sitesForUnauthorized = []string{
 	"/css/*",
 	"/api/v1/session",
 	"/api/v1/health",
+	"/api/v1/ping",
 }
 
 //authorizationMiddleware gets called at every request to check if user is authenticated
@@ -165,4 +168,10 @@ func serveSessionInfo(w http.ResponseWriter, r *http.Request) {
 	}{
 		IsAuthorized(r),
 	})
+}
+
+//servePong only returns pong. Used to check if instance is alive.
+func servePong(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(200)
+	w.Write([]byte("Pong!"))
 }
