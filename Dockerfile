@@ -8,7 +8,7 @@ WORKDIR /frontend
 COPY ./frontend/app .
 RUN npm install && npm run build && rm -rf src/
 
-FROM scratch
+FROM alpine
 WORKDIR /app
 COPY --from=backend /backend/tixter-app /app/
 COPY --from=backend /backend/db/migrations /app/db/migrations
