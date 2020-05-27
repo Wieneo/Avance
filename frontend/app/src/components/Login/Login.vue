@@ -27,6 +27,7 @@
                     type="text"
                     v-model="Username"
                     @keyup.enter.native="Login"
+                    :error="CredentialsInvalid"
                   />
 
                   <v-text-field
@@ -37,6 +38,7 @@
                     type="password"
                     v-model="Password"
                     @keyup.enter.native="Login"
+                    :error="CredentialsInvalid"
                   />
                 </v-form>
               </v-card-text>
@@ -66,17 +68,21 @@ export default Vue.extend({
         return {
           Username: "",
           Password: "",
-          Loading: false
+          Loading: false,
+          CredentialsInvalid: false
         }
     },
     methods:{
       Login: async function (){
         if (this.Username.length > 0 && this.Password.length > 0){
+          this.CredentialsInvalid = false
           this.Loading = true
-          const Result = await Vue.prototype.$PostRequest("/api/v1/login", {Username: this.Username, Password: this.Password})
+          const Result = await Vue.prototype.$Request("POST", "/api/v1/login", {Username: this.Username, Password: this.Password}, true)
           if (Result.Error == undefined){
             Vue.prototype.$SetCookie('session', Result.SessionKey, 3600)
             window.location.href = "/"
+          }else{
+            this.CredentialsInvalid = true
           }
         }
         this.Loading = false
