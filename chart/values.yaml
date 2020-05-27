@@ -2,10 +2,13 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 replicaCount: 1
+strategyType:
+enableSelector:
+deploymentApiVersion: extensions/v1beta1
 image:
   repository: gitlab.gnaucke.dev/tixter/tixter-app
   tag: stable
-  pullPolicy: Always
+  pullPolicy: IfNotPresent
   secrets:
     - name: gitlab-registry
 podAnnotations: {}
@@ -19,7 +22,7 @@ application:
 hpa:
   enabled: false
   minReplicas: 1
-  maxReplicas: 1
+  maxReplicas: 5
   targetCPUUtilizationPercentage: 80
 gitlab:
   app:
@@ -43,22 +46,25 @@ ingress:
   annotations:
     kubernetes.io/tls-acme: "true"
     kubernetes.io/ingress.class: "nginx"
-    cert-manager.io/cluster-issuer: "letsencrypt-prod"
   modSecurity:
     enabled: false
     secRuleEngine: "DetectionOnly"
+    # secRules:
+    #   - variable: ""
+    #     operator: ""
+    #     action: ""
 prometheus:
   metrics: false
 livenessProbe:
   path: "/"
-  initialDelaySeconds: 30
+  initialDelaySeconds: 15
   timeoutSeconds: 15
   scheme: "HTTP"
   probeType: "httpGet"
 readinessProbe:
-  path: "/api/v1/health"
-  initialDelaySeconds: 30
-  timeoutSeconds: 5
+  path: "/"
+  initialDelaySeconds: 5
+  timeoutSeconds: 3
   scheme: "HTTP"
   probeType: "httpGet"
 postgresql:
@@ -84,7 +90,23 @@ podDisruptionBudget:
   # minAvailable: 1
   maxUnavailable: 1
 
-workers:
+## Configure NetworkPolicy
+## ref: https://kubernetes.io/docs/concepts/services-networking/network-policies/
+#
+networkPolicy:
+  enabled: false
+  spec:
+    podSelector:
+      matchLabels: {}
+    ingress:
+    - from:
+      - podSelector:
+          matchLabels: {}
+      - namespaceSelector:
+          matchLabels:
+            app.gitlab.com/managed_by: gitlab
+
+workers: {}
   # worker:
   #   replicaCount: 1
   #   terminationGracePeriodSeconds: 60
