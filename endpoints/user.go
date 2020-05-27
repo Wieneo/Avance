@@ -46,8 +46,8 @@ func GetProfilePicture(w http.ResponseWriter, r *http.Request) {
 	}
 
 	seperator := string(os.PathSeparator)
-	filepath, _ := os.Getwd()
-	filepath += fmt.Sprint(seperator, "userData", seperator, "avatar", seperator)
+	cwd, _ := os.Getwd()
+	filepath := fmt.Sprint(cwd, seperator, "userData", seperator, "avatar", seperator)
 	found := false
 	for _, k := range models.GetAllowedImageFormates() {
 		_, err := os.Stat(filepath + strconv.FormatInt(userID, 10) + "." + k)
@@ -57,7 +57,7 @@ func GetProfilePicture(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	if !found {
-		filepath += "default.png"
+		filepath = fmt.Sprint(cwd, seperator, "userData", seperator, "sampleData", seperator, "defaultProfilePicture.png")
 	}
 
 	http.ServeFile(w, r, filepath)
