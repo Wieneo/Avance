@@ -5,6 +5,7 @@ import vuetify from './plugins/vuetify';
 import VueRouter from 'vue-router'
 import MainApp from './components/Main/MainApp.vue'
 import Login from './components/Login/Login.vue'
+import Settings from './components/Settings/Settings.vue'
 import {Utils} from './plugins/utils'
 
 import Moment from 'vue-moment'
@@ -20,7 +21,8 @@ const router = new VueRouter({
   routes: [
     // dynamic segments start with a colon
     { path: '/', component: MainApp, name: "Main" },
-    { path: '/login', component: Login, name: "Login" }
+    { path: '/login', component: Login, name: "Login" },
+    { path: '/settings', component: Settings, name: "Settings" }
   ]
 })
 
