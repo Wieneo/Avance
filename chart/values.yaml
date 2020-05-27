@@ -110,8 +110,8 @@ workers: {}
 
 
 persistence:
-    storageClass: local-path
-    accessMode: "ReadWriteMany"
+    storageClass: nfs-client
+    accessMode: ReadWriteMany
     avatarsCapacity: 8Gi
   # worker:
   #   replicaCount: 1
