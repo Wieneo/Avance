@@ -42,7 +42,7 @@ service:
 ingress:
   tls:
     enabled: true
-    secretName: ""
+    secretName: "expose-tls"
   annotations:
     kubernetes.io/tls-acme: "true"
     kubernetes.io/ingress.class: "nginx"
@@ -62,7 +62,7 @@ livenessProbe:
   scheme: "HTTP"
   probeType: "httpGet"
 readinessProbe:
-  path: "/"
+  path: "/api/v1/health"
   initialDelaySeconds: 5
   timeoutSeconds: 3
   scheme: "HTTP"
@@ -107,6 +107,12 @@ networkPolicy:
             app.gitlab.com/managed_by: gitlab
 
 workers: {}
+
+
+persistence:
+    storageClass: nfs-client
+    accessMode: ReadWriteMany
+    avatarsCapacity: 8Gi
   # worker:
   #   replicaCount: 1
   #   terminationGracePeriodSeconds: 60

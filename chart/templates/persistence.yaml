@@ -1,0 +1,11 @@
+apiVersion: "v1"
+kind: PersistentVolumeClaim
+metadata:
+  name: "avatars"
+spec:
+ storageClassName: {{ .Values.persistence.storageClass | quote }}
+ accessModes:
+    - {{ .Values.persistence.accessMode | quote }}
+ resources:
+   requests:
+     storage: {{ .Values.persistence.avatarsCapacity | quote }}

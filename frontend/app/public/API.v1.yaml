@@ -1701,6 +1701,71 @@ paths:
       description: ''
       tags:
         - Tickets
+  '/api/v1/user/{userid}/avatar':
+    parameters:
+      - schema:
+          type: string
+        name: userid
+        in: path
+        required: true
+    get:
+      summary: Get Profile Picture of User
+      tags:
+        - Users
+      responses:
+        '200':
+          description: OK (Returns the image)
+      operationId: get-api-v1-user-userid-avatar
+      security:
+        - Session Key: []
+  /api/v1/profile/avatar:
+    get:
+      summary: Delete Profile Picutre
+      tags:
+        - Users
+      responses:
+        '200':
+          description: OK (Returns the image)
+      operationId: get-api-v1-user-userid-avatar
+      security:
+        - Session Key: []
+    post:
+      summary: Update Profile Picture
+      operationId: post-api-v1-profile-avatar
+      responses:
+        '200':
+          description: OK
+        '406':
+          description: "'avatar' property not defined / invalid filetype"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Error:
+                    type: string
+      security:
+        - Session Key: []
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                avatar:
+                  type: object
+            examples: {}
+        description: "Image via FORM Upload ('avatar' as property)"
+      description: 'Allowed filetypes: .png, .jpg, .jpeg, .gif'
+    delete:
+      summary: Delete Profile Picture
+      operationId: delete-api-v1-profile-avatar
+      responses:
+        '200':
+          description: OK
+      description: Resets the current profile picture back to the placeholder.
+      security:
+        - Session Key: []
 components:
   schemas:
     Project:
