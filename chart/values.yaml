@@ -57,7 +57,7 @@ ingress:
 prometheus:
   metrics: false
 livenessProbe:
-  path: "/"
+  path: "/api/v1/ping"
   initialDelaySeconds: 15
   timeoutSeconds: 15
   scheme: "HTTP"
