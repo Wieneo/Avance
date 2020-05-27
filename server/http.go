@@ -118,13 +118,13 @@ func authorizationMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if !canBeIgnored(r.RequestURI) {
 			if !IsAuthorized(r) {
-				/*w.WriteHeader(401)
+				w.WriteHeader(401)
 				json.NewEncoder(w).Encode(struct {
 					Error string
 				}{
-					"You are currently not authorized!\nPlease log-in first",
-				})*/
-				http.Redirect(w, r, "/login", 302)
+					"You are currently not authorized!",
+				})
+				//http.Redirect(w, r, "/login", 302)
 				return
 			}
 		}
