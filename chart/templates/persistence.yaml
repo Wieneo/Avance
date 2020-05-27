@@ -1,0 +1,13 @@
+{{- if or (eq .Release.Name "staging") (eq .Release.Name "production") }}
+apiVersion: "v1"
+kind: PersistentVolumeClaim
+metadata:
+  name: "avatars"
+spec:
+ storageClassName: {{ .Values.persistence.storageClass | quote }}
+ accessModes:
+    - {{ .Values.persistence.accessMode | quote }}
+ resources:
+   requests:
+     storage: {{ .Values.persistence.avatarsCapacity | quote }}
+{{- end -}}

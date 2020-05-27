@@ -107,6 +107,12 @@ networkPolicy:
             app.gitlab.com/managed_by: gitlab
 
 workers: {}
+
+
+persistence:
+    storageClass: local-path
+    accessMode: "ReadWriteMany"
+    avatarsCapacity: 8Gi
   # worker:
   #   replicaCount: 1
   #   terminationGracePeriodSeconds: 60

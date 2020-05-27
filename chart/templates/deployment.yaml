@@ -42,12 +42,23 @@ spec:
         tier: "{{ .Values.application.tier }}"
         release: {{ .Release.Name }}
     spec:
+      {{- if or (eq .Release.Name "staging") (eq .Release.Name "production") }}
+      volumes:
+      - name: avatar-ud
+        persistentVolumeClaim:
+          claimName: avatars
+      {{- end }}
       imagePullSecrets:
 {{ toYaml .Values.image.secrets | indent 10 }}
       containers:
       - name: {{ .Chart.Name }}
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
+        {{- if or (eq .Release.Name "staging") (eq .Release.Name "production") }}
+        volumeMounts:
+        - name: avatar-ud
+          mountPath: /app/userData/avatar
+        {{- end }}
         {{- if .Values.application.secretName }}
         envFrom:
         - secretRef:
