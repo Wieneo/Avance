@@ -1,5 +1,5 @@
 {{- if and (.Values.service.enabled) (eq .Values.application.track "stable") -}}
-apiVersion: extensions/v1beta1
+apiVersion: {{ default "extensions/v1beta1" .Values.deploymentApiVersion }}
 kind: Ingress
 metadata:
   name: {{ template "fullname" . }}
