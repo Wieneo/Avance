@@ -64,9 +64,10 @@ livenessProbe:
   probeType: "httpGet"
 readinessProbe:
   path: "/api/v1/health"
-  initialDelaySeconds: 30
-  timeoutSeconds: 5
+  initialDelaySeconds: 5
+  timeoutSeconds: 3
   scheme: "HTTP"
+  probeType: "httpGet"
 postgresql:
   enabled: true
   managed: false
