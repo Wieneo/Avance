@@ -1,4 +1,3 @@
-{{- if or (eq .Release.Name "staging") (eq .Release.Name "production") }}
 apiVersion: "v1"
 kind: PersistentVolumeClaim
 metadata:
@@ -10,4 +9,3 @@ spec:
  resources:
    requests:
      storage: {{ .Values.persistence.avatarsCapacity | quote }}
-{{- end -}}
