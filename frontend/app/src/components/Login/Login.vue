@@ -74,9 +74,7 @@ export default Vue.extend({
         if (this.Username.length > 0 && this.Password.length > 0){
           this.Loading = true
           const Result = await Vue.prototype.$PostRequest("/api/v1/login", {Username: this.Username, Password: this.Password})
-          if (Result.Error != undefined){
-            Vue.prototype.$NotifyError(Result.Error)
-          }else{
+          if (Result.Error == undefined){
             Vue.prototype.$SetCookie('session', Result.SessionKey, 3600)
             window.location.href = "/"
           }
