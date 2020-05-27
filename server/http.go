@@ -108,6 +108,7 @@ func loggingMiddleware(next http.Handler) http.Handler {
 
 //sitesForUnauthorized contains all URLs which should be accessible without being logged in
 var sitesForUnauthorized = []string{
+	"/$",
 	"/login$",
 	"/js/*",
 	"/css/*",
