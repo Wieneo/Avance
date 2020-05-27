@@ -91,7 +91,7 @@ func CreateProject(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if len(req.Name) == 0 {
+	if utils.IsEmpty(req.Name) {
 		w.WriteHeader(400)
 		dev.ReportUserError(w, "Name can't be empty")
 		return

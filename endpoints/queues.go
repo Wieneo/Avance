@@ -54,7 +54,7 @@ func CreateQueue(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if len(req.Name) == 0 {
+	if utils.IsEmpty(req.Name) {
 		w.WriteHeader(406)
 		dev.ReportUserError(w, "Name can't be empty")
 		return
@@ -197,7 +197,7 @@ func PatchQueue(w http.ResponseWriter, r *http.Request) {
 		somethingChanged := false
 
 		//Now check if value was specified
-		if len(req.Name) > 0 {
+		if !utils.IsEmpty(req.Name) && queue.Name != req.Name {
 			queue.Name = req.Name
 			somethingChanged = true
 		}
