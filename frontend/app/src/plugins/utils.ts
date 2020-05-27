@@ -80,7 +80,7 @@ export function Utils<AxiosPlugOptions>(Vue: typeof _Vue): void {
 
         return resp
     }
-    Vue.prototype.$Request = async (Method: string, URL: string, Data: any) => {
+    Vue.prototype.$Request = async (Method: string, URL: string, Data: any, Silent = false) => {
         const resp = await new Promise((resolve) => {
             const req = new XMLHttpRequest();
             req.open(Method, URL)
@@ -89,7 +89,9 @@ export function Utils<AxiosPlugOptions>(Vue: typeof _Vue): void {
                     try{
                         const obj = JSON.parse(req.response)
                         if (obj.Error != undefined){
-                            Vue.prototype.$NotifyError(obj.Error)
+                            if (!Silent){
+                                Vue.prototype.$NotifyError(obj.Error)
+                            }
 
                             if (obj.Error === "You are currently not authorized!"){
                                 //Session timed out
