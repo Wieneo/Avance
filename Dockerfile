@@ -12,6 +12,7 @@ FROM alpine
 WORKDIR /app
 COPY --from=backend /backend/tixter-app /app/
 COPY --from=backend /backend/db/migrations /app/db/migrations
+COPY --from=backend /backend/userData/sampleData /backend/userData/sampleData
 COPY --from=frontend /frontend /app/frontend/app
 EXPOSE 8000
 CMD [ "/app/tixter-app", "" ]
