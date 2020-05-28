@@ -68,7 +68,7 @@
       this.Projects = (await Vue.prototype.$GetRequest("/api/v1/projects"))
       //ToDo: Get to last project
 
-      if(this.$route.query.project == undefined && this.Projects.length > 0){
+      if(this.$route.name == "Main" && this.$route.query.project == undefined && this.Projects.length > 0){
         this.$router.push({ path: '/', query: { project: this.Projects[0].ID.toString() } })
       }
     },

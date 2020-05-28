@@ -35,7 +35,7 @@
         nav
         dense
         >
-        <v-list-item link @click="$emit('ShowProjects')" title="Projects">
+        <v-list-item link @click="showProjects = true" title="Projects">
             <v-list-item-icon>
             <v-icon>mdi-folder</v-icon>
             </v-list-item-icon>
@@ -74,12 +74,24 @@
                 </v-card-actions>
             </v-card>
         </v-dialog>
+        <template v-slot:append>
+            <v-list>
+                <v-list-item link title="Settings" @click="GoToSettings">
+                    <v-list-item-icon>
+                        <v-icon>mdi-cog</v-icon>
+                    </v-list-item-icon>
+                    <v-list-item-title>Settings</v-list-item-title>
+                </v-list-item>
+            </v-list>
+        </template>
+        <ProjectsContainer v-bind:showProjects="showProjects" v-on:closeProjects="showProjects = false"/>
     </v-navigation-drawer>
 </template>
 
 
 <script lang="ts">
   import Vue from 'vue'
+  import ProjectsContainer from '../misc/ProjectsContainer.vue';
 
   interface User {
     ID:          number;
@@ -110,9 +122,13 @@
 
   export default Vue.extend({
     name: 'Drawer',
+    components:{
+        ProjectsContainer
+    },
 
     data: function(){
         return {
+            showProjects: false,
             Loading: false,
             UserInfo,
             ChangedProfileInfo,
@@ -160,6 +176,9 @@
                 this.ShowEditMenu = false
             }
             this.Loading = false
+        },
+        GoToSettings: function(){
+            this.$router.push({ path: '/settings', query: {} })
         }
     }
   })

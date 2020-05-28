@@ -6,7 +6,6 @@
 
             <!-- Provides the application the proper gutter -->
             <v-container fluid style="max-height: calc(100vh - 64px); overflow-y: auto">
-            <ProjectsContainer v-bind:showProjects="showProjects" v-on:closeProjects="showProjects = false"/>
             <v-row no-gutters>
                 <v-col lg="3">
                 <TicketList style="max-height: calc(100vh - 88px); overflow-y: auto"/>
@@ -38,7 +37,6 @@
 import Vue from 'vue'
 import Drawer from './Drawer.vue';
 import AppBar from './AppBar.vue';
-import ProjectsContainer from '../misc/ProjectsContainer.vue';
 import TicketList from './TicketList.vue';
 import TicketDisplay from './TicketDisplay.vue';
 import ActionDisplay from './ActionDisplay.vue';
@@ -50,7 +48,6 @@ export default Vue.extend({
     components:{
         Drawer,
         AppBar,
-        ProjectsContainer,
         TicketList,
         TicketDisplay,
         ActionDisplay,
@@ -58,7 +55,6 @@ export default Vue.extend({
     },
     data: function(){
         return {
-            showProjects: false,
             CurrentTicket: {},
             CurrentTicketID: 0,
             CurrentProjectID: 0,
