@@ -103,20 +103,20 @@
   }
   const UserInfo: User = {
       ID: 0,
-      Username: "Loading",
-      Firstname: "Please",
-      Lastname: "Wait",
-      Mail: "Loading",
+      Username: "",
+      Firstname: "",
+      Lastname: "",
+      Mail: "",
       Password: ""
   }
 
   //Initialize seperately so we don't create a reference
   const ChangedProfileInfo: User = {
       ID: 0,
-      Username: "Loading",
-      Firstname: "Please",
-      Lastname: "Wait",
-      Mail: "Loading",
+      Username: "",
+      Firstname: "",
+      Lastname: "",
+      Mail: "",
       Password: ""
   }
 
