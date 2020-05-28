@@ -7,7 +7,7 @@ import (
 
 //GetVisibleProjects returns all projects visible to the user
 func GetVisibleProjects(User models.User) ([]models.Project, error) {
-	Perms, err := combinePermissions(User)
+	Perms, err := CombinePermissions(User)
 	if err != nil {
 		return make([]models.Project, 0), err
 	}
@@ -37,7 +37,7 @@ func GetVisibleProjects(User models.User) ([]models.Project, error) {
 
 //GetVisibleQueuesFromProject returns all queues visible for the given user
 func GetVisibleQueuesFromProject(User models.User, ProjectID int64) ([]models.Queue, error) {
-	Perms, err := combinePermissions(User)
+	Perms, err := CombinePermissions(User)
 	if err != nil {
 		return make([]models.Queue, 0), err
 	}

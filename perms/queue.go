@@ -4,7 +4,7 @@ import "gitlab.gnaucke.dev/tixter/tixter-app/v2/models"
 
 //GetPermissionsToQueue returns the QueuePermissions struct regarding the given user and project
 func GetPermissionsToQueue(User models.User, Queue models.Queue) (models.Permissions, *models.QueuePermission, error) {
-	perms, err := combinePermissions(User)
+	perms, err := CombinePermissions(User)
 	if err != nil {
 		return models.Permissions{}, &models.QueuePermission{}, err
 	}

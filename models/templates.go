@@ -44,8 +44,10 @@ type Queue struct {
 
 //Permissions should store all permissions regarding a user or a group
 type Permissions struct {
-	Admin    bool
-	AccessTo struct {
+	Admin           bool
+	CanCreateUsers  bool
+	CanCreateGroups bool
+	AccessTo        struct {
 		Projects []ProjectPermission
 		Queues   []QueuePermission
 	}
