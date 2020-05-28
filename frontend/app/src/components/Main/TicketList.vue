@@ -14,7 +14,7 @@
                         @click="DisplayTicket(ticket.ID)">
                         <v-list-item-avatar>
                             <v-img v-if="ticket.OwnerID.Valid" :src="getUserAvatarLink(ticket.Owner.ID)"></v-img>
-                            <v-img v-else src=""></v-img>
+                            <v-img v-else src="" style="background-color: #d0d0d0;"></v-img>
                         </v-list-item-avatar>
 
                         <v-list-item-content>
