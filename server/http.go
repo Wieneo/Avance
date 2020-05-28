@@ -41,6 +41,11 @@ func HTTPInit() {
 	router.HandleFunc("/api/v1/user/{[0-9]{*}}/avatar", endpoints.GetProfilePicture).Methods("GET")
 	router.HandleFunc("/api/v1/profile", endpoints.PatchProfile).Methods("PATCH")
 
+	router.HandleFunc("/api/v1/users", endpoints.GetUsers).Methods("GET")
+	router.HandleFunc("/api/v1/users", endpoints.CreateUser).Methods("POST")
+	router.HandleFunc("/api/v1/groups", endpoints.GetGroups).Methods("GET")
+	router.HandleFunc("/api/v1/groups", endpoints.CreateGroup).Methods("POST")
+
 	//PROJECT APIs
 	router.HandleFunc("/api/v1/projects", endpoints.GetProjects).Methods("GET")
 	router.HandleFunc("/api/v1/projects", endpoints.CreateProject).Methods("POST")
