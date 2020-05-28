@@ -332,6 +332,27 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 
 //GetUsers returns all groups
 func GetUsers(w http.ResponseWriter, r *http.Request) {
+	user, err := utils.GetUser(r, w)
+	if err != nil {
+		w.WriteHeader(500)
+		dev.ReportError(err, w, err.Error())
+		return
+	}
+
+	perms, err := perms.CombinePermissions(user)
+	if err != nil {
+		w.WriteHeader(500)
+		dev.ReportError(err, w, err.Error())
+		return
+	}
+
+	//All Perms that allow access to all users on instance
+	if !perms.Admin && !perms.CanChangePermissionsGlobal && !perms.CanModifyUsers {
+		w.WriteHeader(403)
+		dev.ReportUserError(w, "You are not allowed to view all users")
+		return
+	}
+
 	users, err := db.GetALLUsers()
 	if err != nil {
 		w.WriteHeader(500)
