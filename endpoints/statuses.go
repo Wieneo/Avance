@@ -67,7 +67,7 @@ func CreateStatus(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if len(req.Name) == 0 || len(req.DisplayColor) == 0 {
+	if utils.IsEmpty(req.Name) || utils.IsEmpty(req.DisplayColor) {
 		w.WriteHeader(406)
 		dev.ReportUserError(w, "Name / DisplayColor can't be empty")
 		return
@@ -209,12 +209,12 @@ func PatchStatus(w http.ResponseWriter, r *http.Request) {
 		somethingChanged := false
 
 		//Now check if value was specified
-		if len(req.Name) > 0 {
+		if !utils.IsEmpty(req.Name) && status.Name != req.Name {
 			status.Name = req.Name
 			somethingChanged = true
 		}
 
-		if len(req.DisplayColor) > 0 {
+		if !utils.IsEmpty(req.DisplayColor) && status.DisplayColor != req.DisplayColor {
 			status.DisplayColor = req.DisplayColor
 			somethingChanged = true
 		}

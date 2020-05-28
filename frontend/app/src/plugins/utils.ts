@@ -30,16 +30,15 @@ export function Utils<AxiosPlugOptions>(Vue: typeof _Vue): void {
             req.open("GET", URL)
             req.onreadystatechange = function(evt){
                 if (req.readyState == 4){
-                    //Maybe Session is timed out again
-                    const allSplits = req.responseURL.split("/")
-                    if (allSplits[allSplits.length - 1] == "login"){
-                        window.location.href = "/login"
-                    }
-
                     try{
                         const obj = JSON.parse(req.response)
                         if (obj.Error != undefined){
                             Vue.prototype.$NotifyError(obj.Error)
+
+                            if (obj.Error === "You are currently not authorized!"){
+                                //Session timed out
+                                window.location.href = "/login"
+                            }
                         }
                         resolve(obj)
                     }catch(Exception){
@@ -59,16 +58,15 @@ export function Utils<AxiosPlugOptions>(Vue: typeof _Vue): void {
             req.open("POST", URL)
             req.onreadystatechange = function(evt){
                 if (req.readyState == 4){
-                    //Maybe Session is timed out again
-                    const allSplits = req.responseURL.split("/")
-                    if (allSplits[allSplits.length - 1] == "login"){
-                        window.location.href = "/login"
-                    }
-
                     try{
                         const obj = JSON.parse(req.response)
                         if (obj.Error != undefined){
                             Vue.prototype.$NotifyError(obj.Error)
+
+                            if (obj.Error === "You are currently not authorized!"){
+                                //Session timed out
+                                window.location.href = "/login"
+                            }
                         }
                         resolve(obj)
                     }catch(Exception){
@@ -82,22 +80,23 @@ export function Utils<AxiosPlugOptions>(Vue: typeof _Vue): void {
 
         return resp
     }
-    Vue.prototype.$Request = async (Method: string, URL: string, Data: any) => {
+    Vue.prototype.$Request = async (Method: string, URL: string, Data: any, Silent = false) => {
         const resp = await new Promise((resolve) => {
             const req = new XMLHttpRequest();
             req.open(Method, URL)
             req.onreadystatechange = function(evt){
                 if (req.readyState == 4){
-                    //Maybe Session is timed out again
-                    const allSplits = req.responseURL.split("/")
-                    if (allSplits[allSplits.length - 1] == "login"){
-                        window.location.href = "/login"
-                    }
-
                     try{
                         const obj = JSON.parse(req.response)
                         if (obj.Error != undefined){
-                            Vue.prototype.$NotifyError(obj.Error)
+                            if (!Silent){
+                                Vue.prototype.$NotifyError(obj.Error)
+                            }
+
+                            if (obj.Error === "You are currently not authorized!"){
+                                //Session timed out
+                                window.location.href = "/login"
+                            }
                         }
                         resolve(obj)
                     }catch(Exception){

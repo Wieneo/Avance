@@ -74,6 +74,10 @@ func migrate() {
 				ticket2, _ := CreateTicket("Create User", "Please create a user for my new staff member!", qid, false, userid, severityid, statusid, false, "")
 				AddRelation(ticket1, ticket2, models.ParentOf)
 				AddRelation(ticket2, ticket1, models.ReferencedBy)
+				AddAction(ticket1, models.Comment, "Comment was added", "This is the first comment on this new instance!", userid)
+				AddAction(ticket1, models.Answer, "Answer was added", "This is the first answer on this new instance!", userid)
+				AddAction(ticket2, models.Answer, "Answer was added", "This is the second Answer on this new instance!<br>Even with <i>formatting</i>", userid)
+
 			}
 			return
 		}
