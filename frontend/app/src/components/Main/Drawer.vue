@@ -196,7 +196,7 @@
             await Vue.prototype.$Request("DELETE", "/api/v1/profile/avatar", null)
             const imgElement: HTMLCollectionOf<HTMLElement> = document.getElementsByClassName('v-image__image') as HTMLCollectionOf<HTMLElement>
             for (let i = 0 ; i < imgElement.length; i++){
-                if (imgElement.item(i).style.backgroundImage.includes("avatar")) {
+                if (imgElement[i].style.backgroundImage.includes("avatar")) {
                     imgElement[i].style.backgroundImage = (imgElement[i].style.backgroundImage.substr(0, imgElement[i].style.backgroundImage.length - 2)) + "?" + (new Date()) + `")`
                 }
             }
@@ -214,14 +214,15 @@
                 return
             }
             const element: HTMLIFrameElement = document.getElementById("submitDeflector") as HTMLIFrameElement
-            if (element.contentDocument.documentElement.innerText.length > 0) {
-                const JSONData: JsonError = JSON.parse(element.contentDocument.documentElement.innerText)
+            const elementDocument: Document = element.contentDocument as Document
+            if (elementDocument.documentElement.innerText.length > 0) {
+                const JSONData: JsonError = JSON.parse(elementDocument.documentElement.innerText)
                 Vue.prototype.$NotifyError(JSONData.Error)
             } else {
                 Vue.prototype.$NotifySuccess("Avatar Updated")
                 const imgElement: HTMLCollectionOf<HTMLElement> = document.getElementsByClassName('v-image__image') as HTMLCollectionOf<HTMLElement>
                 for (let i = 0 ; i < imgElement.length; i++){
-                    if (imgElement.item(i).style.backgroundImage.includes("avatar")) {
+                    if (imgElement[i].style.backgroundImage.includes("avatar")) {
                         imgElement[i].style.backgroundImage = (imgElement[i].style.backgroundImage.substr(0, imgElement[i].style.backgroundImage.length - 2)) + "?" + (new Date()) + `")`
                     }
                 }
