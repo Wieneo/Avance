@@ -7,7 +7,7 @@
             <template v-slot:activator="{ on }">
                     <v-list-item class="px-2">
                     <v-list-item-avatar>
-                        <v-img class="ProfilePicture" src="https://randomuser.me/api/portraits/women/85.jpg" v-on="on" @click="ShowUserMenu = true" style="cursor: pointer;" ></v-img>
+                        <v-img class="ProfilePicture" src="/api/v1/profile/avatar" v-on="on" @click="ShowUserMenu = true" style="cursor: pointer;" ></v-img>
                     </v-list-item-avatar>
                 </v-list-item>
             </template>
@@ -56,8 +56,17 @@
                 <v-card-text>
                     <div style="text-align: center;">
                         <v-list-item-avatar style="width: 128px; height: 128px;">
-                            <v-img class="ProfilePicture" src="https://randomuser.me/api/portraits/women/85.jpg" style="cursor: pointer; " ></v-img>
+                            <v-img class="ProfilePicture" src="/api/v1/profile/avatar" style="cursor: pointer; " >
+                                <div class="EditProfilePicture" @click="uploadProfilePicture" >
+                                    EDIT
+                                    <form action="/api/v1/profile/avatar" method="POST" target="submitDeflector" enctype="multipart/form-data">
+                                        <input type="file" style="display: none;" onchange="this.form.submit()" name="avatar" id="uploader">
+                                    </form>
+                                </div>
+                            </v-img>
                         </v-list-item-avatar>
+                        <br>
+                        <v-btn title="delete profile picture" color="orange darken-1" icon @click="deleteProfilePicture"><v-icon>mdi-delete-outline</v-icon></v-btn>
                     </div>
                     <v-text-field label="Username" :rules="rules" hide-details="auto" v-model="ChangedProfileInfo.Username"></v-text-field>
                     <v-text-field style="margin-top: 20px;" label="Firstname" :rules="rules" hide-details="auto" v-model="ChangedProfileInfo.Firstname"></v-text-field>
@@ -74,6 +83,7 @@
                 </v-card-actions>
             </v-card>
         </v-dialog>
+        <iframe name="submitDeflector" style="display: none;" id="submitDeflector" @load="HandleUploadFinish"> </iframe>
     </v-navigation-drawer>
 </template>
 
@@ -160,6 +170,20 @@
                 this.ShowEditMenu = false
             }
             this.Loading = false
+        },
+
+        deleteProfilePicture: async function(){
+            await Vue.prototype.$Request("DELETE", "/api/v1/profile/avatar", null)
+        },
+
+        uploadProfilePicture: async function(){
+            const element: HTMLElement = document.getElementById("uploader") as HTMLElement
+            console.log(element.click)
+            element.click()
+        },
+
+        HandleUploadFinish: async function(){
+            console.log("OH NE")
         }
     }
   })
