@@ -19,6 +19,27 @@ type groupWebRequest struct {
 
 //GetGroups returns all groups
 func GetGroups(w http.ResponseWriter, r *http.Request) {
+	user, err := utils.GetUser(r, w)
+	if err != nil {
+		w.WriteHeader(500)
+		dev.ReportError(err, w, err.Error())
+		return
+	}
+
+	perms, err := perms.CombinePermissions(user)
+	if err != nil {
+		w.WriteHeader(500)
+		dev.ReportError(err, w, err.Error())
+		return
+	}
+
+	//All Perms that allow access to all users on instance
+	if !perms.Admin && !perms.CanChangePermissionsGlobal && !perms.CanModifyGroups {
+		w.WriteHeader(403)
+		dev.ReportUserError(w, "You are not allowed to view all groups")
+		return
+	}
+
 	groups, err := db.GetALLGroups()
 	if err != nil {
 		w.WriteHeader(500)
