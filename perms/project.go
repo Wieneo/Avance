@@ -64,7 +64,7 @@ func CheckAccessToProject(next http.Handler) http.Handler {
 
 //GetPermissionsToProject returns the ProjectPermission struct regarding the given user and project
 func GetPermissionsToProject(User models.User, Project models.Project) (models.Permissions, *models.ProjectPermission, error) {
-	perms, err := combinePermissions(User)
+	perms, err := CombinePermissions(User)
 	if err != nil {
 		return models.Permissions{}, &models.ProjectPermission{}, err
 	}

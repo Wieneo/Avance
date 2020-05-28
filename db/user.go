@@ -3,6 +3,7 @@ package db
 import (
 	"encoding/json"
 
+	"gitlab.gnaucke.dev/tixter/tixter-app/v2/dev"
 	"gitlab.gnaucke.dev/tixter/tixter-app/v2/models"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -38,6 +39,24 @@ func GetUser(UserID int64) (models.User, error) {
 	}
 
 	return Requested, nil
+}
+
+//GetALLUsers returns all users from the database. This should be used with caution as it can cause many cpu cycles
+func GetALLUsers() ([]models.User, error) {
+	users := make([]models.User, 0)
+	rows, err := Connection.Query(`SELECT "ID", "Username", "Firstname", "Lastname", "Mail" FROM "Users"`)
+	if err != nil {
+		dev.LogError(err, "Error occured while creating user: "+err.Error())
+		return make([]models.User, 0), err
+	}
+
+	for rows.Next() {
+		var singleUser models.User
+		rows.Scan(&singleUser.ID, &singleUser.Username, &singleUser.Firstname, &singleUser.Lastname, &singleUser.Mail)
+		users = append(users, singleUser)
+	}
+
+	return users, nil
 }
 
 //PatchUser patches the given user. It DOES NOT update permissions and the password

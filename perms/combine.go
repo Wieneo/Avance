@@ -6,7 +6,7 @@ import (
 )
 
 //CombinePermissions combines the permission from the user and the assigned groups to produce the highest permission set
-func combinePermissions(User models.User) (models.Permissions, error) {
+func CombinePermissions(User models.User) (models.Permissions, error) {
 	var PermissionSet models.Permissions
 	PermissionSet = User.Permissions
 
@@ -20,6 +20,14 @@ func combinePermissions(User models.User) (models.Permissions, error) {
 		if k.Permissions.Admin {
 			PermissionSet.Admin = true
 			break
+		}
+
+		if k.Permissions.CanCreateUsers {
+			PermissionSet.CanCreateUsers = true
+		}
+
+		if k.Permissions.CanCreateGroups {
+			PermissionSet.CanCreateGroups = true
 		}
 
 		for _, k := range k.Permissions.AccessTo.Projects {

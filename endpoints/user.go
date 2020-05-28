@@ -12,6 +12,7 @@ import (
 
 	"gitlab.gnaucke.dev/tixter/tixter-app/v2/db"
 	"gitlab.gnaucke.dev/tixter/tixter-app/v2/models"
+	"gitlab.gnaucke.dev/tixter/tixter-app/v2/perms"
 	"gitlab.gnaucke.dev/tixter/tixter-app/v2/utils"
 	"golang.org/x/crypto/bcrypt"
 
@@ -217,4 +218,114 @@ func PatchProfile(w http.ResponseWriter, r *http.Request) {
 	}
 
 	json.NewEncoder(w).Encode(user)
+}
+
+type userWebRequest struct {
+	Username, Mail, Firstname, Lastname, Password string
+}
+
+//CreateUser updates profile information
+func CreateUser(w http.ResponseWriter, r *http.Request) {
+	user, err := utils.GetUser(r, w)
+	if err != nil {
+		w.WriteHeader(500)
+		dev.ReportError(err, w, err.Error())
+		return
+	}
+
+	perms, err := perms.CombinePermissions(user)
+	if err != nil {
+		w.WriteHeader(500)
+		dev.ReportError(err, w, err.Error())
+		return
+	}
+
+	if !perms.CanCreateUsers && !perms.Admin {
+		w.WriteHeader(403)
+		dev.ReportUserError(w, "You are not allowed create users")
+		return
+	}
+
+	var req userWebRequest
+
+	rawBytes, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		w.WriteHeader(500)
+		dev.ReportError(err, w, err.Error())
+		return
+	}
+
+	err = json.Unmarshal(rawBytes, &req)
+	if err != nil {
+		w.WriteHeader(400)
+		dev.ReportUserError(w, "Request is malformed: "+err.Error())
+		return
+	}
+
+	if utils.IsEmpty(req.Password) {
+		w.WriteHeader(406)
+		dev.ReportUserError(w, "Password can't be empty for new user")
+		return
+	}
+
+	if utils.IsEmpty(req.Username) {
+		w.WriteHeader(406)
+		dev.ReportUserError(w, "Username can't be empty")
+		return
+	}
+
+	if utils.IsEmpty(req.Firstname) {
+		w.WriteHeader(406)
+		dev.ReportUserError(w, "Firstname can't be empty")
+		return
+	}
+
+	if utils.IsEmpty(req.Lastname) {
+		w.WriteHeader(406)
+		dev.ReportUserError(w, "Lastname can't be empty")
+		return
+	}
+
+	if utils.IsEmpty(req.Mail) {
+		w.WriteHeader(406)
+		dev.ReportUserError(w, "Mail can't be empty")
+		return
+	}
+
+	users, err := db.GetALLUsers()
+	if err != nil {
+		w.WriteHeader(500)
+		dev.ReportError(err, w, err.Error())
+		return
+	}
+
+	for _, k := range users {
+		if strings.ToLower(k.Username) == strings.ToLower(req.Username) {
+			w.WriteHeader(406)
+			dev.ReportUserError(w, "User with that username already exists")
+			return
+		}
+
+		if strings.ToLower(k.Mail) == strings.ToLower(req.Mail) {
+			w.WriteHeader(406)
+			dev.ReportUserError(w, "User with that E-Mail already exists")
+			return
+		}
+	}
+
+	var newUser models.User = models.User{
+		Username:  req.Username,
+		Firstname: req.Firstname,
+		Lastname:  req.Lastname,
+		Mail:      req.Mail,
+	}
+
+	newUser.ID, err = db.CreateUser(newUser, req.Password)
+	if err != nil {
+		w.WriteHeader(500)
+		dev.ReportError(err, w, err.Error())
+		return
+	}
+
+	json.NewEncoder(w).Encode(newUser)
 }
