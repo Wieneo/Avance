@@ -46,7 +46,7 @@ func GetALLUsers() ([]models.User, error) {
 	users := make([]models.User, 0)
 	rows, err := Connection.Query(`SELECT "ID", "Username", "Firstname", "Lastname", "Mail" FROM "Users"`)
 	if err != nil {
-		dev.LogError(err, "Error occured while creating user: "+err.Error())
+		dev.LogError(err, "Error occured while getting users: "+err.Error())
 		return make([]models.User, 0), err
 	}
 

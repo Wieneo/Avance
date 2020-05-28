@@ -329,3 +329,15 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 
 	json.NewEncoder(w).Encode(newUser)
 }
+
+//GetUsers returns all groups
+func GetUsers(w http.ResponseWriter, r *http.Request) {
+	users, err := db.GetALLUsers()
+	if err != nil {
+		w.WriteHeader(500)
+		dev.ReportError(err, w, err.Error())
+		return
+	}
+
+	json.NewEncoder(w).Encode(users)
+}
