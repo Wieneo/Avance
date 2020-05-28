@@ -13,7 +13,7 @@
                         :key="ticket.ID"
                         @click="DisplayTicket(ticket.ID)">
                         <v-list-item-avatar>
-                            <v-img v-if="ticket.OwnerID.Valid" :src="'/api/v1/user/' + ticket.Owner.ID + '/avatar'"></v-img>
+                            <v-img v-if="ticket.OwnerID.Valid" :src="getUserAvatarLink(ticket.Owner.ID)"></v-img>
                             <v-img v-else src=""></v-img>
                         </v-list-item-avatar>
 
@@ -101,6 +101,9 @@
         for (let index = 0; index < array.length; index++) {
           await callback(array[index], index, array);
         }
+      },
+      getUserAvatarLink(UserID: number){
+        return '/api/v1/user/' + UserID + '/avatar?' + performance.now()
       }
     }
   })

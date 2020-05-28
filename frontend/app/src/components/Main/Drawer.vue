@@ -7,7 +7,7 @@
             <template v-slot:activator="{ on }">
                     <v-list-item class="px-2">
                     <v-list-item-avatar>
-                        <v-img class="ProfilePicture" src="/api/v1/profile/avatar" v-on="on" @click="ShowUserMenu = true" style="cursor: pointer;" ></v-img>
+                        <v-img class="ProfilePicture" :src="getProfilePictureLink" v-on="on" @click="ShowUserMenu = true" style="cursor: pointer;" ></v-img>
                     </v-list-item-avatar>
                 </v-list-item>
             </template>
@@ -56,7 +56,7 @@
                 <v-card-text>
                     <div style="text-align: center;">
                         <v-list-item-avatar style="width: 128px; height: 128px;">
-                            <v-img class="ProfilePicture" src="/api/v1/profile/avatar" style="cursor: pointer; " >
+                            <v-img class="ProfilePicture" :src="getProfilePictureLink" style="cursor: pointer; " >
                                 <div class="EditProfilePicture" @click="uploadProfilePicture" >
                                     EDIT
                                     <form action="/api/v1/profile/avatar" method="POST" target="submitDeflector" enctype="multipart/form-data">
@@ -188,6 +188,12 @@
         Object.assign(this.UserInfo, data);
         Object.assign(this.ChangedProfileInfo, data);
     },
+     computed: {
+        // a computed getter
+        getProfilePictureLink: function () {
+            return '/api/v1/profile/avatar?' + performance.now()
+        }
+     },
     methods:{
         SaveChanges: async function(){
             if (this.NewPassword1.trim().length > 0){
@@ -242,7 +248,10 @@
                 const imgElement: HTMLCollectionOf<HTMLElement> = document.getElementsByClassName('v-image__image') as HTMLCollectionOf<HTMLElement>
                 for (let i = 0 ; i < imgElement.length; i++){
                     if (imgElement[i].style.backgroundImage.includes("avatar")) {
-                        imgElement[i].style.backgroundImage = (imgElement[i].style.backgroundImage.substr(0, imgElement[i].style.backgroundImage.length - 2)) + "?" + (new Date()) + `")`
+                        if (imgElement[i].style.backgroundImage.includes("?")){
+                            imgElement[i].style.backgroundImage = imgElement[i].style.backgroundImage.split("?")[0] + `")`
+                        }
+                        imgElement[i].style.backgroundImage = (imgElement[i].style.backgroundImage.substr(0, imgElement[i].style.backgroundImage.length - 2)) + "?" + performance.now() + `")`
                     }
                 }
             }
