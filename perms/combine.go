@@ -30,6 +30,18 @@ func CombinePermissions(User models.User) (models.Permissions, error) {
 			PermissionSet.CanCreateGroups = true
 		}
 
+		if k.Permissions.CanModifyUsers {
+			PermissionSet.CanModifyUsers = true
+		}
+
+		if k.Permissions.CanModifyGroups {
+			PermissionSet.CanModifyGroups = true
+		}
+
+		if k.Permissions.CanChangePermissionsGlobal {
+			PermissionSet.CanChangePermissionsGlobal = true
+		}
+
 		for _, k := range k.Permissions.AccessTo.Projects {
 			if found, project := containsProjectPermission(k, PermissionSet.AccessTo.Projects); !found {
 				PermissionSet.AccessTo.Projects = append(PermissionSet.AccessTo.Projects, k)
