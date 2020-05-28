@@ -7,7 +7,7 @@
             <template v-slot:activator="{ on }">
                     <v-list-item class="px-2">
                     <v-list-item-avatar>
-                        <v-img class="ProfilePicture" src="https://randomuser.me/api/portraits/women/85.jpg" v-on="on" @click="ShowUserMenu = true" style="cursor: pointer;" ></v-img>
+                        <v-img class="ProfilePicture" src="/api/v1/profile/avatar" v-on="on" @click="ShowUserMenu = true" style="cursor: pointer;" ></v-img>
                     </v-list-item-avatar>
                 </v-list-item>
             </template>
@@ -56,8 +56,17 @@
                 <v-card-text>
                     <div style="text-align: center;">
                         <v-list-item-avatar style="width: 128px; height: 128px;">
-                            <v-img class="ProfilePicture" src="https://randomuser.me/api/portraits/women/85.jpg" style="cursor: pointer; " ></v-img>
+                            <v-img class="ProfilePicture" src="/api/v1/profile/avatar" style="cursor: pointer; " >
+                                <div class="EditProfilePicture" @click="uploadProfilePicture" >
+                                    EDIT
+                                    <form action="/api/v1/profile/avatar" method="POST" target="submitDeflector" enctype="multipart/form-data">
+                                        <input type="file" style="display: none;" onchange="this.form.submit()" name="avatar" id="uploader">
+                                    </form>
+                                </div>
+                            </v-img>
                         </v-list-item-avatar>
+                        <br>
+                        <v-btn title="delete profile picture" color="orange darken-1" icon @click="ShowAvatarDeleteConfirmation = true;"><v-icon>mdi-delete-outline</v-icon></v-btn>
                     </div>
                     <v-text-field label="Username" :rules="rules" hide-details="auto" v-model="ChangedProfileInfo.Username"></v-text-field>
                     <v-text-field style="margin-top: 20px;" label="Firstname" :rules="rules" hide-details="auto" v-model="ChangedProfileInfo.Firstname"></v-text-field>
@@ -85,6 +94,21 @@
             </v-list>
         </template>
         <ProjectsContainer v-bind:showProjects="showProjects" v-on:closeProjects="showProjects = false"/>
+
+        <v-dialog v-model="ShowAvatarDeleteConfirmation" persistent max-width="380">
+            <v-card>
+                <v-card-title class="headline">Are you sure?</v-card-title>
+                <v-card-text>Do you really want to remove your Profile Picture?<br>This change will take effect immediately!</v-card-text>
+                <v-card-actions>
+                    <v-spacer></v-spacer>
+                    <v-btn color="orange darken-1" text @click="ShowAvatarDeleteConfirmation = false">ABORT</v-btn>
+                    <v-btn color="red darken-1" text @click="deleteProfilePicture">DELETE</v-btn>
+                </v-card-actions>
+
+            </v-card>
+        </v-dialog>
+
+        <iframe name="submitDeflector" style="display: none;" id="submitDeflector" @load="HandleUploadFinish"> </iframe>
     </v-navigation-drawer>
 </template>
 
@@ -100,6 +124,10 @@
     Firstname:   string;
     Lastname:    string;
     Password:    string;
+  }
+
+  interface JsonError {
+      Error:    string;
   }
   const UserInfo: User = {
       ID: 0,
@@ -136,9 +164,11 @@
             NewPassword2: "",
             ShowUserMenu: false,
             ShowEditMenu: false,
+            ShowAvatarDeleteConfirmation: false,
             rules: [
                 value => !!value || 'Required.',
             ] as ((value: any) => true | "Required.")[],
+            IFrameLoaded: false,
         }
     },
     watch:{
@@ -179,6 +209,43 @@
         },
         GoToSettings: function(){
             this.$router.push({ path: '/settings', query: {} })
+        },
+
+        deleteProfilePicture: async function(){
+            await Vue.prototype.$Request("DELETE", "/api/v1/profile/avatar", null)
+            const imgElement: HTMLCollectionOf<HTMLElement> = document.getElementsByClassName('v-image__image') as HTMLCollectionOf<HTMLElement>
+            for (let i = 0 ; i < imgElement.length; i++){
+                if (imgElement[i].style.backgroundImage.includes("avatar")) {
+                    imgElement[i].style.backgroundImage = (imgElement[i].style.backgroundImage.substr(0, imgElement[i].style.backgroundImage.length - 2)) + "?" + (new Date()) + `")`
+                }
+            }
+            this.ShowAvatarDeleteConfirmation = false
+        },
+
+        uploadProfilePicture: async function(){
+            const element: HTMLElement = document.getElementById("uploader") as HTMLElement
+            element.click()
+        },
+
+        HandleUploadFinish: async function(){
+            if (this.IFrameLoaded == false) {
+                this.IFrameLoaded = true
+                return
+            }
+            const element: HTMLIFrameElement = document.getElementById("submitDeflector") as HTMLIFrameElement
+            const elementDocument: Document = element.contentDocument as Document
+            if (elementDocument.documentElement.innerText.length > 0) {
+                const JSONData: JsonError = JSON.parse(elementDocument.documentElement.innerText)
+                Vue.prototype.$NotifyError(JSONData.Error)
+            } else {
+                Vue.prototype.$NotifySuccess("Avatar Updated")
+                const imgElement: HTMLCollectionOf<HTMLElement> = document.getElementsByClassName('v-image__image') as HTMLCollectionOf<HTMLElement>
+                for (let i = 0 ; i < imgElement.length; i++){
+                    if (imgElement[i].style.backgroundImage.includes("avatar")) {
+                        imgElement[i].style.backgroundImage = (imgElement[i].style.backgroundImage.substr(0, imgElement[i].style.backgroundImage.length - 2)) + "?" + (new Date()) + `")`
+                    }
+                }
+            }
         }
     }
   })
