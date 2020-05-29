@@ -41,6 +41,8 @@ func HTTPInit() {
 	router.HandleFunc("/api/v1/user/{[0-9]{*}}/avatar", endpoints.GetProfilePicture).Methods("GET")
 	router.HandleFunc("/api/v1/profile", endpoints.PatchProfile).Methods("PATCH")
 
+	router.HandleFunc("/api/v1/logo", endpoints.GetLogo).Methods("GET")
+
 	router.HandleFunc("/api/v1/users", endpoints.GetUsers).Methods("GET")
 	router.HandleFunc("/api/v1/users", endpoints.CreateUser).Methods("POST")
 	router.HandleFunc("/api/v1/groups", endpoints.GetGroups).Methods("GET")
@@ -90,6 +92,7 @@ func HTTPInit() {
 	//Needs to be at the bottom!
 	router.HandleFunc("/", endpoints.ServeAppFrontend).Methods("GET")
 	router.HandleFunc("/login", endpoints.ServeAppFrontend).Methods("GET")
+	router.HandleFunc("/favicon.ico", endpoints.GetFavicon).Methods("GET")
 	router.PathPrefix("/").HandlerFunc(endpoints.ServeAssets).Methods("GET")
 
 	srv := &http.Server{
@@ -116,10 +119,12 @@ var sitesForUnauthorized = []string{
 	"/$",
 	"/login$",
 	"/js/*",
+	"/favicon.ico",
 	"/css/*",
 	"/api/v1/session",
 	"/api/v1/health",
 	"/api/v1/ping",
+	"/api/v1/logo",
 }
 
 //authorizationMiddleware gets called at every request to check if user is authenticated
