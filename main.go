@@ -1,6 +1,8 @@
 package main
 
 import (
+	"os"
+
 	"gitlab.gnaucke.dev/tixter/tixter-app/v2/config"
 	"gitlab.gnaucke.dev/tixter/tixter-app/v2/db"
 	"gitlab.gnaucke.dev/tixter/tixter-app/v2/dev"
@@ -12,10 +14,35 @@ import (
 	_ "github.com/lib/pq"
 )
 
+const usageMessage = "Please specify if the container should start as App (--app) or as Worker (--worker)"
+
 func main() {
-	dev.LogInfo("Starting App Version", utils.MainVersion, utils.Channel)
-	config.LoadConfig()
-	db.Init()
-	redis.Init()
-	server.HTTPInit()
+	if len(os.Args) == 2 {
+		switch os.Args[1] {
+		case "--app":
+			{
+				dev.LogInfo("Starting App Version", utils.AppVersion, utils.AppChannel)
+				config.LoadConfig()
+				db.Init()
+				redis.Init()
+				server.HTTPInit()
+				break
+			}
+		case "--worker":
+			{
+				dev.LogInfo("Starting Worker Version", utils.WorkerVersion, utils.WorkerChannel)
+				config.LoadConfig()
+				db.Init()
+				break
+			}
+		default:
+			{
+				dev.LogInfo(usageMessage)
+				break
+			}
+		}
+	} else {
+		dev.LogInfo(usageMessage)
+	}
+
 }
