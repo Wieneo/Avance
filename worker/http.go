@@ -1,4 +1,4 @@
-package http
+package worker
 
 import (
 	//Imported to be used with database/sql
