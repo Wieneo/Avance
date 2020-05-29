@@ -9,6 +9,7 @@ import (
 	"gitlab.gnaucke.dev/tixter/tixter-app/v2/redis"
 	"gitlab.gnaucke.dev/tixter/tixter-app/v2/server"
 	"gitlab.gnaucke.dev/tixter/tixter-app/v2/utils"
+	"gitlab.gnaucke.dev/tixter/tixter-app/v2/worker"
 
 	//Imported to be used with database/sql
 	_ "github.com/lib/pq"
@@ -33,6 +34,7 @@ func main() {
 				dev.LogInfo("Starting Worker Version", utils.WorkerVersion, utils.WorkerChannel)
 				config.LoadConfig()
 				db.Init()
+				worker.StartServing()
 				break
 			}
 		default:
