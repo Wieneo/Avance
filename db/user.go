@@ -13,7 +13,7 @@ func SearchUser(Name string) (int64, bool, error) {
 	var ID int64
 
 	//Ignoring casing
-	err := Connection.QueryRow(`SELECT "ID" FROM "Users" WHERE UPPER("Username") = UPPER($1)`, Name).Scan(&ID)
+	err := Connection.QueryRow(`SELECT "ID" FROM "Users" WHERE UPPER("Username") = UPPER($1) AND "Active" = true`, Name).Scan(&ID)
 	if err != nil {
 		if err.Error() == "sql: no rows in result set" {
 			return ID, false, nil
@@ -29,7 +29,7 @@ func SearchUser(Name string) (int64, bool, error) {
 func GetUser(UserID int64) (models.User, error) {
 	var Requested models.User
 	var RawPermissions string
-	err := Connection.QueryRow(`SELECT "ID","Username","Mail", "Permissions", "Firstname", "Lastname" FROM "Users" WHERE "ID" = $1`, UserID).Scan(&Requested.ID, &Requested.Username, &Requested.Mail, &RawPermissions, &Requested.Firstname, &Requested.Lastname)
+	err := Connection.QueryRow(`SELECT "ID","Username","Mail", "Permissions", "Firstname", "Lastname" FROM "Users" WHERE "ID" = $1 AND "Active" = true`, UserID).Scan(&Requested.ID, &Requested.Username, &Requested.Mail, &RawPermissions, &Requested.Firstname, &Requested.Lastname)
 	if err != nil {
 		return Requested, err
 	}

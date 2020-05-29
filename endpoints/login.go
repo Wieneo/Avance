@@ -34,7 +34,7 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//Select ID + Password from Database
-	if rows, err := db.Connection.Query(`SELECT "ID","Password" FROM "Users" WHERE "Username" = $1`, loginRequest.Username); err != nil {
+	if rows, err := db.Connection.Query(`SELECT "ID","Password" FROM "Users" WHERE "Username" = $1 AND "Active" = true`, loginRequest.Username); err != nil {
 		w.WriteHeader(500)
 		dev.ReportError(err, w, "An error happened on our side :( Please try again later!")
 		dev.LogError(err, err.Error())
