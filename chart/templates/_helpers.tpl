@@ -26,8 +26,8 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 {{- end -}}
 
 {{- define "trackableworkername" -}}
-{{- $trackableName := printf "%s-%s" (include "appname" .) .Values.application.track -}}
-{{- $trackableName | "worker" | trimSuffix "-stable" | trunc 63 | trimSuffix "-" -}}
+{{- $trackableName := printf "%s-%s-%s" (include "appname" .) .Values.worker.name .Values.application.track -}}
+{{- $trackableName | trimSuffix "-stable" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
 {{/*
