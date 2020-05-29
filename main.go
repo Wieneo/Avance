@@ -34,6 +34,7 @@ func main() {
 				dev.LogInfo("Starting Worker Version", utils.WorkerVersion, utils.WorkerChannel)
 				config.LoadConfig()
 				db.Init()
+				worker.StartQueueService()
 				worker.StartServing()
 				break
 			}
