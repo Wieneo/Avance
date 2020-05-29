@@ -8,7 +8,7 @@ CREATE TABLE public."Tasks"
     "Status" integer NOT NULL DEFAULT 0,
     "Type" integer NOT NULL,
     CONSTRAINT "Tasks_pkey" PRIMARY KEY ("ID")
-)
+);
 
 CREATE OR REPLACE FUNCTION public."GetTask"(
 	)
