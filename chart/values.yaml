@@ -123,6 +123,7 @@ worker:
     timeoutSeconds: 3
     scheme: "HTTP"
     probeType: "httpGet"
+  replicaCount: 2
 
 persistence:
     storageClass: nfs-client
