@@ -22,7 +22,7 @@ spec:
       tier: "{{ .Values.application.tier }}"
       release: {{ .Release.Name }}
 {{- end }}
-  replicas: {{ .Values.replicaCount }}
+  replicas: {{ .Values.worker.replicaCount }}
 {{- if .Values.strategyType }}
   strategy:
     type: {{ .Values.strategyType | quote }}
