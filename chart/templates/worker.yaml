@@ -2,7 +2,7 @@
 apiVersion: {{ default "extensions/v1beta1" .Values.deploymentApiVersion }}
 kind: Deployment
 metadata:
-  name: {{ template "trackableappname" . }}
+  name: {{ template "trackableworkername" . }}
   annotations:
     {{ if .Values.gitlab.app }}app.gitlab.com/app: {{ .Values.gitlab.app | quote }}{{ end }}
     {{ if .Values.gitlab.env }}app.gitlab.com/env: {{ .Values.gitlab.env | quote }}{{ end }}
@@ -42,19 +42,13 @@ spec:
         tier: "{{ .Values.application.tier }}"
         release: {{ .Release.Name }}
     spec:
-      volumes:
-      - name: avatar-ud
-        persistentVolumeClaim:
-          claimName: avatars
       imagePullSecrets:
 {{ toYaml .Values.image.secrets | indent 10 }}
       containers:
       - name: {{ .Chart.Name }}
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
-        volumeMounts:
-        - name: avatar-ud
-          mountPath: /app/userData/avatar
+        args: ["--worker"]
         {{- if .Values.application.secretName }}
         envFrom:
         - secretRef:
@@ -88,37 +82,37 @@ spec:
         - name: "{{ .Values.service.name }}"
           containerPort: {{ .Values.service.internalPort }}
         livenessProbe:
-{{- if eq .Values.livenessProbe.probeType "httpGet" }}
+{{- if eq .Values.worker.livenessProbe.probeType "httpGet" }}
           httpGet:
-            path: {{ .Values.livenessProbe.path }}
-            scheme: {{ .Values.livenessProbe.scheme }}
+            path: {{ .Values.worker.livenessProbe.path }}
+            scheme: {{ .Values.worker.livenessProbe.scheme }}
             port: {{ .Values.service.internalPort }}
-{{- else if eq .Values.livenessProbe.probeType "tcpSocket" }}
+{{- else if eq .Values.worker.livenessProbe.probeType "tcpSocket" }}
           tcpSocket:
             port: {{ .Values.service.internalPort }}
-{{- else if eq .Values.livenessProbe.probeType "exec" }}
+{{- else if eq .Values.worker.livenessProbe.probeType "exec" }}
           exec:
             command:
-{{ toYaml .Values.livenessProbe.command | indent 14 }}
+{{ toYaml .Values.worker.livenessProbe.command | indent 14 }}
 {{- end }}
-          initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
-          timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds }}
+          initialDelaySeconds: {{ .Values.worker.livenessProbe.initialDelaySeconds }}
+          timeoutSeconds: {{ .Values.worker.livenessProbe.timeoutSeconds }}
         readinessProbe:
-{{- if eq .Values.readinessProbe.probeType "httpGet" }}
+{{- if eq .Values.worker.readinessProbe.probeType "httpGet" }}
           httpGet:
-            path: {{ .Values.readinessProbe.path }}
-            scheme: {{ .Values.readinessProbe.scheme }}
+            path: {{ .Values.worker.readinessProbe.path }}
+            scheme: {{ .Values.worker.readinessProbe.scheme }}
             port: {{ .Values.service.internalPort }}
-{{- else if eq .Values.readinessProbe.probeType "tcpSocket" }}
+{{- else if eq .Values.worker.readinessProbe.probeType "tcpSocket" }}
           tcpSocket:
             port: {{ .Values.service.internalPort }}
-{{- else if eq .Values.readinessProbe.probeType "exec" }}
+{{- else if eq .Values.worker.readinessProbe.probeType "exec" }}
           exec:
             command:
-{{ toYaml .Values.readinessProbe.command | indent 14 }}
+{{ toYaml .Values.worker.readinessProbe.command | indent 14 }}
 {{- end }}
-          initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
-          timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}
+          initialDelaySeconds: {{ .Values.worker.readinessProbe.initialDelaySeconds }}
+          timeoutSeconds: {{ .Values.worker.readinessProbe.timeoutSeconds }}
         resources:
 {{ toYaml .Values.resources | indent 12 }}
 {{- end -}}
