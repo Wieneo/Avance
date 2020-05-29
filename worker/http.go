@@ -9,6 +9,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"gitlab.gnaucke.dev/tixter/tixter-app/v2/config"
+	"gitlab.gnaucke.dev/tixter/tixter-app/v2/db"
 	"gitlab.gnaucke.dev/tixter/tixter-app/v2/dev"
 )
 
@@ -39,10 +40,29 @@ func loggingMiddleware(next http.Handler) http.Handler {
 	})
 }
 
+//getInstanceHealth returns the current state of the instance
+//This is mainly used to check if requests function
+//Output should look something like this: {"DB":true,"Redis":true,"Errors":[]}
 func getInstanceHealth(w http.ResponseWriter, r *http.Request) {
+	errors := make([]string, 0)
+
+	var dummyDBVersion string
+
+	dBAlive := true
+	err := db.Connection.QueryRow(`SELECT "Schema" FROM "Version"`).Scan(&dummyDBVersion)
+	if err != nil {
+		dBAlive = false
+		errors = append(errors, err.Error())
+	}
+	if !dBAlive {
+		w.WriteHeader(500)
+	}
+
 	json.NewEncoder(w).Encode(struct {
-		Status string
+		DB     bool
+		Errors []string
 	}{
-		"Worker is alive!",
+		dBAlive,
+		errors,
 	})
 }
