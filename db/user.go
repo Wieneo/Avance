@@ -41,10 +41,26 @@ func GetUser(UserID int64) (models.User, error) {
 	return Requested, nil
 }
 
+//DumbGetUser returns the user struct from the database ignoring the "Active" field
+func DumbGetUser(UserID int64) (models.User, error) {
+	var Requested models.User
+	var RawPermissions string
+	err := Connection.QueryRow(`SELECT "ID","Username","Mail", "Permissions", "Firstname", "Lastname" FROM "Users" WHERE "ID" = $1`, UserID).Scan(&Requested.ID, &Requested.Username, &Requested.Mail, &RawPermissions, &Requested.Firstname, &Requested.Lastname)
+	if err != nil {
+		return Requested, err
+	}
+
+	if err := json.Unmarshal([]byte(RawPermissions), &Requested.Permissions); err != nil {
+		return Requested, err
+	}
+
+	return Requested, nil
+}
+
 //GetALLUsers returns all users from the database. This should be used with caution as it can cause many cpu cycles
 func GetALLUsers() ([]models.User, error) {
 	users := make([]models.User, 0)
-	rows, err := Connection.Query(`SELECT "ID", "Username", "Firstname", "Lastname", "Mail" FROM "Users"`)
+	rows, err := Connection.Query(`SELECT "ID", "Username", "Firstname", "Lastname", "Mail" FROM "Users" WHERE "Active" = true`)
 	if err != nil {
 		dev.LogError(err, "Error occured while getting users: "+err.Error())
 		return make([]models.User, 0), err
