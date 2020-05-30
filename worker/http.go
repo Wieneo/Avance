@@ -49,7 +49,7 @@ func getInstanceHealth(w http.ResponseWriter, r *http.Request) {
 	var dummyDBVersion string
 
 	dBAlive := true
-	err := db.Connection.QueryRow(`SELECT "Schema" FROM "Version"`).Scan(&dummyDBVersion)
+	err := db.Connection.QueryRow(`SELECT "Name" FROM "Patches" LIMIT 1`).Scan(&dummyDBVersion)
 	if err != nil {
 		dBAlive = false
 		errors = append(errors, err.Error())
