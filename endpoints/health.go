@@ -40,7 +40,7 @@ func GetInstanceHealth(w http.ResponseWriter, r *http.Request) {
 		Redis   bool
 		Errors  []string
 	}{
-		fmt.Sprint(utils.MainVersion, " ", utils.Channel),
+		fmt.Sprint(utils.AppVersion, " ", utils.AppChannel),
 		dBAlive,
 		redisAlive,
 		errors,

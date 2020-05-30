@@ -270,9 +270,9 @@ func migrate() {
 					//Little fix to maybe catch some BEGIN; END; statements which break the transaction
 					//If BEGIN; / END; is specified in the SQL file, a single target file can fail and others be still applied.
 					//Thats not good because next start the whole migration will be applied again (even with the already applied target)
-					rawString := strings.ReplaceAll(strings.ReplaceAll(string(rawBytes), "BEGIN;", ""), "END;", "")
+					//rawString := strings.ReplaceAll(strings.ReplaceAll(string(rawBytes), "BEGIN;", ""), "END;", "")
 
-					sqlstring += rawString
+					sqlstring += string(rawBytes)
 				}
 
 				sqlstring += "END;"

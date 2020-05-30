@@ -114,3 +114,25 @@ func CreateUser(User models.User, Password string) (int64, error) {
 
 	return newID, nil
 }
+
+//GetTicketsOfUser returns all tickets where the user is the owner
+func GetTicketsOfUser(UserID int64) ([]models.Ticket, error) {
+	tickets := make([]models.Ticket, 0)
+	rows, err := Connection.Query(`SELECT "ID" FROM "Tickets" WHERE "Owner" = $1`, UserID)
+	if err != nil {
+		return tickets, err
+	}
+
+	for rows.Next() {
+		var id int64
+		rows.Scan(&id)
+		ticket, _, err := GetTicket(id, false)
+		if err != nil {
+			dev.LogError(err, "Couldn't get ticket: "+err.Error())
+		}
+
+		tickets = append(tickets, ticket)
+	}
+
+	return tickets, err
+}
