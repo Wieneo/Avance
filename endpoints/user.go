@@ -362,3 +362,64 @@ func GetUsers(w http.ResponseWriter, r *http.Request) {
 
 	json.NewEncoder(w).Encode(users)
 }
+
+//DeactivateUser sets the deactivated flag for the specified user
+func DeactivateUser(w http.ResponseWriter, r *http.Request) {
+	userid, _ := strconv.ParseInt(strings.Split(r.URL.String(), "/")[4], 10, 64)
+	req, found, err := db.GetUser(userid)
+
+	if !found {
+		w.WriteHeader(404)
+		dev.ReportUserError(w, "Requested User wasn't found")
+		return
+	}
+
+	user, err := utils.GetUser(r, w)
+	if err != nil {
+		w.WriteHeader(500)
+		dev.ReportError(err, w, err.Error())
+		return
+	}
+
+	accessGranted := false
+
+	//Only need perms if user isn't deleting himself
+	if user.ID != req.ID {
+		perms, err := perms.CombinePermissions(user)
+		if err != nil {
+			w.WriteHeader(500)
+			dev.ReportError(err, w, err.Error())
+			return
+		}
+
+		accessGranted = perms.CanDeleteUsers
+	} else {
+		accessGranted = true
+	}
+
+	if !accessGranted {
+		w.WriteHeader(403)
+		dev.ReportUserError(w, "You are not allowed to delete users")
+		return
+	}
+
+	if err := db.DeactivateUser(req.ID); err != nil {
+		w.WriteHeader(500)
+		dev.ReportError(err, w, err.Error())
+		return
+	}
+
+	data, _ := json.Marshal(req)
+	taskid, err := db.CreateTask(models.DeleteUser, string(data))
+	if err != nil {
+		w.WriteHeader(500)
+		dev.ReportError(err, w, err.Error())
+		return
+	}
+
+	json.NewEncoder(w).Encode(struct {
+		TaskID int64
+	}{
+		taskid,
+	})
+}

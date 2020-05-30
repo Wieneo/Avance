@@ -39,7 +39,7 @@ func GetUser(r *http.Request, w http.ResponseWriter) (models.User, error) {
 		return models.User{}, err
 	}
 
-	user, err := db.GetUser(userid)
+	user, _, err := db.GetUser(userid)
 	if err != nil {
 		w.WriteHeader(500)
 		dev.ReportError(err, w, err.Error())

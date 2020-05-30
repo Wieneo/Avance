@@ -48,8 +48,10 @@ type Permissions struct {
 	Admin                      bool
 	CanCreateUsers             bool
 	CanModifyUsers             bool
+	CanDeleteUsers             bool
 	CanCreateGroups            bool
 	CanModifyGroups            bool
+	CanDeleteGroups            bool
 	CanChangePermissionsGlobal bool
 	AccessTo                   struct {
 		Projects []ProjectPermission

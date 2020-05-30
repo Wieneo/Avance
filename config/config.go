@@ -37,6 +37,9 @@ type SampleConfig struct {
 		DSN         string
 		Environment string
 	}
+	Worker struct {
+		Listen bool
+	}
 }
 
 //CurrentConfig stores the currently used config
@@ -127,6 +130,12 @@ func LoadConfig() {
 		if len(CurrentConfig.Sentry.Environment) == 0 {
 			CurrentConfig.Sentry.Environment = os.Getenv("GITLAB_ENVIRONMENT_NAME")
 			dev.LogInfo("Used GITLAB_ENVIRONMENT_NAME as Sentry Environment")
+		}
+
+		CurrentConfig.Worker.Listen, Error = strconv.ParseBool(os.Getenv("TIX_Worker_Listen"))
+		if Error != nil {
+			dev.LogWarn("Worker_Listen is not a boolean! Using true as default")
+			CurrentConfig.Worker.Listen = true
 		}
 
 	} else {

@@ -1,6 +1,8 @@
 package db
 
 import (
+	"time"
+
 	"gitlab.gnaucke.dev/tixter/tixter-app/v2/models"
 )
 
@@ -10,6 +12,13 @@ func ReserveTask() (int64, error) {
 	err := Connection.QueryRow(`SELECT public."GetTask"();`).Scan(&newID)
 
 	return newID, err
+}
+
+//CreateTask queues a task
+func CreateTask(Type models.WorkerTaskType, Data string) (int64, error) {
+	var taskID int64
+	err := Connection.QueryRow(`INSERT INTO "Tasks" ("Task", "QueuedAt", "Status", "Type") VALUES ($1, $2, $3, $4) RETURNING "ID"`, Data, time.Now(), models.Idle, Type).Scan(&taskID)
+	return taskID, err
 }
 
 //GetTask returns the task to a give ID

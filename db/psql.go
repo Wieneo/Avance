@@ -238,8 +238,12 @@ func migrate() {
 	//MAIN APPLY
 	for len(neededPatches) > 0 {
 		patchesProcessed := 0
-		for i, k := range neededPatches {
 
+		patchesForThisRun := make([]Migration, 0)
+		for _, k := range neededPatches {
+			patchesForThisRun = append(patchesForThisRun, k)
+		}
+		for i, k := range patchesForThisRun {
 			//Check if dependency of migartion already was applied
 			baseExists := false
 			//{{BASE}} is a placeholder. Basically means the patch has no dependency and can installed right after the base image was imported
@@ -287,10 +291,10 @@ func migrate() {
 
 				appliedPatches = append(appliedPatches, k.Name)
 
-				//Removed this migration from neededPAtches
-				if len(neededPatches) >= i+2 {
+				//Removed this migration from neededPatches
+				if len(neededPatches) > 1 {
 					neededPatches = append(neededPatches[:i], neededPatches[i+1:]...)
-				} else {
+				} else if len(neededPatches) == 1 {
 					//No preceeding item left
 					neededPatches = make([]Migration, 0)
 				}

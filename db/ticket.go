@@ -103,7 +103,7 @@ func GetTicketsInQueue(QueueID int64, ShowInvisible bool) ([]models.Ticket, erro
 		rows.Scan(&ticket.ID, &ticket.Title, &ticket.Description, &ticket.QueueID, &ticket.OwnerID, &ticket.SeverityID, &ticket.StatusID, &ticket.CreatedAt, &ticket.LastModified, &ticket.StalledUntil, &ticket.Meta)
 		ticket.Queue, _, err = GetQueueUNSAFE(ticket.QueueID)
 		if ticket.OwnerID.Valid {
-			ticket.Owner, err = GetUser(ticket.OwnerID.Int64)
+			ticket.Owner, _, err = GetUser(ticket.OwnerID.Int64)
 		}
 		ticket.Severity, _, err = GetSeverityUNSAFE(ticket.SeverityID)
 		ticket.Status, _, err = GetStatusUNSAFE(ticket.StatusID)

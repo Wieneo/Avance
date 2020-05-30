@@ -38,6 +38,14 @@ func CombinePermissions(User models.User) (models.Permissions, error) {
 			PermissionSet.CanModifyGroups = true
 		}
 
+		if k.Permissions.CanDeleteUsers {
+			PermissionSet.CanDeleteUsers = true
+		}
+
+		if k.Permissions.CanDeleteGroups {
+			PermissionSet.CanDeleteGroups = true
+		}
+
 		if k.Permissions.CanChangePermissionsGlobal {
 			PermissionSet.CanChangePermissionsGlobal = true
 		}

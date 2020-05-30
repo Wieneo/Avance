@@ -19,7 +19,7 @@ func GetActions(TicketID int64) ([]models.Action, error) {
 		var rawUserID int64
 		rows.Scan(&singleAction.ID, &singleAction.Type, &singleAction.Title, &singleAction.Content, &singleAction.IssuedAt, &rawUserID)
 
-		user, err := GetUser(rawUserID)
+		user, _, err := GetUser(rawUserID)
 		if err != nil {
 			return make([]models.Action, 0), err
 		}

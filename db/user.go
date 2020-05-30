@@ -26,19 +26,23 @@ func SearchUser(Name string) (int64, bool, error) {
 }
 
 //GetUser returns the user struct from the database
-func GetUser(UserID int64) (models.User, error) {
+func GetUser(UserID int64) (models.User, bool, error) {
 	var Requested models.User
 	var RawPermissions string
 	err := Connection.QueryRow(`SELECT "ID","Username","Mail", "Permissions", "Firstname", "Lastname" FROM "Users" WHERE "ID" = $1 AND "Active" = true`, UserID).Scan(&Requested.ID, &Requested.Username, &Requested.Mail, &RawPermissions, &Requested.Firstname, &Requested.Lastname)
 	if err != nil {
-		return Requested, err
+		if err.Error() == "sql: no rows in result set" {
+			return Requested, false, nil
+		}
+
+		return Requested, true, err
 	}
 
 	if err := json.Unmarshal([]byte(RawPermissions), &Requested.Permissions); err != nil {
-		return Requested, err
+		return Requested, true, err
 	}
 
-	return Requested, nil
+	return Requested, true, nil
 }
 
 //DumbGetUser returns the user struct from the database ignoring the "Active" field
@@ -78,6 +82,12 @@ func GetALLUsers() ([]models.User, error) {
 //PatchUser patches the given user. It DOES NOT update permissions and the password
 func PatchUser(User models.User) error {
 	_, err := Connection.Exec(`UPDATE "Users" SET "Username" = $1, "Firstname" = $2, "Lastname" = $3, "Mail" = $4 WHERE "ID" = $5`, User.Username, User.Firstname, User.Lastname, User.Mail, User.ID)
+	return err
+}
+
+//DeactivateUser deactivates the user in the database
+func DeactivateUser(UserID int64) error {
+	_, err := Connection.Exec(`UPDATE "Users" SET "Active" = false WHERE "ID" = $1`, UserID)
 	return err
 }
 
