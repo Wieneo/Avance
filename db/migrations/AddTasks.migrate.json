@@ -1,0 +1,5 @@
+{
+    "Name": "AddTasks",
+    "Targets": ["tasks.sql"],
+    "After": "{{BASE}}"
+}
