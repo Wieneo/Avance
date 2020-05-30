@@ -2,10 +2,11 @@ package db
 
 import (
 	"database/sql"
+	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
-	"strconv"
 	"strings"
 	"time"
 
@@ -16,6 +17,13 @@ import (
 
 //Connection stores the current connection to postgres
 var Connection *sql.DB
+
+//Migration stores a single database migration
+type Migration struct {
+	Name    string
+	Targets []string
+	After   string
+}
 
 //Init is called after config is read to connect to postgres
 func Init() {
@@ -42,13 +50,24 @@ func Init() {
 func migrate() {
 	dev.LogInfo("Preparing database to be migrated...")
 
-	//Get current verison from "Version" table
-	var currentVersion int
-	rows, err := Connection.Query(`SELECT "Schema" FROM "Version"`)
+	rows, err := Connection.Query(`SELECT "Name" FROM "Patches"`)
 	if err != nil {
 		dev.LogError(err, err.Error())
 		//If table doesn't exist
 		if strings.Contains(err.Error(), "does not exist") {
+			//Fix for old instances
+			if _, err := Connection.Query(`SELECT "Schema" FROM "Version"`); err == nil {
+				dev.LogInfo("Old Database System detected -> Migrating")
+
+				//Create needed patches table
+				if _, err := Connection.Exec(`CREATE TABLE public."Patches" ("Name" text NOT NULL);`); err != nil {
+					dev.LogFatal(err, "Couldn't migrate to new migration system! "+err.Error())
+				} else {
+					migrate()
+					return
+				}
+			}
+
 			deploy()
 			migrate()
 
@@ -84,10 +103,11 @@ func migrate() {
 
 		dev.LogFatal(err, err.Error())
 	}
+	/*LEGACY!
+
 	if !rows.Next() {
 		dev.LogFatal(err, "Version Table is empty! Something went horribly wrong... Check your database.")
 	}
-
 	//Scan returns error
 	if rows.Scan(&currentVersion) != nil {
 		dev.LogFatal(err, "Version Table is malformed! Something went horribly wrong... Check your database.")
@@ -138,6 +158,131 @@ func migrate() {
 		}
 	} else {
 		dev.LogInfo("No migrations needed!")
+	}
+	*/
+	appliedPatches := make([]string, 0)
+	localPatches := make([]Migration, 0)
+	for rows.Next() {
+		var patch string
+		rows.Scan(&patch)
+		appliedPatches = append(appliedPatches, patch)
+	}
+
+	cwd, _ := os.Getwd()
+	files, err := ioutil.ReadDir(fmt.Sprint(cwd, "/db/migrations/"))
+	if err != nil {
+		dev.LogFatal(err, "Couldn't find/read migrations: ", err.Error())
+	}
+
+	for _, k := range files {
+		if strings.HasSuffix(k.Name(), ".migrate.json") {
+			var migration Migration
+			rawBytes, err := ioutil.ReadFile(fmt.Sprint(cwd, "/db/migrations/", k.Name()))
+			if err != nil {
+				dev.LogFatal(err, "Couldn't read migration file: "+err.Error())
+			}
+
+			if json.Unmarshal(rawBytes, &migration) != nil {
+				dev.LogFatal(err, err.Error())
+			}
+
+			if len(migration.Name) == 0 || len(migration.Targets) == 0 || len(migration.After) == 0 {
+				dev.LogWarn("Skipping empty migration: " + migration.Name + "(" + k.Name() + ")")
+				continue
+			}
+
+			found := false
+			for _, patch := range localPatches {
+				if patch.Name == migration.Name {
+					found = true
+				}
+			}
+
+			if found {
+				dev.LogFatal(errors.New("Duplicate Migration"), "Duplicate Migartion-Name: "+migration.Name)
+			}
+
+			localPatches = append(localPatches, migration)
+		}
+	}
+
+	dev.LogInfo(fmt.Sprintf("Database has %d Patches applied. Local Patches available: %d", len(appliedPatches), len(localPatches)))
+
+	neededPatches := make([]Migration, 0)
+	for _, k := range localPatches {
+		found := false
+		for _, db := range appliedPatches {
+			if k.Name == db {
+				found = true
+			}
+		}
+
+		if !found {
+			neededPatches = append(neededPatches, k)
+		}
+	}
+
+	dev.LogInfo(fmt.Sprintf("%d Migration(s) need to be applied", len(neededPatches)))
+
+	for len(neededPatches) > 0 {
+		patchesProcessed := 0
+		for i, k := range neededPatches {
+			baseExists := false
+			if k.After != "{{BASE}}" {
+				for _, db := range appliedPatches {
+					if db == k.After {
+						baseExists = true
+					}
+				}
+			} else {
+				baseExists = true
+			}
+
+			if baseExists {
+				dev.LogInfo("Applying " + k.Name)
+				sqlstring := "BEGIN;"
+				for _, k := range k.Targets {
+					rawBytes, err := ioutil.ReadFile(cwd + "/db/migrations/" + k)
+
+					if err != nil {
+						dev.LogFatal(err, "Couldn't read target:", err.Error())
+					}
+
+					rawString := strings.ReplaceAll(strings.ReplaceAll(string(rawBytes), "BEGIN;", ""), "END;", "")
+
+					sqlstring += rawString
+				}
+
+				sqlstring += "END;"
+				if _, err = Connection.Exec(sqlstring); err != nil {
+					dev.LogFatal(err, "Couldn't apply migration:", err.Error())
+				}
+
+				if _, err := Connection.Exec(`INSERT INTO "Patches" VALUES ($1)`, k.Name); err != nil {
+					dev.LogFatal(err, "Couldn't apply migration:", err.Error())
+				}
+
+				appliedPatches = append(appliedPatches, k.Name)
+
+				if len(neededPatches) >= i+2 {
+					neededPatches = append(neededPatches[:i], neededPatches[i+1:]...)
+				} else {
+					//No preceeding item left
+					neededPatches = make([]Migration, 0)
+				}
+				patchesProcessed++
+			}
+		}
+
+		if patchesProcessed == 0 {
+			errorMessage := "No patches could be applied! Maybe you have a dependency loop / missing dependency?\nThe following patches remain to be applied: "
+			for _, k := range neededPatches {
+				rawBytes, _ := json.Marshal(k)
+				errorMessage += "\n" + string(rawBytes)
+			}
+
+			dev.LogFatal(errors.New("Patches couldn't be applied"), errorMessage)
+		}
 	}
 }
 
