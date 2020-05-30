@@ -1,0 +1,5 @@
+{
+    "Name": "AddFieldActiveToUser",
+    "Targets": ["useractivation.sql"],
+    "After": "{{BASE}}"
+}
