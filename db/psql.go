@@ -189,8 +189,8 @@ func migrate() {
 				dev.LogFatal(err, "Couldn't read migration file: "+err.Error())
 			}
 
-			if json.Unmarshal(rawBytes, &migration) != nil {
-				dev.LogFatal(err, err.Error())
+			if err := json.Unmarshal(rawBytes, &migration); err != nil {
+				dev.LogFatal(err, "Error in migration "+k.Name()+": "+err.Error())
 			}
 
 			//Name, Targets and After shouldn't be empty
