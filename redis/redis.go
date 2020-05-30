@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"math/rand"
+	"net/http"
 	"strconv"
 	"strings"
 	"time"
@@ -65,17 +66,43 @@ func SessionValid(Session string) bool {
 //CreateSession returns a session key for the given userid
 //SessionKey will be saved as follows: session_USERID_UUID
 //This is used to be able to delete all sessions of a user
-func CreateSession(UserID int) (string, error) {
+func CreateSession(UserID int64) (string, error) {
 	Session := uuid.New()
-	if err := connection.Set("session_"+strconv.Itoa(UserID)+"_"+Session.String(), strconv.Itoa(UserID), time.Hour).Err(); err != nil {
+	if err := connection.Set("session_"+strconv.FormatInt(UserID, 10)+"_"+Session.String(), strconv.FormatInt(UserID, 10), time.Hour).Err(); err != nil {
 		return "", err
 	}
-	return "session_" + strconv.Itoa(UserID) + "_" + Session.String(), nil
+	return "session_" + strconv.FormatInt(UserID, 10) + "_" + Session.String(), nil
+}
+
+//DestroyAllSessions removes all session keys from redis for the specific user
+func DestroyAllSessions(UserID int64) error {
+	keys, err := connection.Keys("session_" + strconv.FormatInt(UserID, 10) + "_*").Result()
+	if err != nil {
+		return err
+	}
+
+	for _, k := range keys {
+		if err := connection.Del(k).Err(); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 //DestroySession removes the session key from redis
-func DestroySession(SessionKey string) error {
-	return connection.Del(SessionKey).Err()
+func DestroySession(r *http.Request) error {
+	session := r.Header.Get("Authorization")
+	if len(session) == 0 {
+		//Check if maybe cookie was set
+		keks, err := r.Cookie("session")
+		if err != nil {
+			return err
+		}
+
+		session = keks.Value
+	}
+
+	return connection.Del(session).Err()
 }
 
 //SessionToUserID return the user id stores as value to the session key

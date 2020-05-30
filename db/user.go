@@ -13,7 +13,7 @@ func SearchUser(Name string) (int64, bool, error) {
 	var ID int64
 
 	//Ignoring casing
-	err := Connection.QueryRow(`SELECT "ID" FROM "Users" WHERE UPPER("Username") = UPPER($1)`, Name).Scan(&ID)
+	err := Connection.QueryRow(`SELECT "ID" FROM "Users" WHERE UPPER("Username") = UPPER($1) AND "Active" = true`, Name).Scan(&ID)
 	if err != nil {
 		if err.Error() == "sql: no rows in result set" {
 			return ID, false, nil
@@ -26,7 +26,27 @@ func SearchUser(Name string) (int64, bool, error) {
 }
 
 //GetUser returns the user struct from the database
-func GetUser(UserID int64) (models.User, error) {
+func GetUser(UserID int64) (models.User, bool, error) {
+	var Requested models.User
+	var RawPermissions string
+	err := Connection.QueryRow(`SELECT "ID","Username","Mail", "Permissions", "Firstname", "Lastname" FROM "Users" WHERE "ID" = $1 AND "Active" = true`, UserID).Scan(&Requested.ID, &Requested.Username, &Requested.Mail, &RawPermissions, &Requested.Firstname, &Requested.Lastname)
+	if err != nil {
+		if err.Error() == "sql: no rows in result set" {
+			return Requested, false, nil
+		}
+
+		return Requested, true, err
+	}
+
+	if err := json.Unmarshal([]byte(RawPermissions), &Requested.Permissions); err != nil {
+		return Requested, true, err
+	}
+
+	return Requested, true, nil
+}
+
+//DumbGetUser returns the user struct from the database ignoring the "Active" field
+func DumbGetUser(UserID int64) (models.User, error) {
 	var Requested models.User
 	var RawPermissions string
 	err := Connection.QueryRow(`SELECT "ID","Username","Mail", "Permissions", "Firstname", "Lastname" FROM "Users" WHERE "ID" = $1`, UserID).Scan(&Requested.ID, &Requested.Username, &Requested.Mail, &RawPermissions, &Requested.Firstname, &Requested.Lastname)
@@ -44,7 +64,7 @@ func GetUser(UserID int64) (models.User, error) {
 //GetALLUsers returns all users from the database. This should be used with caution as it can cause many cpu cycles
 func GetALLUsers() ([]models.User, error) {
 	users := make([]models.User, 0)
-	rows, err := Connection.Query(`SELECT "ID", "Username", "Firstname", "Lastname", "Mail" FROM "Users"`)
+	rows, err := Connection.Query(`SELECT "ID", "Username", "Firstname", "Lastname", "Mail" FROM "Users" WHERE "Active" = true`)
 	if err != nil {
 		dev.LogError(err, "Error occured while getting users: "+err.Error())
 		return make([]models.User, 0), err
@@ -62,6 +82,12 @@ func GetALLUsers() ([]models.User, error) {
 //PatchUser patches the given user. It DOES NOT update permissions and the password
 func PatchUser(User models.User) error {
 	_, err := Connection.Exec(`UPDATE "Users" SET "Username" = $1, "Firstname" = $2, "Lastname" = $3, "Mail" = $4 WHERE "ID" = $5`, User.Username, User.Firstname, User.Lastname, User.Mail, User.ID)
+	return err
+}
+
+//DeactivateUser deactivates the user in the database
+func DeactivateUser(UserID int64) error {
+	_, err := Connection.Exec(`UPDATE "Users" SET "Active" = false WHERE "ID" = $1`, UserID)
 	return err
 }
 

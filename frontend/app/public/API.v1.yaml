@@ -1766,6 +1766,57 @@ paths:
       description: Resets the current profile picture back to the placeholder.
       security:
         - Session Key: []
+  '/api/v1/user/{userid}':
+    parameters:
+      - schema:
+          type: string
+        name: userid
+        in: path
+        required: true
+    delete:
+      summary: ''
+      operationId: delete-api-v1-user-userid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  TaskID:
+                    type: number
+        '403':
+          description: "User doesn't have the privilege to delete users"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Error:
+                    type: string
+        '404':
+          description: Requested User not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Error:
+                    type: string
+        '406':
+          description: "The last admin can't delete himself"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Error:
+                    type: string
+      tags:
+        - Users
+      security:
+        - Session Key: []
 components:
   schemas:
     Project:

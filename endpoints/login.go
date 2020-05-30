@@ -34,7 +34,7 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//Select ID + Password from Database
-	if rows, err := db.Connection.Query(`SELECT "ID","Password" FROM "Users" WHERE "Username" = $1`, loginRequest.Username); err != nil {
+	if rows, err := db.Connection.Query(`SELECT "ID","Password" FROM "Users" WHERE "Username" = $1 AND "Active" = true`, loginRequest.Username); err != nil {
 		w.WriteHeader(500)
 		dev.ReportError(err, w, "An error happened on our side :( Please try again later!")
 		dev.LogError(err, err.Error())
@@ -46,7 +46,7 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		var UserID int
+		var UserID int64
 		var PasswordHash string
 
 		if err := rows.Scan(&UserID, &PasswordHash); err != nil {
@@ -105,7 +105,7 @@ func LogoutUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := redis.DestroySession(session); err != nil {
+	if err := redis.DestroySession(r); err != nil {
 		w.WriteHeader(500)
 		dev.ReportError(err, w, err.Error())
 		return

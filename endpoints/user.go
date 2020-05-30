@@ -13,6 +13,7 @@ import (
 	"gitlab.gnaucke.dev/tixter/tixter-app/v2/db"
 	"gitlab.gnaucke.dev/tixter/tixter-app/v2/models"
 	"gitlab.gnaucke.dev/tixter/tixter-app/v2/perms"
+	"gitlab.gnaucke.dev/tixter/tixter-app/v2/redis"
 	"gitlab.gnaucke.dev/tixter/tixter-app/v2/utils"
 	"golang.org/x/crypto/bcrypt"
 
@@ -361,4 +362,86 @@ func GetUsers(w http.ResponseWriter, r *http.Request) {
 	}
 
 	json.NewEncoder(w).Encode(users)
+}
+
+//DeactivateUser sets the deactivated flag for the specified user
+func DeactivateUser(w http.ResponseWriter, r *http.Request) {
+	userid, _ := strconv.ParseInt(strings.Split(r.URL.String(), "/")[4], 10, 64)
+	req, found, err := db.GetUser(userid)
+
+	if !found {
+		w.WriteHeader(404)
+		dev.ReportUserError(w, "Requested User wasn't found")
+		return
+	}
+
+	user, err := utils.GetUser(r, w)
+	if err != nil {
+		w.WriteHeader(500)
+		dev.ReportError(err, w, err.Error())
+		return
+	}
+
+	userperms, err := perms.CombinePermissions(user)
+	if err != nil {
+		w.WriteHeader(500)
+		dev.ReportError(err, w, err.Error())
+		return
+	}
+
+	if req.ID != user.ID && !userperms.Admin {
+		w.WriteHeader(403)
+		dev.ReportUserError(w, "You are not allowed to delete users")
+		return
+	}
+
+	//Check if this is the last Admin
+	if userperms.Admin {
+		users, err := db.GetALLUsers()
+		if err != nil {
+			w.WriteHeader(500)
+			dev.ReportError(err, w, err.Error())
+			return
+		}
+
+		var remainingAdmins int64 = 0
+		for _, k := range users {
+			if k.ID != req.ID {
+				tempperms, _ := perms.CombinePermissions(k)
+				if tempperms.Admin {
+					remainingAdmins++
+				}
+			}
+		}
+
+		if remainingAdmins == 0 {
+			w.WriteHeader(406)
+			dev.ReportUserError(w, "You cannot delete the last remaining admin user")
+			return
+		}
+	}
+
+	if err := db.DeactivateUser(req.ID); err != nil {
+		w.WriteHeader(500)
+		dev.ReportError(err, w, err.Error())
+		return
+	}
+
+	RemoveProfilePicture(w, r)
+
+	data, _ := json.Marshal(req)
+	taskid, err := db.CreateTask(models.DeleteUser, string(data))
+	if err != nil {
+		w.WriteHeader(500)
+		dev.ReportError(err, w, err.Error())
+		return
+	}
+
+	redis.DestroyAllSessions(req.ID)
+
+	json.NewEncoder(w).Encode(struct {
+		TaskID int64
+	}{
+		taskid,
+	})
 }

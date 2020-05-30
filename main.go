@@ -35,7 +35,11 @@ func main() {
 				config.LoadConfig()
 				db.Init()
 				worker.StartQueueService()
-				worker.StartServing()
+				if config.CurrentConfig.Worker.Listen {
+					worker.StartServing()
+				} else {
+					select {}
+				}
 				break
 			}
 		default:
