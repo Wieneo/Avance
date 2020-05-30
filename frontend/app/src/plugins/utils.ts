@@ -39,6 +39,8 @@ export function Utils<AxiosPlugOptions>(Vue: typeof _Vue): void {
                                 //Session timed out
                                 window.location.href = "/login"
                             }
+                        }else{
+                            Vue.prototype.$SetCookie('session', Vue.prototype.$GetCookie('session'), 3600)
                         }
                         resolve(obj)
                     }catch(Exception){
@@ -67,6 +69,8 @@ export function Utils<AxiosPlugOptions>(Vue: typeof _Vue): void {
                                 //Session timed out
                                 window.location.href = "/login"
                             }
+                        }else{
+                            Vue.prototype.$SetCookie('session', Vue.prototype.$GetCookie('session'), 3600)
                         }
                         resolve(obj)
                     }catch(Exception){
@@ -97,6 +101,8 @@ export function Utils<AxiosPlugOptions>(Vue: typeof _Vue): void {
                                 //Session timed out
                                 window.location.href = "/login"
                             }
+                        }else{
+                            Vue.prototype.$SetCookie('session', Vue.prototype.$GetCookie('session'), 3600)
                         }
                         resolve(obj)
                     }catch(Exception){
