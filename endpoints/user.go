@@ -382,26 +382,43 @@ func DeactivateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	accessGranted := false
+	userperms, err := perms.CombinePermissions(user)
+	if err != nil {
+		w.WriteHeader(500)
+		dev.ReportError(err, w, err.Error())
+		return
+	}
 
-	//Only need perms if user isn't deleting himself
-	if user.ID != req.ID {
-		perms, err := perms.CombinePermissions(user)
+	if req.ID != user.ID && !userperms.Admin {
+		w.WriteHeader(403)
+		dev.ReportUserError(w, "You are not allowed to delete users")
+		return
+	}
+
+	//Check if this is the last Admin
+	if userperms.Admin {
+		users, err := db.GetALLUsers()
 		if err != nil {
 			w.WriteHeader(500)
 			dev.ReportError(err, w, err.Error())
 			return
 		}
 
-		accessGranted = perms.CanDeleteUsers
-	} else {
-		accessGranted = true
-	}
+		var remainingAdmins int64 = 0
+		for _, k := range users {
+			if k.ID != req.ID {
+				tempperms, _ := perms.CombinePermissions(k)
+				if tempperms.Admin {
+					remainingAdmins++
+				}
+			}
+		}
 
-	if !accessGranted {
-		w.WriteHeader(403)
-		dev.ReportUserError(w, "You are not allowed to delete users")
-		return
+		if remainingAdmins == 0 {
+			w.WriteHeader(406)
+			dev.ReportUserError(w, "You cannot delete the last remaining admin user")
+			return
+		}
 	}
 
 	if err := db.DeactivateUser(req.ID); err != nil {
