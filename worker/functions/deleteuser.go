@@ -2,6 +2,7 @@ package functions
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"gitlab.gnaucke.dev/tixter/tixter-app/v2/db"
 	"gitlab.gnaucke.dev/tixter/tixter-app/v2/dev"
@@ -33,6 +34,7 @@ func DeleteUser(Task models.WorkerTask) error {
 			dev.LogError(err, "Couldn't remove owner from ticket: "+err.Error())
 			Error = err
 		}
+		dev.LogInfo(fmt.Sprintf("[%d] Updated ticket (%d) %s -> Owner set to Nobody", Task.ID, k.ID, k.Title))
 	}
 
 	//As the above loop is the last step -> Return the before declared Error

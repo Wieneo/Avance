@@ -13,6 +13,7 @@ import (
 	"gitlab.gnaucke.dev/tixter/tixter-app/v2/db"
 	"gitlab.gnaucke.dev/tixter/tixter-app/v2/models"
 	"gitlab.gnaucke.dev/tixter/tixter-app/v2/perms"
+	"gitlab.gnaucke.dev/tixter/tixter-app/v2/redis"
 	"gitlab.gnaucke.dev/tixter/tixter-app/v2/utils"
 	"golang.org/x/crypto/bcrypt"
 
@@ -416,6 +417,8 @@ func DeactivateUser(w http.ResponseWriter, r *http.Request) {
 		dev.ReportError(err, w, err.Error())
 		return
 	}
+
+	redis.DestroyAllSessions(req.ID)
 
 	json.NewEncoder(w).Encode(struct {
 		TaskID int64
