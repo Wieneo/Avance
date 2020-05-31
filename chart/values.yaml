@@ -124,6 +124,7 @@ worker:
     scheme: "HTTP"
     probeType: "httpGet"
   replicaCount: 1
+  tier: worker
 
 persistence:
     storageClass: nfs-client

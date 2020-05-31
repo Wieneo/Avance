@@ -19,7 +19,7 @@ spec:
     matchLabels:
       app: {{ template "appname" . }}
       track: "{{ .Values.application.track }}"
-      tier: "{{ .Values.application.tier }}"
+      tier: "{{ .Values.worker.tier }}"
       release: {{ .Release.Name }}
 {{- end }}
   replicas: {{ .Values.worker.replicaCount }}
