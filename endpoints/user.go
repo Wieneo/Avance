@@ -32,6 +32,53 @@ func GetProfile(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(user)
 }
 
+//GetPermissionsOfUser returns all permissions of the user
+func GetPermissionsOfUser(w http.ResponseWriter, r *http.Request) {
+	userID, _ := strconv.ParseInt(strings.Split(r.URL.String(), "/")[4], 10, 64)
+
+	user, err := utils.GetUser(r, w)
+	if err != nil {
+		w.WriteHeader(500)
+		dev.ReportError(err, w, err.Error())
+		return
+	}
+
+	req, found, err := db.GetUser(userID)
+	if err != nil {
+		w.WriteHeader(500)
+		dev.ReportError(err, w, err.Error())
+		return
+	}
+
+	if !found {
+		w.WriteHeader(404)
+		dev.ReportUserError(w, "Requested user doesn't exist")
+		return
+	}
+
+	userperms, err := perms.CombinePermissions(user)
+	if err != nil {
+		w.WriteHeader(500)
+		dev.ReportError(err, w, err.Error())
+		return
+	}
+
+	if !userperms.Admin && !userperms.CanChangePermissionsGlobal && req.ID != user.ID {
+		w.WriteHeader(403)
+		dev.ReportUserError(w, "You are not allowed to view permissions in this context.")
+		return
+	}
+
+	reqperms, err := perms.CombinePermissions(req)
+	if err != nil {
+		w.WriteHeader(500)
+		dev.ReportError(err, w, err.Error())
+		return
+	}
+
+	json.NewEncoder(w).Encode(reqperms)
+}
+
 //GetProfilePicture returns the rofile icture of the UserID
 func GetProfilePicture(w http.ResponseWriter, r *http.Request) {
 	var userID int64
