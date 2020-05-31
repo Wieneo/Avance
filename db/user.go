@@ -42,6 +42,16 @@ func GetUser(UserID int64) (models.User, bool, error) {
 		return Requested, true, err
 	}
 
+	//Fix that AccessTo arrays are never null / nil
+	if Requested.Permissions.AccessTo.Projects == nil {
+		Requested.Permissions.AccessTo.Projects = make([]models.ProjectPermission, 0)
+	}
+
+	if Requested.Permissions.AccessTo.Queues == nil {
+		Requested.Permissions.AccessTo.Queues = make([]models.QueuePermission, 0)
+	}
+	////////////////////////////////////////////////
+
 	return Requested, true, nil
 }
 
@@ -57,6 +67,16 @@ func DumbGetUser(UserID int64) (models.User, error) {
 	if err := json.Unmarshal([]byte(RawPermissions), &Requested.Permissions); err != nil {
 		return Requested, err
 	}
+
+	//Fix that AccessTo arrays are never null / nil
+	if Requested.Permissions.AccessTo.Projects == nil {
+		Requested.Permissions.AccessTo.Projects = make([]models.ProjectPermission, 0)
+	}
+
+	if Requested.Permissions.AccessTo.Queues == nil {
+		Requested.Permissions.AccessTo.Queues = make([]models.QueuePermission, 0)
+	}
+	////////////////////////////////////////////////
 
 	return Requested, nil
 }

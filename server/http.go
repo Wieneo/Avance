@@ -38,7 +38,6 @@ func HTTPInit() {
 	router.HandleFunc("/api/v1/profile/avatar", endpoints.UpdateProfilePicture).Methods("POST")
 	router.HandleFunc("/api/v1/profile/avatar", endpoints.RemoveProfilePicture).Methods("DELETE")
 	router.HandleFunc("/api/v1/profile/avatar", endpoints.GetProfilePicture).Methods("GET")
-	router.HandleFunc("/api/v1/user/{[0-9]{*}}/avatar", endpoints.GetProfilePicture).Methods("GET")
 	router.HandleFunc("/api/v1/profile", endpoints.PatchProfile).Methods("PATCH")
 
 	router.HandleFunc("/api/v1/users", endpoints.GetUsers).Methods("GET")
@@ -47,6 +46,9 @@ func HTTPInit() {
 	router.HandleFunc("/api/v1/groups", endpoints.CreateGroup).Methods("POST")
 
 	router.HandleFunc("/api/v1/user/{[0-9]{*}}", endpoints.DeactivateUser).Methods("DELETE")
+	router.HandleFunc("/api/v1/user/{[0-9]{*}}/avatar", endpoints.GetProfilePicture).Methods("GET")
+	router.HandleFunc("/api/v1/user/{[0-9]{*}}/permissions", endpoints.GetPermissionsOfUser).Methods("GET")
+
 	//PROJECT APIs
 	router.HandleFunc("/api/v1/projects", endpoints.GetProjects).Methods("GET")
 	router.HandleFunc("/api/v1/projects", endpoints.CreateProject).Methods("POST")

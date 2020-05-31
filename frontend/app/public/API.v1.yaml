@@ -1817,6 +1817,50 @@ paths:
         - Users
       security:
         - Session Key: []
+  '/api/v1/user/{userid}/permissions':
+    parameters:
+      - schema:
+          type: string
+        name: userid
+        in: path
+        required: true
+    get:
+      summary: Get Permissions of user
+      tags:
+        - Users
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Permissions'
+        '403':
+          description: 'User is not allowed to view this permission set. Look at description!'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Error:
+                    type: string
+        '404':
+          description: "Specified user couldn't be found"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Error:
+                    type: string
+      operationId: get-api-v1-user-userid-permissions
+      description: |-
+        Returns all permissions of the given user.
+        Permissions needed: Admin / CanChangePermissionsGlobal
+        Note: You can always view your own permissions
+      parameters: []
+      security:
+        - Session Key: []
 components:
   schemas:
     Project:
@@ -1918,6 +1962,77 @@ components:
               type: string
         Meta:
           type: string
+    Permissions:
+      title: Permissions
+      type: object
+      properties:
+        Admin:
+          type: boolean
+        CanCreateUsers:
+          type: boolean
+        CanModifyUsers:
+          type: boolean
+        CanDeleteUsers:
+          type: boolean
+        CanCreateGroups:
+          type: boolean
+        CanModifyGroups:
+          type: boolean
+        CanDeleteGroups:
+          type: boolean
+        CanChangePermissionsGlobal:
+          type: boolean
+        AccessTo:
+          type: object
+          properties:
+            Projects:
+              type: array
+              items:
+                type: object
+                properties:
+                  ProjectID:
+                    type: integer
+                  CanSee:
+                    type: boolean
+                  CanModify:
+                    type: boolean
+                  CanChangePermissions:
+                    type: boolean
+                  CanCreateQueues:
+                    type: boolean
+                  CanModifyQueues:
+                    type: boolean
+                  CanRemoveQueues:
+                    type: boolean
+                  CanCreateSeverities:
+                    type: boolean
+                  CanModifySeverities:
+                    type: boolean
+                  CanRemoveSeverities:
+                    type: boolean
+                  CanCreateStatuses:
+                    type: boolean
+                  CanModifyStatuses:
+                    type: boolean
+                  CanRemoveStatuses:
+                    type: boolean
+            Queues:
+              type: array
+              items:
+                type: object
+                properties:
+                  QueueID:
+                    type: integer
+                  CanSee:
+                    type: boolean
+                  CanCreateTicket:
+                    type: boolean
+                  CanEditTicket:
+                    type: boolean
+                  CanModify:
+                    type: boolean
+                  CanChangePermissions:
+                    type: boolean
   securitySchemes:
     Session Key:
       name: Authorization
