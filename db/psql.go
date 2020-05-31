@@ -26,7 +26,7 @@ type Migration struct {
 }
 
 //Init is called after config is read to connect to postgres
-func Init() {
+func Init(ApplyMigrations bool) {
 	dev.LogInfo("Postgres is being initialized")
 	//FROM: https://godoc.org/github.com/lib/pq
 	connStr := "ERROR"
@@ -44,17 +44,18 @@ func Init() {
 		//Program will terminate here
 	}
 	Connection = db
-	migrate()
+
+	migrate(ApplyMigrations)
 }
 
-func migrate() {
+func migrate(ApplyMigrations bool) {
 	dev.LogInfo("Preparing database to be migrated...")
 
 	rows, err := Connection.Query(`SELECT "Name" FROM "Patches"`)
 	if err != nil {
 		dev.LogError(err, err.Error())
 		//If table doesn't exist
-		if strings.Contains(err.Error(), "does not exist") {
+		if strings.Contains(err.Error(), "does not exist") && ApplyMigrations {
 			//Fix for old instances
 			if _, err := Connection.Query(`SELECT "Schema" FROM "Version"`); err == nil {
 				dev.LogInfo("Old Database System detected -> Migrating")
@@ -63,13 +64,13 @@ func migrate() {
 				if _, err := Connection.Exec(`CREATE TABLE public."Patches" ("Name" text NOT NULL);`); err != nil {
 					dev.LogFatal(err, "Couldn't migrate to new migration system! "+err.Error())
 				} else {
-					migrate()
+					migrate(ApplyMigrations)
 					return
 				}
 			}
 
 			deploy()
-			migrate()
+			migrate(ApplyMigrations)
 
 			userid, _ := CreateUser(models.User{
 				Username:  "Admin",
@@ -101,65 +102,15 @@ func migrate() {
 			return
 		}
 
+		if !ApplyMigrations {
+			dev.LogInfo("Database Schema isn't deployed. Waiting for it...")
+			stallMigration(ApplyMigrations)
+			return
+		}
+
 		dev.LogFatal(err, err.Error())
 	}
-	/*LEGACY!
 
-	if !rows.Next() {
-		dev.LogFatal(err, "Version Table is empty! Something went horribly wrong... Check your database.")
-	}
-	//Scan returns error
-	if rows.Scan(&currentVersion) != nil {
-		dev.LogFatal(err, "Version Table is malformed! Something went horribly wrong... Check your database.")
-	}
-
-	cwd, _ := os.Getwd()
-	files, err := ioutil.ReadDir(fmt.Sprint(cwd, "/db/migrations/"))
-	if err != nil {
-		dev.LogFatal(err, "Couldn't find/read migrations: ", err.Error())
-	}
-
-	var newestVersion int
-	migrationsAvailable := make(map[int]string, 0)
-	for _, k := range files {
-		version, err := strconv.Atoi(strings.Split(k.Name(), "-")[0])
-		if err != nil {
-			dev.LogDebug("Ignoring non-migration file:", k.Name())
-		}
-
-		if version > newestVersion {
-			newestVersion = version
-		}
-		migrationsAvailable[version] = k.Name()
-	}
-
-	dev.LogInfo("Database:", currentVersion, " | Code:", newestVersion)
-	if currentVersion < newestVersion {
-		for currentVersion < newestVersion {
-			currentVersion++
-			//Ignore versions that arent mapped
-			if len(migrationsAvailable[currentVersion]) > 0 {
-				dev.LogInfo("Applying", migrationsAvailable[currentVersion])
-				rawBytes, err := ioutil.ReadFile(cwd + "/db/migrations/" + migrationsAvailable[currentVersion])
-				if err != nil {
-					dev.LogFatal(err, "Couldn't read migration:", err.Error())
-				}
-
-				_, err = Connection.Exec(string(rawBytes))
-				if err != nil {
-					dev.LogFatal(err, "Couldn't apply migration:", err.Error())
-				}
-
-				_, err = Connection.Exec(`UPDATE "Version" SET "Schema" = $1`, currentVersion)
-				if err != nil {
-					dev.LogFatal(err, "Couldn't apply migration:", err.Error())
-				}
-			}
-		}
-	} else {
-		dev.LogInfo("No migrations needed!")
-	}
-	*/
 	//appliedPatches contains all patches from the "Patches" database table. These are tracked via their names
 	appliedPatches := make([]string, 0)
 	//localPatches contains all patches from the ./db/migrations/ folder. All files with the suffix .migrate.json will be included
@@ -234,6 +185,12 @@ func migrate() {
 	}
 
 	dev.LogInfo(fmt.Sprintf("%d Migration(s) need to be applied", len(neededPatches)))
+
+	if !ApplyMigrations && len(neededPatches) > 0 {
+		dev.LogInfo("There are still unapplied patches. Waiting for App to apply them!")
+		stallMigration(ApplyMigrations)
+		return
+	}
 
 	//MAIN APPLY
 	for len(neededPatches) > 0 {
@@ -354,4 +311,9 @@ func deploy() {
 		dev.LogFatal(err, "Couldn't create administrator!", err.Error())
 	}
 
+}
+
+func stallMigration(ApplyMigrations bool) {
+	time.Sleep(5 * time.Second)
+	migrate(ApplyMigrations)
 }

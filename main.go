@@ -24,7 +24,7 @@ func main() {
 			{
 				dev.LogInfo("Starting App Version", utils.AppVersion, utils.AppChannel)
 				config.LoadConfig()
-				db.Init()
+				db.Init(true)
 				redis.Init()
 				server.HTTPInit()
 				break
@@ -33,7 +33,7 @@ func main() {
 			{
 				dev.LogInfo("Starting Worker Version", utils.WorkerVersion, utils.WorkerChannel)
 				config.LoadConfig()
-				db.Init()
+				db.Init(false)
 				worker.StartQueueService()
 				if config.CurrentConfig.Worker.Listen {
 					worker.StartServing()
