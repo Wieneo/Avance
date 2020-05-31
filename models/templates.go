@@ -52,6 +52,8 @@ type Permissions struct {
 	CanModifyGroups            bool
 	CanDeleteGroups            bool
 	CanChangePermissionsGlobal bool
+	CanSeeWorker               bool
+	CanChangeWorker            bool
 	AccessTo                   struct {
 		Projects []ProjectPermission
 		Queues   []QueuePermission

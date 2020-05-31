@@ -6,7 +6,25 @@ import (
 	"time"
 
 	"gitlab.gnaucke.dev/tixter/tixter-app/v2/dev"
+	"gitlab.gnaucke.dev/tixter/tixter-app/v2/models"
 )
+
+//GetAllWorkers returns all workers from the database
+func GetAllWorkers() ([]models.Worker, error) {
+	allworkers := make([]models.Worker, 0)
+	rows, err := Connection.Query(`SELECT "ID", "Name", "LastSeen", "Active" FROM "Workers"`)
+	if err != nil {
+		return allworkers, err
+	}
+
+	for rows.Next() {
+		var singleWorker models.Worker
+		rows.Scan(&singleWorker.ID, &singleWorker.Name, &singleWorker.LastSeen, &singleWorker.Active)
+		allworkers = append(allworkers, singleWorker)
+	}
+
+	return allworkers, nil
+}
 
 //RegisterWorker tries to find out if the worker already is registered and if not registers it
 func RegisterWorker() (int, error) {

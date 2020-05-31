@@ -5,6 +5,14 @@ import (
 	"time"
 )
 
+//Worker represents a single worker from the database
+type Worker struct {
+	ID       int
+	Name     string
+	LastSeen time.Time
+	Active   bool
+}
+
 //WorkerTask is the generic task for a worker
 type WorkerTask struct {
 	ID       int64

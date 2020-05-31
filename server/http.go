@@ -90,6 +90,7 @@ func HTTPInit() {
 
 	router.HandleFunc("/api/v1/ticket/{[0-9]{*}}", endpoints.GetTicket).Methods("GET")
 
+	router.HandleFunc("/api/v1/workers", endpoints.GetWorkers).Methods("GET")
 	//Needs to be at the bottom!
 	router.HandleFunc("/", endpoints.ServeAppFrontend).Methods("GET")
 	router.HandleFunc("/login", endpoints.ServeAppFrontend).Methods("GET")
