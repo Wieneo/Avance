@@ -50,6 +50,14 @@ func CombinePermissions(User models.User) (models.Permissions, error) {
 			PermissionSet.CanChangePermissionsGlobal = true
 		}
 
+		if k.Permissions.CanSeeWorker {
+			PermissionSet.CanSeeWorker = true
+		}
+
+		if k.Permissions.CanChangeWorker {
+			PermissionSet.CanChangeWorker = true
+		}
+
 		for _, k := range k.Permissions.AccessTo.Projects {
 			if found, project := containsProjectPermission(k, PermissionSet.AccessTo.Projects); !found {
 				PermissionSet.AccessTo.Projects = append(PermissionSet.AccessTo.Projects, k)

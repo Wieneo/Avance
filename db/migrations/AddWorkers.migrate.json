@@ -1,0 +1,5 @@
+{
+    "Name": "AddWorkers",
+    "Targets": ["workers.sql"],
+    "After": "{{BASE}}"
+}

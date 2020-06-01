@@ -9,28 +9,48 @@
         <v-tab>
           <v-icon left>mdi-bell-ring</v-icon>Notifications
         </v-tab>
-        <v-tab v-if="UserInfo.Permissions.Admin">
-            <v-icon left>mdi-cog</v-icon>Instance
+
+        <v-tab v-if="Permissions.Admin">
+          <v-icon left>mdi-cog</v-icon>Instance
         </v-tab>
 
-        <v-tab v-if="UserInfo.Permissions.Admin">
-            <v-icon left>mdi-human</v-icon>User & Groups
+        <v-tab v-if="Permissions.Admin">
+          <v-icon left>mdi-application</v-icon>Deployment
         </v-tab>
 
-        <v-tab v-if="UserInfo.Permissions.Admin">
-            <v-icon left>mdi-ticket</v-icon>Ticket
+        <v-tab v-if="Permissions.Admin">
+          <v-icon left>mdi-human</v-icon>User & Groups
         </v-tab>
 
-        <v-tab v-if="UserInfo.Permissions.Admin">
-            <v-icon left>mdi-transit-connection-variant</v-icon>Integrations
+        <v-tab v-if="Permissions.Admin">
+          <v-icon left>mdi-ticket</v-icon>Ticket
         </v-tab>
 
-        <v-tab-item class="overflow-y-auto" style="max-height: calc(100vh - 130px);"><Personal/></v-tab-item>
-        <v-tab-item class="overflow-y-auto" style="max-height: calc(100vh - 130px);"><Notifications/></v-tab-item>
-        <v-tab-item class="overflow-y-auto" style="max-height: calc(100vh - 130px);"><Instance/></v-tab-item>
-        <v-tab-item class="overflow-y-auto" style="max-height: calc(100vh - 130px);"><Users/></v-tab-item>
-        <v-tab-item class="overflow-y-auto" style="max-height: calc(100vh - 130px);"><Ticket/></v-tab-item>
-        <v-tab-item class="overflow-y-auto" style="max-height: calc(100vh - 130px);"><Integrations/></v-tab-item>
+        <v-tab v-if="Permissions.Admin">
+          <v-icon left>mdi-transit-connection-variant</v-icon>Integrations
+        </v-tab>
+
+        <v-tab-item class="overflow-y-auto" style="max-height: calc(100vh - 130px);">
+          <Personal />
+        </v-tab-item>
+        <v-tab-item class="overflow-y-auto" style="max-height: calc(100vh - 130px);">
+          <Notifications />
+        </v-tab-item>
+        <v-tab-item class="overflow-y-auto" style="max-height: calc(100vh - 130px);">
+          <Instance />
+        </v-tab-item>
+        <v-tab-item class="overflow-y-auto" style="max-height: calc(100vh - 130px);">
+          <Deployment v-bind:Permissions="Permissions"/>
+        </v-tab-item>
+        <v-tab-item class="overflow-y-auto" style="max-height: calc(100vh - 130px);">
+          <Users />
+        </v-tab-item>
+        <v-tab-item class="overflow-y-auto" style="max-height: calc(100vh - 130px);">
+          <Ticket />
+        </v-tab-item>
+        <v-tab-item class="overflow-y-auto" style="max-height: calc(100vh - 130px);">
+          <Integrations />
+        </v-tab-item>
       </v-tabs>
     </div>
   </div>
@@ -40,30 +60,25 @@ import Vue from "vue";
 import Drawer from "../Main/Drawer.vue";
 import AppBar from "../Main/AppBar.vue";
 import Personal from "./Personal.vue";
-import Ticket from "./Ticket.vue"
-import Integrations from "./Integrations.vue"
-import Notifications from "./Notifications.vue"
-import Users from "./Users.vue"
-import Instance from "./Instance.vue"
+import Ticket from "./Ticket.vue";
+import Integrations from "./Integrations.vue";
+import Notifications from "./Notifications.vue";
+import Users from "./Users.vue";
+import Instance from "./Instance.vue";
+import Deployment from "./Deployment.vue";
 
-interface User {
-  ID: number;
-  Username: string;
-  Mail: string;
-  Firstname: string;
-  Lastname: string;
-  Password: string;
-  Permissions: {};
+
+interface Permissions {
+  Admin: boolean;
+  CanCreateUsers: boolean;
+  CanModifyUsers: boolean;
+  CanDeleteUsers: boolean;
+  CanCreateGroups: boolean;
+  CanModifyGroups: boolean;
+  CanDeleteGroups: boolean;
+  CanChangePermissionsGlobal: boolean;
 }
-const UserInfo: User = {
-  ID: 0,
-  Username: "Loading",
-  Firstname: "Please",
-  Lastname: "Wait",
-  Mail: "Loading",
-  Password: "",
-  Permissions: {}
-};
+let Permissions: Permissions
 
 export default Vue.extend({
   name: "Settings",
@@ -74,17 +89,17 @@ export default Vue.extend({
     Integrations,
     Notifications,
     Users,
-    Instance
+    Instance,
+    Deployment
   },
   data: function() {
     return {
-      UserInfo,
+      Permissions
     };
   },
   mounted: async function() {
-    const data = await Vue.prototype.$GetRequest("/api/v1/profile");
-    //Assign so we dont create a reference here
-    Object.assign(this.UserInfo, data);
+    const user = await Vue.prototype.$Request("GET", "/api/v1/profile");
+    this.Permissions = await Vue.prototype.$Request("GET", "/api/v1/user/" + user.ID + "/permissions")
   }
 });
 </script>
