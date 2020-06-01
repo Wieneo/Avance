@@ -26,6 +26,27 @@ func GetAllWorkers() ([]models.Worker, error) {
 	return allworkers, nil
 }
 
+//GetWorker returns a single worker
+func GetWorker(WorkerID int) (models.Worker, bool, error) {
+	var singleWorker models.Worker
+	err := Connection.QueryRow(`SELECT "ID", "Name", "LastSeen", "Active" FROM "Workers" WHERE "ID" = $1`, WorkerID).Scan(&singleWorker.ID, &singleWorker.Name, &singleWorker.LastSeen, &singleWorker.Active)
+	if err != nil {
+		if err.Error() == "sql: no rows in result set" {
+			return singleWorker, false, nil
+		}
+
+		return singleWorker, true, err
+	}
+
+	return singleWorker, true, nil
+}
+
+//PatchWorker enables or disables the specified worker
+func PatchWorker(Worker models.Worker) error {
+	_, err := Connection.Exec(`UPDATE "Workers" SET "Active" = $1 WHERE "ID" = $2`, Worker.Active, Worker.ID)
+	return err
+}
+
 //RegisterWorker tries to find out if the worker already is registered and if not registers it
 func RegisterWorker() (int, error) {
 	name, _ := os.Hostname()
