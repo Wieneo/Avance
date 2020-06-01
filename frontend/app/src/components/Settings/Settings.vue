@@ -1,59 +1,57 @@
 <template>
-  <div>
+  <div style="height: 100%; width: 94%">
     <Drawer v-on:ShowProjects="showProjects = true" />
-    <div>
-      <v-tabs background-color="#46494c" dark height="40px" style="margin-left: 56px;">
-        <v-tab>
-          <v-icon left>mdi-account</v-icon>Personal
-        </v-tab>
-        <v-tab>
-          <v-icon left>mdi-bell-ring</v-icon>Notifications
-        </v-tab>
+        <v-tabs background-color="#46494c" dark style="margin-left: 56px; height: 100%;" vertical v-model="SelectedTab" @change="UpdateQuery">
+          <v-tab>
+            <v-icon left>mdi-account</v-icon>Personal
+          </v-tab>
+          <v-tab>
+            <v-icon left>mdi-bell-ring</v-icon>Notifications
+          </v-tab>
 
-        <v-tab v-if="Permissions.Admin">
-          <v-icon left>mdi-cog</v-icon>Instance
-        </v-tab>
+          <v-tab v-if="Permissions.Admin">
+            <v-icon left>mdi-cog</v-icon>Instance
+          </v-tab>
 
-        <v-tab v-if="Permissions.Admin">
-          <v-icon left>mdi-application</v-icon>Deployment
-        </v-tab>
+          <v-tab v-if="Permissions.Admin">
+            <v-icon left>mdi-application</v-icon>Deployment
+          </v-tab>
 
-        <v-tab v-if="Permissions.Admin">
-          <v-icon left>mdi-human</v-icon>User & Groups
-        </v-tab>
+          <v-tab v-if="Permissions.Admin">
+            <v-icon left>mdi-human</v-icon>User & Groups
+          </v-tab>
 
-        <v-tab v-if="Permissions.Admin">
-          <v-icon left>mdi-ticket</v-icon>Ticket
-        </v-tab>
+          <v-tab v-if="Permissions.Admin">
+            <v-icon left>mdi-ticket</v-icon>Ticket
+          </v-tab>
 
-        <v-tab v-if="Permissions.Admin">
-          <v-icon left>mdi-transit-connection-variant</v-icon>Integrations
-        </v-tab>
+          <v-tab v-if="Permissions.Admin">
+            <v-icon left>mdi-transit-connection-variant</v-icon>Integrations
+          </v-tab>
 
-        <v-tab-item class="overflow-y-auto" style="max-height: calc(100vh - 130px);">
-          <Personal />
-        </v-tab-item>
-        <v-tab-item class="overflow-y-auto" style="max-height: calc(100vh - 130px);">
-          <Notifications />
-        </v-tab-item>
-        <v-tab-item class="overflow-y-auto" style="max-height: calc(100vh - 130px);">
-          <Instance />
-        </v-tab-item>
-        <v-tab-item class="overflow-y-auto" style="max-height: calc(100vh - 130px);">
-          <Deployment v-bind:Permissions="Permissions"/>
-        </v-tab-item>
-        <v-tab-item class="overflow-y-auto" style="max-height: calc(100vh - 130px);">
-          <Users />
-        </v-tab-item>
-        <v-tab-item class="overflow-y-auto" style="max-height: calc(100vh - 130px);">
-          <Ticket />
-        </v-tab-item>
-        <v-tab-item class="overflow-y-auto" style="max-height: calc(100vh - 130px);">
-          <Integrations />
-        </v-tab-item>
+          <v-tab-item class="overflow-y-auto" style="max-height: calc(100vh - 130px);">
+            <Personal />
+          </v-tab-item>
+          <v-tab-item class="overflow-y-auto" style="max-height: calc(100vh - 130px);">
+            <Notifications />
+          </v-tab-item>
+          <v-tab-item class="overflow-y-auto" style="max-height: calc(100vh - 130px);">
+            <Instance />
+          </v-tab-item>
+          <v-tab-item class="overflow-y-auto" style="max-height: calc(100vh - 130px);">
+            <Deployment v-bind:Permissions="Permissions"/>
+          </v-tab-item>
+          <v-tab-item class="overflow-y-auto" style="max-height: calc(100vh - 130px);">
+            <Users />
+          </v-tab-item>
+          <v-tab-item class="overflow-y-auto" style="max-height: calc(100vh - 130px);">
+            <Ticket />
+          </v-tab-item>
+          <v-tab-item class="overflow-y-auto" style="max-height: calc(100vh - 130px);">
+            <Integrations />
+          </v-tab-item>
       </v-tabs>
-    </div>
-  </div>
+  </div> 
 </template>
 <script lang="ts">
 import Vue from "vue";
@@ -94,12 +92,38 @@ export default Vue.extend({
   },
   data: function() {
     return {
-      Permissions
+      Permissions,
+      SelectedTab: 0
     };
   },
   mounted: async function() {
     const user = await Vue.prototype.$Request("GET", "/api/v1/profile");
     this.Permissions = await Vue.prototype.$Request("GET", "/api/v1/user/" + user.ID + "/permissions")
+    this.SelectRightTab()
+  },
+  watch:{
+      $route (to, from){
+          this.SelectRightTab()
+      }
+  },
+  methods:{
+    SelectRightTab: function(){
+      if(this.$route.query.setting != undefined){
+        const tab = Number.parseInt(this.$route.query.setting as string)
+        if (!isNaN(tab)){
+          this.SelectedTab = tab
+        }
+      }else{
+        this.UpdateQuery()
+      }
+    },
+    UpdateQuery: function(){
+      try{
+        this.$router.push({ query: Object.assign({}, this.$route.query, { setting: this.SelectedTab }) });
+      }finally{
+        //Do nothing
+      }
+    }
   }
 });
 </script>

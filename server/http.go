@@ -94,6 +94,7 @@ func HTTPInit() {
 	router.HandleFunc("/api/v1/worker/{[0-9]{*}}", endpoints.ToggleWorker).Methods("PATCH")
 	//Needs to be at the bottom!
 	router.HandleFunc("/", endpoints.ServeAppFrontend).Methods("GET")
+	router.HandleFunc("/settings", endpoints.ServeAppFrontend).Methods("GET")
 	router.HandleFunc("/login", endpoints.ServeAppFrontend).Methods("GET")
 	router.PathPrefix("/").HandlerFunc(endpoints.ServeAssets).Methods("GET")
 
