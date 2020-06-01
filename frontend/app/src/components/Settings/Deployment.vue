@@ -2,7 +2,18 @@
   <v-container>
     <v-row>
       <v-col>
-        <h2 style="margin-bottom: 10px;">Worker</h2>
+          <v-card>
+          <v-card-title>
+            Worker
+            <v-spacer></v-spacer>
+            <v-text-field
+            v-model="CurrentSearch"
+            append-icon="mdi-magnify"
+            label="Search"
+            single-line
+            hide-details
+          ></v-text-field>
+          </v-card-title>
         <v-data-table
           v-model="WorkersSelected"
           :headers="headers"
@@ -10,6 +21,7 @@
           item-key="ID"
           show-select
           :loading="Loading"
+          :search="CurrentSearch"
           class="elevation-1"
         >
           <template
@@ -26,6 +38,7 @@
             </v-btn>
           </template>
         </v-data-table>
+          </v-card>
         <v-btn
           color="green"
           class="mr-2"
@@ -63,6 +76,7 @@ export default Vue.extend({
   },
   data: function() {
     return {
+      CurrentSearch: '',
       Loading: true,
       Workers: [],
       WorkerPermsFailed: false,
