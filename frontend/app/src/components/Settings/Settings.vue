@@ -109,7 +109,7 @@ export default Vue.extend({
   methods:{
     SelectRightTab: function(){
       if(this.$route.query.setting != undefined){
-        const tab = Number.parseInt(this.$route.query.setting)
+        const tab = Number.parseInt(this.$route.query.setting as string)
         if (!isNaN(tab)){
           this.SelectedTab = tab
         }
