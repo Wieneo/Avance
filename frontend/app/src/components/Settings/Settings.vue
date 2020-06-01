@@ -15,7 +15,7 @@
         </v-tab>
 
         <v-tab v-if="Permissions.Admin">
-          <v-icon left>mdi-cog</v-icon>Deployment
+          <v-icon left>mdi-application</v-icon>Deployment
         </v-tab>
 
         <v-tab v-if="Permissions.Admin">
