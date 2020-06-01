@@ -98,7 +98,7 @@ export default Vue.extend({
           "PATCH",
           "/api/v1/worker/" + Data.ID
         );
-        this.Workers.forEach(element => {
+        this.Workers.forEach((element: any) => {
           if (element.ID == Data.ID) {
             element.Active = result.Active;
           }
@@ -110,7 +110,7 @@ export default Vue.extend({
     ToggleSelected: async function(Enable: boolean){
       this.Loading = true
       try{
-        this.asyncForEach(this.WorkersSelected, async (element) => {
+        this.asyncForEach(this.WorkersSelected, async (element: any) => {
           if (Enable != element.Active){
             const result = await Vue.prototype.$Request(
               "PATCH",
