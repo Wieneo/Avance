@@ -7,7 +7,11 @@
         ></v-skeleton-loader>
           <v-card v-for="action in CurrentTicket.Actions" :key="action.ID" style="margin-top: 5px;" v-else>
             <div v-if="action.Type == 0 || action.Type == 1">
-              <v-card-subtitle><b>{{action.Title}}</b><br>{{action.IssuedBy.Firstname}} {{action.IssuedBy.Lastname}} ({{action.IssuedBy.Username}})<br>{{action.IssuedAt | moment("dddd, MM/DD/YYYY HH:mm:ss")}}</v-card-subtitle>
+              <v-card-subtitle><b>{{action.Title}}</b><br>
+                <span v-if="action.IssuedBy.Valid">{{action.IssuedBy.Issuer.Firstname}} {{action.IssuedBy.Issuer.Lastname}} ({{action.IssuedBy.Issuer.Username}})</span>
+                <span v-else><b>System</b></span>
+                <br>{{action.IssuedAt | moment("dddd, MM/DD/YYYY HH:mm:ss")}}
+              </v-card-subtitle>
               <v-card-text style="color: black;" v-html="action.Content"></v-card-text>
             </div>
           </v-card>
