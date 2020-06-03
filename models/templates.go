@@ -137,7 +137,13 @@ type Action struct {
 	Title    string
 	Content  string
 	IssuedAt time.Time
-	IssuedBy User
+	IssuedBy Issuer
+}
+
+//Issuer stores wheter a action has a valid issuer and which one
+type Issuer struct {
+	Valid  bool
+	Issuer User
 }
 
 //ActionType defines to type of an action to be a comment / answer / etc...

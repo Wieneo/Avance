@@ -1926,6 +1926,27 @@ components:
     Ticket:
       title: Ticket
       type: object
+      Actions:
+        title: Actions
+        type: object
+        properties:
+          ID:
+            type: integer
+          Type:
+            type: integer
+            description: |-
+              0 = Answer
+              1 = Comment
+              2 = Property Update
+              3 = Unspecified
+          Title:
+            type: string
+          Content:
+            type: string
+          IssuedAt:
+            type: string
+          IssuedBy:
+            $ref: '#/components/schemas/Issuer'
       properties:
         ID:
           type: integer
@@ -1962,6 +1983,18 @@ components:
               type: string
         Meta:
           type: string
+        Actions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Actions'
+    Issuer:
+      title: Issuer
+      type: object
+      properties:
+        Valid:
+          type: boolean
+        Issuer:
+          $ref: '#/components/schemas/User'
     Permissions:
       title: Permissions
       type: object
@@ -2033,6 +2066,27 @@ components:
                     type: boolean
                   CanChangePermissions:
                     type: boolean
+    Actions:
+      title: Actions
+      type: object
+      properties:
+        ID:
+          type: number
+        Title:
+          type: string
+        Content:
+          type: string
+        Type:
+          type: integer
+          description: |-
+            0 = Answer
+            1 = Comment
+            2 = Properites Changed
+            3 = Unspecified
+        IssuedAt:
+          type: string
+        IssuedBy:
+          $ref: '#/components/schemas/Issuer'
   securitySchemes:
     Session Key:
       name: Authorization

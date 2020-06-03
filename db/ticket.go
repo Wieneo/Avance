@@ -2,6 +2,7 @@ package db
 
 import (
 	"database/sql"
+	"fmt"
 	"time"
 
 	"gitlab.gnaucke.dev/tixter/tixter-app/v2/dev"
@@ -47,7 +48,7 @@ func GetTicket(TicketID int64, ResolveRelations bool) (models.Ticket, bool, erro
 }
 
 //CreateTicket creates a ticket and returns the new id
-func CreateTicket(Title string, Description string, Queue int64, OwnedByNobody bool, Owner int64, Severity int64, Status int64, IsStalled bool, StalledUntil string) (int64, error) {
+func CreateTicket(Title string, Description string, Queue int64, OwnedByNobody bool, Owner int64, Severity models.Severity, Status models.Status, IsStalled bool, StalledUntil string) (int64, error) {
 	var newID int64
 	var trueOwner sql.NullInt64
 	var trueStall sql.NullString
@@ -62,7 +63,28 @@ func CreateTicket(Title string, Description string, Queue int64, OwnedByNobody b
 		trueStall.String = StalledUntil
 	}
 
-	err := Connection.QueryRow(`INSERT INTO "Tickets" ("Title", "Description", "Queue", "Owner", "Severity", "Status", "CreatedAt", "LastModified", "StalledUntil", "Meta") VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING "ID"`, Title, Description, Queue, trueOwner, Severity, Status, time.Now(), time.Now(), trueStall, "{}").Scan(&newID)
+	err := Connection.QueryRow(`INSERT INTO "Tickets" ("Title", "Description", "Queue", "Owner", "Severity", "Status", "CreatedAt", "LastModified", "StalledUntil", "Meta") VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING "ID"`, Title, Description, Queue, trueOwner, Severity.ID, Status.ID, time.Now(), time.Now(), trueStall, "{}").Scan(&newID)
+
+	if err == nil {
+		resolvedQueue, _, _ := GetQueueUNSAFE(Queue)
+		resolvedOwner := ""
+		if !OwnedByNobody {
+			owner, _, _ := GetUser(Owner)
+			resolvedOwner = owner.Username
+		}
+
+		//Add "Ticket Created" Action from user System
+		_, err = AddAction(newID, models.Unspecific, "Ticket Created", fmt.Sprintf(`Ticket was created with the following properties:<br>
+			<ul>
+				<li>Title: <i>%s</i></li>
+				<li>Description: <i>%s</i></li>
+				<li>Queue: <i>%s</i></li>
+				<li>Owner: <i>%s</i></li>
+				<li>Severity: <i>%s</i></li>
+				<li>Status: <i>%s</i></li>
+				<li>StalledUntil: <i>%s</i></li>
+			</ul>`, Title, Description, resolvedQueue.Name, resolvedOwner, Severity.Name, Status.Name, StalledUntil), models.Issuer{Valid: false})
+	}
 	return newID, err
 }
 

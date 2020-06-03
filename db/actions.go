@@ -1,6 +1,7 @@
 package db
 
 import (
+	"database/sql"
 	"time"
 
 	"gitlab.gnaucke.dev/tixter/tixter-app/v2/models"
@@ -16,15 +17,19 @@ func GetActions(TicketID int64) ([]models.Action, error) {
 
 	for rows.Next() {
 		var singleAction models.Action
-		var rawUserID int64
+		var rawUserID sql.NullInt64
 		rows.Scan(&singleAction.ID, &singleAction.Type, &singleAction.Title, &singleAction.Content, &singleAction.IssuedAt, &rawUserID)
 
-		user, _, err := GetUser(rawUserID)
-		if err != nil {
-			return make([]models.Action, 0), err
+		if rawUserID.Valid {
+			user, _, err := GetUser(rawUserID.Int64)
+			if err != nil {
+				return make([]models.Action, 0), err
+			}
+
+			singleAction.IssuedBy.Valid = true
+			singleAction.IssuedBy.Issuer = user
 		}
 
-		singleAction.IssuedBy = user
 		actions = append(actions, singleAction)
 	}
 
@@ -32,8 +37,15 @@ func GetActions(TicketID int64) ([]models.Action, error) {
 }
 
 //AddAction adds an action to a ticket
-func AddAction(TicketID int64, Type models.ActionType, Title, Content string, IssuedBy int64) (int64, error) {
+func AddAction(TicketID int64, Type models.ActionType, Title, Content string, IssuedBy models.Issuer) (int64, error) {
 	var newID int64
-	err := Connection.QueryRow(`INSERT INTO "Actions" ("Type", "Title", "Content", "Ticket", "IssuedAt", "IssuedBy") VALUES ($1,$2,$3,$4,$5,$6) RETURNING "ID"`, Type, Title, Content, TicketID, time.Now(), IssuedBy).Scan(&newID)
+
+	var issuedByReal sql.NullInt64
+	if IssuedBy.Valid {
+		issuedByReal.Valid = true
+		issuedByReal.Int64 = IssuedBy.Issuer.ID
+	}
+
+	err := Connection.QueryRow(`INSERT INTO "Actions" ("Type", "Title", "Content", "Ticket", "IssuedAt", "IssuedBy") VALUES ($1,$2,$3,$4,$5,$6) RETURNING "ID"`, Type, Title, Content, TicketID, time.Now(), issuedByReal).Scan(&newID)
 	return newID, err
 }
