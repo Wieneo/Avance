@@ -307,6 +307,20 @@ func CreateTicketsInQueue(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	severity, _, err := db.GetSeverity(projectid, severityid)
+	if err != nil {
+		w.WriteHeader(500)
+		dev.ReportError(err, w, err.Error())
+		return
+	}
+
+	status, _, err := db.GetStatus(projectid, statusid)
+	if err != nil {
+		w.WriteHeader(500)
+		dev.ReportError(err, w, err.Error())
+		return
+	}
+
 	if !found {
 		w.WriteHeader(404)
 		dev.ReportUserError(w, "Severity "+req.Severity+" couldn't be found")
@@ -327,7 +341,7 @@ func CreateTicketsInQueue(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//Now everything should be ok
-	id, err := db.CreateTicket(req.Title, req.Description, queueid, ownedByNobody, ownerID, severityid, statusid, isStalled, req.StalledUntil)
+	id, err := db.CreateTicket(req.Title, req.Description, queueid, ownedByNobody, ownerID, severity, status, isStalled, req.StalledUntil)
 	if err != nil {
 		w.WriteHeader(500)
 		dev.ReportError(err, w, err.Error())

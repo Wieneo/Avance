@@ -99,7 +99,7 @@ func CreateAction(w http.ResponseWriter, r *http.Request) {
 		title = "Answer was added"
 	}
 
-	id, err := db.AddAction(ticketid, action.Type, title, action.Content, user.ID)
+	id, err := db.AddAction(ticketid, action.Type, title, action.Content, models.Issuer{Valid: true, Issuer: user})
 	if err != nil {
 		w.WriteHeader(500)
 		dev.ReportError(err, w, err.Error())

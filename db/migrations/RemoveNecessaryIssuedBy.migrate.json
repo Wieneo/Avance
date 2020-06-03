@@ -1,0 +1,5 @@
+{
+    "Name": "RemoveNecessaryIssueByFromActions",
+    "Targets": ["rnib.sql"],
+    "After": "{{BASE}}"
+}

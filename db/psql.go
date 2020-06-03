@@ -90,14 +90,20 @@ func migrate(ApplyMigrations bool) {
 				qid, _ := CreateQueue("Development", projectid)
 				statusid, _ := CreateStatus(true, "Open", "green", true, projectid)
 				severityid, _ := CreateSeverity(true, "Normal", "green", 10, projectid)
-				ticket1, _ := CreateTicket("Pipeline broken", "My pipeline is broken!", qid, true, 0, severityid, statusid, false, "")
-				ticket2, _ := CreateTicket("Create User", "Please create a user for my new staff member!", qid, false, userid, severityid, statusid, false, "")
+
+				severity, _, _ := GetSeverityUNSAFE(severityid)
+				status, _, _ := GetStatusUNSAFE(statusid)
+
+				ticket1, _ := CreateTicket("Pipeline broken", "My pipeline is broken!", qid, true, 0, severity, status, false, "")
+				ticket2, _ := CreateTicket("Create User", "Please create a user for my new staff member!", qid, false, userid, severity, status, false, "")
 				AddRelation(ticket1, ticket2, models.ParentOf)
 				AddRelation(ticket2, ticket1, models.ReferencedBy)
-				AddAction(ticket1, models.Comment, "Comment was added", "This is the first comment on this new instance!", userid)
-				AddAction(ticket1, models.Answer, "Answer was added", "This is the first answer on this new instance!", userid)
-				AddAction(ticket2, models.Answer, "Answer was added", "This is the second Answer on this new instance!<br>Even with <i>formatting</i>", userid)
 
+				user, _, _ := GetUser(userid)
+
+				AddAction(ticket1, models.Comment, "Comment was added", "This is the first comment on this new instance!", models.Issuer{Valid: true, Issuer: user})
+				AddAction(ticket1, models.Answer, "Answer was added", "This is the first answer on this new instance!", models.Issuer{Valid: true, Issuer: user})
+				AddAction(ticket2, models.Answer, "Answer was added", "This is the second Answer on this new instance!<br>Even with <i>formatting</i>", models.Issuer{Valid: true, Issuer: user})
 			}
 			return
 		}
