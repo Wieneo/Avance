@@ -1,6 +1,7 @@
 package endpoints
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -477,7 +478,7 @@ func DeactivateUser(w http.ResponseWriter, r *http.Request) {
 	RemoveProfilePicture(w, r)
 
 	data, _ := json.Marshal(req)
-	taskid, err := db.CreateTask(models.DeleteUser, string(data))
+	taskid, err := db.CreateTask(models.DeleteUser, string(data), sql.NullInt32{Valid: false})
 	if err != nil {
 		w.WriteHeader(500)
 		dev.ReportError(err, w, err.Error())

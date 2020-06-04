@@ -1,6 +1,7 @@
 package models
 
 import (
+	"database/sql"
 	"fmt"
 	"time"
 )
@@ -20,6 +21,8 @@ type WorkerTask struct {
 	Data     string
 	QueuedAt time.Time
 	Status   WorkerTaskStatus
+	Interval sql.NullInt32
+	LastRun  sql.NullTime
 }
 
 //WorkerTaskType stores the type of the worker task
@@ -28,12 +31,16 @@ type WorkerTaskType int
 const (
 	//DeleteUser triggers the user deletion
 	DeleteUser WorkerTaskType = iota
+	//Debug is used during development to test worker behaviour
+	Debug
 )
 
 func (e WorkerTaskType) String() string {
 	switch e {
 	case DeleteUser:
 		return "Delete User"
+	case Debug:
+		return "Debug"
 	default:
 		return fmt.Sprintf("%d", int(e))
 	}
