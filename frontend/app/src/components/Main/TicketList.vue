@@ -81,13 +81,13 @@
     methods:{
       LoadQueues: async function(){
         this.LoadingTickets = true
-        this.Queues = (await Vue.prototype.$GetRequest("/api/v1/project/" + this.CurrentProject + "/queues"))
+        this.Queues = (await Vue.prototype.$Request("GET", "/api/v1/project/" + this.CurrentProject + "/queues"))
         await this.LoadTickets()
         this.LoadingTickets = false
       },
       LoadTickets: async function(){
         await this.asyncForEach(this.Queues, async (element: any) => {
-          element.Tickets = (await Vue.prototype.$GetRequest("/api/v1/project/" + this.CurrentProject + "/queue/" + element.ID + "/tickets"))
+          element.Tickets = (await Vue.prototype.$Request("GET", "/api/v1/project/" + this.CurrentProject + "/queue/" + element.ID + "/tickets"))
         });
       },
       DisplayTicket: async function(TicketID: number){

@@ -15,13 +15,13 @@
     name: 'AppBar',
     methods:{
       logout: async function(){
-        await Vue.prototype.$GetRequest("/api/v1/logout")
+        await Vue.prototype.$Request("GET", "/api/v1/logout")
         window.location.href = "/login"
       },
       getProjectInfo: async function(ProjectID: number){
           if (!isNaN(ProjectID)){
             if (this.CurrentProjectID != ProjectID){
-              this.CurrentProject = (await Vue.prototype.$GetRequest("/api/v1/project/" + ProjectID))
+              this.CurrentProject = (await Vue.prototype.$Request("GET", "/api/v1/project/" + ProjectID))
               this.CurrentProjectID = ProjectID
             }
           }

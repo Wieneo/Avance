@@ -24,88 +24,30 @@ export function Utils<AxiosPlugOptions>(Vue: typeof _Vue): void {
         const expires = 'expires=' + d.toUTCString()
         document.cookie = Name + '=' + Value + ';' + expires + ';path=/'
     }
-    Vue.prototype.$GetRequest = async (URL: string) => {
-        const resp = await new Promise((resolve) => {
-            const req = new XMLHttpRequest();
-            req.open("GET", URL)
-            req.onreadystatechange = function(evt){
-                if (req.readyState == 4){
-                    try{
-                        const obj = JSON.parse(req.response)
-                        if (obj.Error != undefined){
-                            Vue.prototype.$NotifyError(obj.Error)
-
-                            if (obj.Error === "You are currently not authorized!"){
-                                //Session timed out
-                                window.location.href = "/login"
-                            }
-                        }else{
-                            Vue.prototype.$SetCookie('session', Vue.prototype.$GetCookie('session'), 3600)
-                        }
-                        resolve(obj)
-                    }catch(Exception){
-                        console.log(req)
-                        resolve(null)
-                    }
-                }
-            }
-            req.send()
-        })
-
-        return resp
-    }
-    Vue.prototype.$PostRequest = async (URL: string, Data: any) => {
-        const resp = await new Promise((resolve) => {
-            const req = new XMLHttpRequest();
-            req.open("POST", URL)
-            req.onreadystatechange = function(evt){
-                if (req.readyState == 4){
-                    try{
-                        const obj = JSON.parse(req.response)
-                        if (obj.Error != undefined){
-                            Vue.prototype.$NotifyError(obj.Error)
-
-                            if (obj.Error === "You are currently not authorized!"){
-                                //Session timed out
-                                window.location.href = "/login"
-                            }
-                        }else{
-                            Vue.prototype.$SetCookie('session', Vue.prototype.$GetCookie('session'), 3600)
-                        }
-                        resolve(obj)
-                    }catch(Exception){
-                        console.log(Exception)
-                        resolve(null)
-                    }
-                }
-            }
-            req.send(JSON.stringify(Data))
-        })
-
-        return resp
-    }
     Vue.prototype.$Request = async (Method: string, URL: string, Data: any, Silent = false) => {
         const resp = await new Promise((resolve) => {
             const req = new XMLHttpRequest();
             req.open(Method, URL)
-            req.onreadystatechange = function(evt){
-                if (req.readyState == 4){
-                    try{
+            req.onreadystatechange = function (evt) {
+                if (req.readyState == 4) {
+                    try {
                         const obj = JSON.parse(req.response)
-                        if (obj.Error != undefined){
-                            if (!Silent){
+                        if (obj.Error != undefined) {
+                            if (!Silent) {
                                 Vue.prototype.$NotifyError(obj.Error)
                             }
 
-                            if (obj.Error === "You are currently not authorized!"){
-                                //Session timed out
-                                window.location.href = "/login"
+                            if (obj.Error === "You are currently not authorized!") {
+                                if (!window.location.pathname.startsWith("/login")){
+                                    const destination = encodeURIComponent(window.location.pathname + window.location.search)
+                                    window.location.href = "/login?redirect=" + destination
+                                }
                             }
-                        }else{
+                        } else {
                             Vue.prototype.$SetCookie('session', Vue.prototype.$GetCookie('session'), 3600)
                         }
                         resolve(obj)
-                    }catch(Exception){
+                    } catch (Exception) {
                         console.log(Exception)
                         resolve(null)
                     }

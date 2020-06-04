@@ -60,7 +60,7 @@ export default Vue.extend({
     name: "Login",
     mounted: async function(){
         //Check if session already is valid -> Redirect to main page
-        if ((await Vue.prototype.$GetRequest("/api/v1/session")).Authorized){
+        if ((await Vue.prototype.$Request("GET", "/api/v1/session")).Authorized){
             //window.location.href = "/"
         }
     },
@@ -80,7 +80,15 @@ export default Vue.extend({
           const Result = await Vue.prototype.$Request("POST", "/api/v1/login", {Username: this.Username, Password: this.Password}, true)
           if (Result.Error == undefined){
             Vue.prototype.$SetCookie('session', Result.SessionKey, 3600)
-            window.location.href = "/"
+
+            const params = new URLSearchParams(window.location.search)
+            if (!params.has("redirect")){
+              window.location.href = "/"
+            }else{
+              window.location.href = params.get("redirect") as string
+            }
+
+
           }else{
             this.CredentialsInvalid = true
           }
