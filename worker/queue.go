@@ -46,22 +46,24 @@ func StartQueueService() {
 					} else {
 						dev.LogInfo(fmt.Sprintf("Picked Up Task: (%d) %s %s", task.ID, task.Type.String(), task.QueuedAt.String()))
 						//Everything is fine
+						var Error error
 						switch task.Type {
 						case models.DeleteUser:
 							{
-								err := functions.DeleteUser(task)
-								if err != nil {
-									dev.LogError(err, "Task "+strconv.FormatInt(taskid, 10)+" failed: "+err.Error())
-									task.Status = models.Failed
-								} else {
-									task.Status = models.Finished
-								}
-
-								if db.PatchTask(task) != nil {
-									dev.LogFatal(err, "Couldn't event update task! "+err.Error())
-								}
+								Error = functions.DeleteUser(task)
 								break
 							}
+						}
+
+						if Error != nil {
+							dev.LogError(Error, "Task "+strconv.FormatInt(taskid, 10)+" failed: "+Error.Error())
+							task.Status = models.Failed
+						} else {
+							task.Status = models.Finished
+						}
+
+						if db.PatchTask(task) != nil {
+							dev.LogFatal(Error, "Couldn't event update task! "+Error.Error())
 						}
 					}
 				}
