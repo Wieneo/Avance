@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"regexp"
 	"strconv"
+	"strings"
 	"time"
 
 	"gitlab.gnaucke.dev/tixter/tixter-app/v2/perms"
@@ -92,10 +93,8 @@ func HTTPInit() {
 
 	router.HandleFunc("/api/v1/workers", endpoints.GetWorkers).Methods("GET")
 	router.HandleFunc("/api/v1/worker/{[0-9]{*}}", endpoints.ToggleWorker).Methods("PATCH")
+
 	//Needs to be at the bottom!
-	router.HandleFunc("/", endpoints.ServeAppFrontend).Methods("GET")
-	router.HandleFunc("/settings", endpoints.ServeAppFrontend).Methods("GET")
-	router.HandleFunc("/login", endpoints.ServeAppFrontend).Methods("GET")
 	router.PathPrefix("/").HandlerFunc(endpoints.ServeAssets).Methods("GET")
 
 	srv := &http.Server{
@@ -119,13 +118,16 @@ func loggingMiddleware(next http.Handler) http.Handler {
 
 //sitesForUnauthorized contains all URLs which should be accessible without being logged in
 var sitesForUnauthorized = []string{
-	"/$",
-	"/login$",
-	"/js/*",
-	"/css/*",
-	"/api/v1/session",
-	"/api/v1/health",
-	"/api/v1/ping",
+	"^\\/$",
+	"^\\/\\?.*$",
+	"^\\/settings.*$",
+	"^\\/login*",
+	"^\\/js\\/*",
+	"^\\/css\\/*",
+	"^\\/api\\/v1\\/session$",
+	"^\\/api\\/v1\\/health$",
+	"^\\/api\\/v1\\/ping$",
+	"^\\/api\\/v1\\/login$",
 }
 
 //authorizationMiddleware gets called at every request to check if user is authenticated
@@ -133,13 +135,14 @@ func authorizationMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if !canBeIgnored(r.RequestURI) {
 			if !IsAuthorized(r) {
-				w.WriteHeader(401)
-				json.NewEncoder(w).Encode(struct {
-					Error string
-				}{
-					"You are currently not authorized!",
-				})
-				//http.Redirect(w, r, "/login", 302)
+				if strings.HasPrefix(r.RequestURI, "/api/") {
+					w.WriteHeader(401)
+					json.NewEncoder(w).Encode(struct {
+						Error string
+					}{
+						"You are currently not authorized!",
+					})
+				}
 				return
 			}
 		}

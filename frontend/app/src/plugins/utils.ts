@@ -38,9 +38,10 @@ export function Utils<AxiosPlugOptions>(Vue: typeof _Vue): void {
                             }
 
                             if (obj.Error === "You are currently not authorized!") {
-                                //Session timed out
-                                const destination = encodeURIComponent(window.location.pathname + window.location.search)
-                                window.location.href = "/login?redirect=" + destination
+                                if (!window.location.pathname.startsWith("/login")){
+                                    const destination = encodeURIComponent(window.location.pathname + window.location.search)
+                                    window.location.href = "/login?redirect=" + destination
+                                }
                             }
                         } else {
                             Vue.prototype.$SetCookie('session', Vue.prototype.$GetCookie('session'), 3600)
