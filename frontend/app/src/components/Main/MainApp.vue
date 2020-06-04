@@ -94,7 +94,7 @@ export default Vue.extend({
         },
         GetTicket: async function(TicketID: number){
             this.TicketLoading = true
-            this.CurrentTicket = (await Vue.prototype.$GetRequest("/api/v1/ticket/" + TicketID))
+            this.CurrentTicket = (await Vue.prototype.$Request("GET", "/api/v1/ticket/" + TicketID))
             this.TicketLoading = false
         }
     }

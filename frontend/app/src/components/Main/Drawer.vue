@@ -183,7 +183,7 @@
         }
     },
     mounted: async function(){
-        const data =  await Vue.prototype.$GetRequest("/api/v1/profile")
+        const data =  await Vue.prototype.$Request("GET", "/api/v1/profile")
         //Assign so we dont create a reference here
         Object.assign(this.UserInfo, data);
         Object.assign(this.ChangedProfileInfo, data);
