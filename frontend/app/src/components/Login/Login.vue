@@ -85,7 +85,7 @@ export default Vue.extend({
             if (!params.has("redirect")){
               window.location.href = "/"
             }else{
-              window.location.href = params.get("redirect")
+              window.location.href = params.get("redirect") as string
             }
 
 
