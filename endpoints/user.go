@@ -455,7 +455,13 @@ func DeactivateUser(w http.ResponseWriter, r *http.Request) {
 		var remainingAdmins int64 = 0
 		for _, k := range users {
 			if k.ID != req.ID {
-				tempperms, _ := perms.CombinePermissions(k)
+				tempperms, err := perms.CombinePermissions(k)
+				if err != nil {
+					w.WriteHeader(500)
+					dev.ReportError(err, w, err.Error())
+					return
+				}
+
 				if tempperms.Admin {
 					remainingAdmins++
 				}
