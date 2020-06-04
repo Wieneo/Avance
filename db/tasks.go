@@ -1,6 +1,7 @@
 package db
 
 import (
+	"database/sql"
 	"time"
 
 	"gitlab.gnaucke.dev/tixter/tixter-app/v2/models"
@@ -15,16 +16,16 @@ func ReserveTask() (int64, error) {
 }
 
 //CreateTask queues a task
-func CreateTask(Type models.WorkerTaskType, Data string) (int64, error) {
+func CreateTask(Type models.WorkerTaskType, Data string, Interval sql.NullInt32) (int64, error) {
 	var taskID int64
-	err := Connection.QueryRow(`INSERT INTO "Tasks" ("Task", "QueuedAt", "Status", "Type") VALUES ($1, $2, $3, $4) RETURNING "ID"`, Data, time.Now(), models.Idle, Type).Scan(&taskID)
+	err := Connection.QueryRow(`INSERT INTO "Tasks" ("Task", "QueuedAt", "Status", "Type", "Interval") VALUES ($1, $2, $3, $4, $5) RETURNING "ID"`, Data, time.Now(), models.Idle, Type, Interval).Scan(&taskID)
 	return taskID, err
 }
 
 //GetTask returns the task to a give ID
 func GetTask(TaskID int64) (models.WorkerTask, error) {
 	var workerTask models.WorkerTask
-	err := Connection.QueryRow(`SELECT "ID", "Task", "QueuedAt", "Status", "Type" FROM "Tasks" WHERE "ID" = $1`, TaskID).Scan(&workerTask.ID, &workerTask.Data, &workerTask.QueuedAt, &workerTask.Status, &workerTask.Type)
+	err := Connection.QueryRow(`SELECT "ID", "Task", "QueuedAt", "Status", "Type", "Interval", "LastRun" FROM "Tasks" WHERE "ID" = $1`, TaskID).Scan(&workerTask.ID, &workerTask.Data, &workerTask.QueuedAt, &workerTask.Status, &workerTask.Type, &workerTask.Interval, &workerTask.LastRun)
 	if err != nil {
 		return models.WorkerTask{}, err
 	}
@@ -34,6 +35,6 @@ func GetTask(TaskID int64) (models.WorkerTask, error) {
 
 //PatchTask patches the task in the database. Ignores QueuedAt!
 func PatchTask(Task models.WorkerTask) error {
-	_, err := Connection.Exec(`UPDATE "Tasks" SET "Task" = $1, "Status" = $2, "Type" = $3 WHERE "ID" = $4`, Task.Data, Task.Status, Task.Type, Task.ID)
+	_, err := Connection.Exec(`UPDATE "Tasks" SET "Task" = $1, "Status" = $2, "Type" = $3, "Interval" = $4, "LastRun" = $5 WHERE "ID" = $6`, Task.Data, Task.Status, Task.Type, Task.Interval, Task.LastRun, Task.ID)
 	return err
 }

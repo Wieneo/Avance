@@ -46,22 +46,40 @@ func StartQueueService() {
 					} else {
 						dev.LogInfo(fmt.Sprintf("Picked Up Task: (%d) %s %s", task.ID, task.Type.String(), task.QueuedAt.String()))
 						//Everything is fine
+						var Error error
 						switch task.Type {
 						case models.DeleteUser:
 							{
-								err := functions.DeleteUser(task)
-								if err != nil {
-									dev.LogError(err, "Task "+strconv.FormatInt(taskid, 10)+" failed: "+err.Error())
-									task.Status = models.Failed
-								} else {
-									task.Status = models.Finished
-								}
-
-								if db.PatchTask(task) != nil {
-									dev.LogFatal(err, "Couldn't event update task! "+err.Error())
-								}
+								Error = functions.DeleteUser(task)
 								break
 							}
+						case models.Debug:
+							{
+								dev.LogInfo("Debug Task triggered")
+								break
+							}
+						}
+
+						if !task.Interval.Valid {
+							if Error != nil {
+								dev.LogError(Error, "Task "+strconv.FormatInt(taskid, 10)+" failed: "+Error.Error())
+								task.Status = models.Failed
+							} else {
+								task.Status = models.Finished
+							}
+						} else {
+							if Error != nil {
+								dev.LogError(Error, "Reoccuring Task "+strconv.FormatInt(taskid, 10)+" failed: "+Error.Error())
+							} else {
+								task.Status = models.Idle
+								task.LastRun.Valid = true
+								task.LastRun.Time = time.Now()
+								dev.LogInfo(fmt.Sprintf("Finished Task: (%d) %s -> Next Run in %d Seconds", task.ID, task.Type.String(), task.Interval.Int32))
+							}
+						}
+
+						if err := db.PatchTask(task); err != nil {
+							dev.LogFatal(err, "Couldn't event update task! "+err.Error())
 						}
 					}
 				}

@@ -84,15 +84,21 @@ func DumbGetUser(UserID int64) (models.User, error) {
 //GetALLUsers returns all users from the database. This should be used with caution as it can cause many cpu cycles
 func GetALLUsers() ([]models.User, error) {
 	users := make([]models.User, 0)
-	rows, err := Connection.Query(`SELECT "ID", "Username", "Firstname", "Lastname", "Mail" FROM "Users" WHERE "Active" = true`)
+	rows, err := Connection.Query(`SELECT "ID" FROM "Users" WHERE "Active" = true`)
 	if err != nil {
 		dev.LogError(err, "Error occured while getting users: "+err.Error())
 		return make([]models.User, 0), err
 	}
 
 	for rows.Next() {
-		var singleUser models.User
-		rows.Scan(&singleUser.ID, &singleUser.Username, &singleUser.Firstname, &singleUser.Lastname, &singleUser.Mail)
+		var userID int64
+		rows.Scan(&userID)
+
+		singleUser, err := DumbGetUser(userID)
+		if err != nil {
+			return make([]models.User, 0), err
+		}
+
 		users = append(users, singleUser)
 	}
 
