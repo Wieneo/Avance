@@ -12,7 +12,6 @@
                 </v-col>
                 <v-col v-if="CurrentTicketID != 0">
                      <v-tabs
-                        v-model="tab"
                         background-color="primary"
                         dark
                         height="40px"
@@ -71,12 +70,14 @@ export default Vue.extend({
     },
     methods:{
         HandleRouteChange: function(){
+            let ticketChanged = false
             if(this.$route.query.ticket != undefined){
                 const ticketID = parseInt(this.$route.query.ticket as string)
                 if (!isNaN(ticketID)){
                     if (this.CurrentTicketID != ticketID){
                         this.GetTicket(ticketID)
                         this.CurrentTicketID = ticketID
+                        ticketChanged = true
                     }
                 }
             }
@@ -86,8 +87,11 @@ export default Vue.extend({
                 if (!isNaN(projectID)){
                     if (this.CurrentProjectID != projectID){
                         this.CurrentProjectID = projectID
-                        this.CurrentTicketID = 0
-                        this.CurrentTicket = {}
+                                                //This is to prevent issues on initial loading
+                        if (!ticketChanged){
+                            this.CurrentTicketID = 0
+                            this.CurrentTicket = {}
+                        }
                     }
                 }
             }

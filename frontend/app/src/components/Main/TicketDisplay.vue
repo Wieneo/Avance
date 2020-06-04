@@ -6,12 +6,11 @@
                   <div style="height: 40px; background-color: #1976d2;">&nbsp;</div>
                 </v-col>
               </v-row>
-              <v-skeleton-loader
-                :loading="TicketLoading"
+              <v-skeleton-loader v-if="TicketLoading"
                 transition="fade-transition"
                 type="article"
-              >
-              <v-row style="margin-top: 0px; padding-top: 0px; max-height: calc(100vh - 88px);" class="overflow-y-auto">
+              ></v-skeleton-loader>
+              <v-row style="margin-top: 0px; padding-top: 0px; max-height: calc(100vh - 88px);" class="overflow-y-auto" v-else>
                 <v-col style="margin-top: 0px; padding-top: 0px;">
                   <v-card-title>{{CurrentTicket.Title}}</v-card-title>
                   <v-card-subtitle>{{CurrentTicket.Description}}</v-card-subtitle>
@@ -69,7 +68,6 @@
                   </v-card-text>
                 </v-col>
               </v-row>
-              </v-skeleton-loader>
             </v-card>
     </div>
 </template>
