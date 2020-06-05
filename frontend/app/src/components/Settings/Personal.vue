@@ -3,7 +3,6 @@
         <v-row>
             <v-col>
                 <v-card>
-                    <v-card-title class="headline">Your Profile</v-card-title>
                     <v-card-text>
                         <div style="text-align: center;">
                             <v-list-item-avatar style="width: 128px; height: 128px;">

@@ -12,16 +12,6 @@ func GetAllowedImageFormates() []string {
 	return []string{"png", "jpg", "jpeg", "gif"}
 }
 
-//User is the default user struct from the database
-type User struct {
-	ID          int64
-	Username    string
-	Mail        string
-	Permissions Permissions
-	Firstname   string
-	Lastname    string
-}
-
 //Group is the default Group struct from the database
 type Group struct {
 	ID          int64
