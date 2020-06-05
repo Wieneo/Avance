@@ -150,8 +150,12 @@
      },
     methods:{
         GoToSettings: function(){
-            this.$router.push({ path: '/settings', query: {setting: 0} })
-            this.ShowUserMenu = false
+            try{
+                this.$router.push({ path: '/settings', query: { setting: "0" } })
+            }finally{
+                this.ShowUserMenu = false
+            }
+            
         }
     }
   })
