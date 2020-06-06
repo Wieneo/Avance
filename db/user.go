@@ -64,6 +64,22 @@ func getUser(UserID int64, RespectActive bool) (models.User, bool, error) {
 	return Requested, true, nil
 }
 
+//GetSettings populates the Settings struct in the User struct
+func GetSettings(User *models.User) error {
+	var RawSettings string
+	err := Connection.QueryRow(`SELECT "Settings" FROM "Users" WHERE "ID" = $1`, User.ID).Scan(&RawSettings)
+
+	if err != nil {
+		return err
+	}
+
+	if err := json.Unmarshal([]byte(RawSettings), &User.Settings); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 //GetALLUsers returns all users from the database. This should be used with caution as it can cause many cpu cycles
 func GetALLUsers() ([]models.User, error) {
 	users := make([]models.User, 0)
