@@ -30,6 +30,12 @@ func GetProfile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if err := db.GetSettings(&user); err != nil {
+		w.WriteHeader(500)
+		dev.ReportError(err, w, err.Error())
+		return
+	}
+
 	json.NewEncoder(w).Encode(user)
 }
 
