@@ -86,6 +86,7 @@ Mail:        string;
 Firstname:   string;
 Lastname:    string;
 Password:    string;
+Settings:    {};
 }
 
 const UserInfo: User = {
@@ -94,7 +95,8 @@ const UserInfo: User = {
     Firstname: "",
     Lastname: "",
     Mail: "",
-    Password: ""
+    Password: "",
+    Settings: {}
 }
 
 //Initialize seperately so we don't create a reference
@@ -104,7 +106,8 @@ const ChangedProfileInfo: User = {
     Firstname: "",
     Lastname: "",
     Mail: "",
-    Password: ""
+    Password: "",
+    Settings: {}
 }
 
 export default Vue.extend({

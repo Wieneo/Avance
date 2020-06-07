@@ -77,6 +77,11 @@ func GetSettings(User *models.User) error {
 		return err
 	}
 
+	//Make them human readable
+	for _, k := range User.Settings.EnabledNotificationChannels {
+		User.Settings.EnabledNotificationChannelsReadable = append(User.Settings.EnabledNotificationChannelsReadable, k.String())
+	}
+
 	return nil
 }
 
