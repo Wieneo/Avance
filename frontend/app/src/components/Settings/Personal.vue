@@ -44,55 +44,21 @@ interface JsonError {
     Error:    string;
 }
 
-interface User {
-ID:          number;
-Username:    string;
-Mail:        string;
-Firstname:   string;
-Lastname:    string;
-Password:    string;
-}
-
-const UserInfo: User = {
-    ID: 0,
-    Username: "",
-    Firstname: "",
-    Lastname: "",
-    Mail: "",
-    Password: ""
-}
-
-//Initialize seperately so we don't create a reference
-const ChangedProfileInfo: User = {
-    ID: 0,
-    Username: "",
-    Firstname: "",
-    Lastname: "",
-    Mail: "",
-    Password: ""
-}
 
 export default Vue.extend({
     name: 'Personal',
+    props: ["UserInfo", "ChangedProfileInfo"],
     data: function(){
         return {
             NewPassword1: "",
             NewPassword2: "",
             Loading: false,
-            UserInfo,
-            ChangedProfileInfo,
             ShowAvatarDeleteConfirmation: false,
             rules: [
                 value => !!value || 'Required.',
             ] as ((value: any) => true | "Required.")[],
             IFrameLoaded: false,
         }
-    },
-    mounted: async function(){
-        const data =  await Vue.prototype.$Request("GET", "/api/v1/profile")
-        //Assign so we dont create a reference here
-        Object.assign(this.UserInfo, data);
-        Object.assign(this.ChangedProfileInfo, data);
     },
     computed: {
         // a computed getter

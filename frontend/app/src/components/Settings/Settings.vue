@@ -30,10 +30,10 @@
           </v-tab>
 
           <v-tab-item class="overflow-y-auto" style="max-height: calc(100vh - 130px);">
-            <Personal />
+            <Personal v-bind:UserInfo="UserInfo" v-bind:ChangedProfileInfo="ChangedProfileInfo"/>
           </v-tab-item>
           <v-tab-item class="overflow-y-auto" style="max-height: calc(100vh - 130px);">
-            <Notifications />
+            <Notifications v-bind:UserInfo="UserInfo"/>
           </v-tab-item>
           <v-tab-item class="overflow-y-auto" style="max-height: calc(100vh - 130px);">
             <Instance />
@@ -78,6 +78,35 @@ interface Permissions {
 }
 let Permissions: Permissions
 
+
+interface User {
+ID:          number;
+Username:    string;
+Mail:        string;
+Firstname:   string;
+Lastname:    string;
+Password:    string;
+}
+
+const UserInfo: User = {
+    ID: 0,
+    Username: "",
+    Firstname: "",
+    Lastname: "",
+    Mail: "",
+    Password: ""
+}
+
+//Initialize seperately so we don't create a reference
+const ChangedProfileInfo: User = {
+    ID: 0,
+    Username: "",
+    Firstname: "",
+    Lastname: "",
+    Mail: "",
+    Password: ""
+}
+
 export default Vue.extend({
   name: "Settings",
   components: {
@@ -93,13 +122,20 @@ export default Vue.extend({
   data: function() {
     return {
       Permissions,
-      SelectedTab: 0
+      SelectedTab: 0,
+      UserInfo,
+      ChangedProfileInfo
     };
   },
   mounted: async function() {
     const user = await Vue.prototype.$Request("GET", "/api/v1/profile");
     this.Permissions = await Vue.prototype.$Request("GET", "/api/v1/user/" + user.ID + "/permissions")
     this.SelectRightTab()
+
+    const data =  await Vue.prototype.$Request("GET", "/api/v1/profile")
+    //Assign so we dont create a reference here
+    Object.assign(this.UserInfo, data);
+     Object.assign(this.ChangedProfileInfo, data);
   },
   watch:{
       $route (to, from){
