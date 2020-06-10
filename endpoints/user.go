@@ -100,7 +100,7 @@ func PatchSettings(w http.ResponseWriter, r *http.Request) {
 	err = json.Unmarshal(rawBytes, &newSettings)
 	if err != nil {
 		w.WriteHeader(400)
-		dev.ReportUserError(w, "JSON body is malformed")
+		dev.ReportUserError(w, "JSON body is malformed: "+err.Error())
 		return
 	}
 

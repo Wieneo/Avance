@@ -14,6 +14,27 @@
                         <v-checkbox v-model="UserInfo.Settings.Notification.TelegramNotificationEnabled" label="Telegram (Coming soon)" value="Telegram" disabled></v-checkbox>
                     </v-card-text>
                 </v-card>
+                <v-card style="margin-top: 20px">
+                    <v-card-title>
+                        Mail Settings
+                    </v-card-title>
+                    <v-card-text>
+                        <v-overlay :absolute=true :value="!UserInfo.Settings.Notification.MailNotificationEnabled">
+                        </v-overlay>
+                        <v-overlay :absolute=true :value="MailSettingsLoading">
+                            <v-progress-circular indeterminate size="64"></v-progress-circular>
+                        </v-overlay>
+                        <v-text-field
+                            v-model="UserInfo.Settings.Notification.NotificationFrequency"
+                            :rules="frequencyRules"
+                            label="Frequency (Seconds)"
+                            required
+                            @keyup="StartMailSettingsTimer"
+                            @keydown="ResetMailSettingsTimer"
+                            type="number"
+                        ></v-text-field>
+                    </v-card-text>
+                </v-card>
             </v-col>
         </v-row>
     </v-container>
@@ -23,10 +44,16 @@ import Vue from 'vue'
 
 export default Vue.extend({
     name: 'Notifications',
-    props:["UserInfo"],
+    props: ["UserInfo"],
     data: function() {
         return {
-            ChannelsLoading: false
+            ChannelsLoading: false,
+            MailSettingsLoading: false,
+            frequencyRules: [
+                v => !!v || 'Frequency is required',
+                v => /^[0-9]*$/.test(v) || 'Frequency must be a positive number',
+            ],
+            MailSettingsTypingTimeout: 0
         }
     },
     methods:{
@@ -37,7 +64,24 @@ export default Vue.extend({
             }
             this.ChannelsLoading = false
         },
+        ResetMailSettingsTimer: function(){
+            clearTimeout(this.MailSettingsTypingTimeout);
+        },
+        StartMailSettingsTimer: function(){
+            clearTimeout(this.MailSettingsTypingTimeout);
+            this.MailSettingsTypingTimeout = setTimeout(this.UpdateMailSettings, 2000);
+        },
+        UpdateMailSettings: async function(){
+            this.MailSettingsLoading = true
+            if (!(await this.Update())){
+                this.$emit('refreshUserInfo')
+            }
+            this.MailSettingsLoading = false
+        },
         Update: async function(): Promise<boolean>{
+            //Fix Typings
+            this.UserInfo.Settings.Notification.NotificationFrequency = Number.parseInt(this.UserInfo.Settings.Notification.NotificationFrequency)
+
             const result = await Vue.prototype.$Request("PATCH", "/api/v1/profile/settings", this.UserInfo.Settings)
             if (result.Error == undefined){
                 return true

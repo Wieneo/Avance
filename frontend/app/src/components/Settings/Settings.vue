@@ -79,6 +79,7 @@ interface Permissions {
 let Permissions: Permissions
 
 
+
 interface User {
 ID:          number;
 Username:    string;
@@ -86,29 +87,12 @@ Mail:        string;
 Firstname:   string;
 Lastname:    string;
 Password:    string;
-Settings:    {};
+Settings:     {};
 }
-
-const UserInfo: User = {
-    ID: 0,
-    Username: "",
-    Firstname: "",
-    Lastname: "",
-    Mail: "",
-    Password: "",
-    Settings: {}
-}
+const UserInfo = {} as User
 
 //Initialize seperately so we don't create a reference
-const ChangedProfileInfo: User = {
-    ID: 0,
-    Username: "",
-    Firstname: "",
-    Lastname: "",
-    Mail: "",
-    Password: "",
-    Settings: {}
-}
+const ChangedProfileInfo = {} as User
 
 export default Vue.extend({
   name: "Settings",
