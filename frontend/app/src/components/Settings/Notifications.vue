@@ -64,6 +64,8 @@ export default Vue.extend({
             this.ChannelsLoading = true
             if (!(await this.Update())){
                 this.$emit('refreshUserInfo')
+            }else{
+                Vue.prototype.$NotifySuccess("Settings updated")
             }
             this.ChannelsLoading = false
         },
@@ -78,6 +80,8 @@ export default Vue.extend({
             this.MailSettingsLoading = true
             if (!(await this.Update())){
                 this.$emit('refreshUserInfo')
+            }else{
+                Vue.prototype.$NotifySuccess("Settings updated")
             }
             this.MailSettingsLoading = false
         },
