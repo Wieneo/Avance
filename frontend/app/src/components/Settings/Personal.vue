@@ -28,12 +28,23 @@
                     </v-card-text>
                     <v-card-actions>
                     <v-spacer></v-spacer>
-                    <v-btn color="orange darken-1" text @click="ResetInput">Reset</v-btn>
                     <v-btn color="green darken-1" text @click="SaveChanges" :loading="Loading">Save</v-btn>
                     </v-card-actions>
                 </v-card>
             </v-col>
         </v-row>
+         <v-dialog v-model="ShowAvatarDeleteConfirmation" persistent max-width="380">
+            <v-card>
+                <v-card-title class="headline">Are you sure?</v-card-title>
+                <v-card-text>Do you really want to remove your Profile Picture?<br>This change will take effect immediately!</v-card-text>
+                <v-card-actions>
+                    <v-spacer></v-spacer>
+                    <v-btn color="orange darken-1" text @click="ShowAvatarDeleteConfirmation = false">ABORT</v-btn>
+                    <v-btn color="red darken-1" text @click="deleteProfilePicture">DELETE</v-btn>
+                </v-card-actions>
+
+            </v-card>
+        </v-dialog>
         <iframe name="submitDeflector" style="display: none;" id="submitDeflector" @load="HandleUploadFinish"> </iframe>
     </v-container>
 </template>
@@ -67,11 +78,6 @@ export default Vue.extend({
         }
      },
     methods:{
-        ResetInput: function(){
-            Object.assign(this.ChangedProfileInfo, this.UserInfo)
-            this.NewPassword1 = ""
-            this.NewPassword2 = ""
-        },
         SaveChanges: async function(){
             if (this.NewPassword1.trim().length > 0){
                 if (this.NewPassword1 == this.NewPassword2){

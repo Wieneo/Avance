@@ -61,19 +61,6 @@
             </v-list>
         </template>
         <ProjectsContainer v-bind:showProjects="showProjects" v-on:closeProjects="showProjects = false"/>
-
-        <v-dialog v-model="ShowAvatarDeleteConfirmation" persistent max-width="380">
-            <v-card>
-                <v-card-title class="headline">Are you sure?</v-card-title>
-                <v-card-text>Do you really want to remove your Profile Picture?<br>This change will take effect immediately!</v-card-text>
-                <v-card-actions>
-                    <v-spacer></v-spacer>
-                    <v-btn color="orange darken-1" text @click="ShowAvatarDeleteConfirmation = false">ABORT</v-btn>
-                    <v-btn color="red darken-1" text @click="deleteProfilePicture">DELETE</v-btn>
-                </v-card-actions>
-
-            </v-card>
-        </v-dialog>
     </v-navigation-drawer>
 </template>
 
@@ -155,7 +142,6 @@
             }finally{
                 this.ShowUserMenu = false
             }
-            
         }
     }
   })
