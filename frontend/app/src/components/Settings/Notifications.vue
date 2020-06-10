@@ -55,7 +55,7 @@ export default Vue.extend({
             frequencyRules: [
                 v => !!v || 'Frequency is required',
                 v => /^[0-9]*$/.test(v) || 'Frequency must be a positive number',
-            ],
+            ] as ((value: any) => true | "Frequency is required.")[],
             MailSettingsTypingTimeout: 0
         }
     },
