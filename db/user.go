@@ -77,11 +77,6 @@ func GetSettings(User *models.User) error {
 		return err
 	}
 
-	//Make them human readable
-	for _, k := range User.Settings.EnabledNotificationChannels {
-		User.Settings.EnabledNotificationChannelsReadable = append(User.Settings.EnabledNotificationChannelsReadable, k.String())
-	}
-
 	return nil
 }
 
@@ -109,9 +104,16 @@ func GetALLUsers() ([]models.User, error) {
 	return users, nil
 }
 
-//PatchUser patches the given user. It DOES NOT update permissions and the password
+//PatchUser patches the given user. It DOES NOT update permissions, settings and the password
 func PatchUser(User models.User) error {
 	_, err := Connection.Exec(`UPDATE "Users" SET "Username" = $1, "Firstname" = $2, "Lastname" = $3, "Mail" = $4 WHERE "ID" = $5`, User.Username, User.Firstname, User.Lastname, User.Mail, User.ID)
+	return err
+}
+
+//PatchSettings persists the current settings struct in the user struct
+func PatchSettings(User models.User) error {
+	rawBytes, _ := json.Marshal(User.Settings)
+	_, err := Connection.Exec(`UPDATE "Users" SET "Settings" = $1 WHERE "ID" = $2`, string(rawBytes), User.ID)
 	return err
 }
 

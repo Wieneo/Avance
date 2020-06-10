@@ -7,11 +7,11 @@
                         Channels
                     </v-card-title>
                     <v-card-text>
-                        <v-overlay absolute=true :value="Loading">
+                        <v-overlay :absolute=true :value="ChannelsLoading">
                             <v-progress-circular indeterminate size="64"></v-progress-circular>
                         </v-overlay>
-                        <v-checkbox v-model="UserInfo.Settings.EnabledNotificationChannelsReadable" label="E-Mail" value="Mail" @click="UpdateChannels"></v-checkbox>
-                        <v-checkbox v-model="UserInfo.Settings.EnabledNotificationChannelsReadable" label="Telegram (Coming soon)" value="Telegram" disabled></v-checkbox>
+                        <v-checkbox v-model="UserInfo.Settings.Notification.MailNotificationEnabled" label="E-Mail" @change="UpdateChannels"></v-checkbox>
+                        <v-checkbox v-model="UserInfo.Settings.Notification.TelegramNotificationEnabled" label="Telegram (Coming soon)" value="Telegram" disabled></v-checkbox>
                     </v-card-text>
                 </v-card>
             </v-col>
@@ -26,14 +26,23 @@ export default Vue.extend({
     props:["UserInfo"],
     data: function() {
         return {
-            Loading: false
+            ChannelsLoading: false
         }
     },
     methods:{
         UpdateChannels: async function(){
-            this.Loading = true
-            
-            this.Loading = false
+            this.ChannelsLoading = true
+            if (!(await this.Update())){
+                this.$emit('refreshUserInfo')
+            }
+            this.ChannelsLoading = false
+        },
+        Update: async function(): Promise<boolean>{
+            const result = await Vue.prototype.$Request("PATCH", "/api/v1/profile/settings", this.UserInfo.Settings)
+            if (result.Error == undefined){
+                return true
+            }
+            return false
         }
     }
 })
