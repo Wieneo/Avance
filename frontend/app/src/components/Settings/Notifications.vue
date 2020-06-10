@@ -33,6 +33,9 @@
                             @keydown="ResetMailSettingsTimer"
                             type="number"
                         ></v-text-field>
+                        <v-checkbox v-model="UserInfo.Settings.Notification.NotificationAboutNewTickets" label="Notify about new tickets" @change="UpdateMailSettings"></v-checkbox>
+                        <v-checkbox v-model="UserInfo.Settings.Notification.NotificationAboutUpdates" label="Notify about updates in tickets" @change="UpdateMailSettings"></v-checkbox>
+                        <v-checkbox v-model="UserInfo.Settings.Notification.NotificationAfterInvolvment" label="Notify about updates in tickets you have been involved in" @change="UpdateMailSettings"></v-checkbox>
                     </v-card-text>
                 </v-card>
             </v-col>
