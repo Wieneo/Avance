@@ -13,9 +13,10 @@ import (
 
 //SampleConfig templates the used config
 type SampleConfig struct {
-	Debug    bool
-	Port     int
-	Postgres struct {
+	Debug     bool
+	Port      int
+	SetupDemo bool
+	Postgres  struct {
 		ConnectionString string
 		Host             string
 		Port             int
@@ -67,6 +68,12 @@ func LoadConfig() {
 			CurrentConfig.Debug = false
 		}
 		dev.DeubgLogging = CurrentConfig.Debug
+
+		CurrentConfig.SetupDemo, Error = strconv.ParseBool(os.Getenv("TIX_SetupDemo"))
+		if Error != nil {
+			CurrentConfig.SetupDemo = false
+			dev.LogInfo("TIX_SetupDemo seems not to be a boolean! Assuming \"false\"")
+		}
 
 		//Parse listen port to int
 		CurrentConfig.Port, Error = strconv.Atoi(os.Getenv("TIX_Port"))

@@ -1,0 +1,2 @@
+ALTER TABLE public."Users"
+    ADD COLUMN "Settings" json NOT NULL DEFAULT '{ "Notification": { "MailNotificationEnabled": true, "NotificationFrequency": 600, "NotificationAboutNewTickets": true, "NotificationAboutUpdates": true }}';

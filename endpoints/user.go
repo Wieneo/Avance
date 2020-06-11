@@ -30,6 +30,12 @@ func GetProfile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if err := db.GetSettings(&user); err != nil {
+		w.WriteHeader(500)
+		dev.ReportError(err, w, err.Error())
+		return
+	}
+
 	json.NewEncoder(w).Encode(user)
 }
 
@@ -78,6 +84,39 @@ func GetPermissionsOfUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	json.NewEncoder(w).Encode(reqperms)
+}
+
+//PatchSettings updates the users preferences. WARNING! The full settings struct must be given to the backend in order to update the settings
+func PatchSettings(w http.ResponseWriter, r *http.Request) {
+	user, err := utils.GetUser(r, w)
+	if err != nil {
+		w.WriteHeader(500)
+		dev.ReportError(err, w, err.Error())
+		return
+	}
+
+	var newSettings models.UserSettings
+	rawBytes, _ := ioutil.ReadAll(r.Body)
+	err = json.Unmarshal(rawBytes, &newSettings)
+	if err != nil {
+		w.WriteHeader(400)
+		dev.ReportUserError(w, "JSON body is malformed: "+err.Error())
+		return
+	}
+
+	if newSettings.Notification.NotificationFrequency < 0 {
+		w.WriteHeader(400)
+		dev.ReportUserError(w, "Notification Frequency can't be negative")
+		return
+	}
+
+	user.Settings = newSettings
+	if err := db.PatchSettings(user); err != nil {
+		w.WriteHeader(500)
+		dev.ReportError(err, w, err.Error())
+	} else {
+		json.NewEncoder(w).Encode(user)
+	}
 }
 
 //GetProfilePicture returns the rofile icture of the UserID
@@ -367,6 +406,14 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 		Firstname: req.Firstname,
 		Lastname:  req.Lastname,
 		Mail:      req.Mail,
+		Settings: models.UserSettings{
+			Notification: models.NotificationSettings{
+				MailNotificationEnabled:     true,
+				NotificationAboutNewTickets: false,
+				NotificationAboutUpdates:    true,
+				NotificationFrequency:       300,
+			},
+		},
 	}
 
 	newUser.ID, err = db.CreateUser(newUser, req.Password)

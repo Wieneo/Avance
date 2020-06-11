@@ -39,6 +39,7 @@ func HTTPInit() {
 	router.HandleFunc("/api/v1/profile/avatar", endpoints.UpdateProfilePicture).Methods("POST")
 	router.HandleFunc("/api/v1/profile/avatar", endpoints.RemoveProfilePicture).Methods("DELETE")
 	router.HandleFunc("/api/v1/profile/avatar", endpoints.GetProfilePicture).Methods("GET")
+	router.HandleFunc("/api/v1/profile/settings", endpoints.PatchSettings).Methods("PATCH")
 	router.HandleFunc("/api/v1/profile", endpoints.PatchProfile).Methods("PATCH")
 
 	router.HandleFunc("/api/v1/users", endpoints.GetUsers).Methods("GET")

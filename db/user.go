@@ -27,9 +27,18 @@ func SearchUser(Name string) (int64, bool, error) {
 
 //GetUser returns the user struct from the database
 func GetUser(UserID int64) (models.User, bool, error) {
+	return getUser(UserID, true)
+}
+
+//DumbGetUser returns the user struct from the database ignoring the "Active" field
+func DumbGetUser(UserID int64) (models.User, bool, error) {
+	return getUser(UserID, false)
+}
+
+func getUser(UserID int64, RespectActive bool) (models.User, bool, error) {
 	var Requested models.User
 	var RawPermissions string
-	err := Connection.QueryRow(`SELECT "ID","Username","Mail", "Permissions", "Firstname", "Lastname" FROM "Users" WHERE "ID" = $1 AND "Active" = true`, UserID).Scan(&Requested.ID, &Requested.Username, &Requested.Mail, &RawPermissions, &Requested.Firstname, &Requested.Lastname)
+	err := Connection.QueryRow(`SELECT "ID","Username","Mail", "Permissions", "Firstname", "Lastname" FROM "Users" WHERE "ID" = $1 AND ("Active" = true OR "Active" = $2)`, UserID, RespectActive).Scan(&Requested.ID, &Requested.Username, &Requested.Mail, &RawPermissions, &Requested.Firstname, &Requested.Lastname)
 	if err != nil {
 		if err.Error() == "sql: no rows in result set" {
 			return Requested, false, nil
@@ -55,30 +64,20 @@ func GetUser(UserID int64) (models.User, bool, error) {
 	return Requested, true, nil
 }
 
-//DumbGetUser returns the user struct from the database ignoring the "Active" field
-func DumbGetUser(UserID int64) (models.User, error) {
-	var Requested models.User
-	var RawPermissions string
-	err := Connection.QueryRow(`SELECT "ID","Username","Mail", "Permissions", "Firstname", "Lastname" FROM "Users" WHERE "ID" = $1`, UserID).Scan(&Requested.ID, &Requested.Username, &Requested.Mail, &RawPermissions, &Requested.Firstname, &Requested.Lastname)
+//GetSettings populates the Settings struct in the User struct
+func GetSettings(User *models.User) error {
+	var RawSettings string
+	err := Connection.QueryRow(`SELECT "Settings" FROM "Users" WHERE "ID" = $1`, User.ID).Scan(&RawSettings)
+
 	if err != nil {
-		return Requested, err
+		return err
 	}
 
-	if err := json.Unmarshal([]byte(RawPermissions), &Requested.Permissions); err != nil {
-		return Requested, err
+	if err := json.Unmarshal([]byte(RawSettings), &User.Settings); err != nil {
+		return err
 	}
 
-	//Fix that AccessTo arrays are never null / nil
-	if Requested.Permissions.AccessTo.Projects == nil {
-		Requested.Permissions.AccessTo.Projects = make([]models.ProjectPermission, 0)
-	}
-
-	if Requested.Permissions.AccessTo.Queues == nil {
-		Requested.Permissions.AccessTo.Queues = make([]models.QueuePermission, 0)
-	}
-	////////////////////////////////////////////////
-
-	return Requested, nil
+	return nil
 }
 
 //GetALLUsers returns all users from the database. This should be used with caution as it can cause many cpu cycles
@@ -94,7 +93,7 @@ func GetALLUsers() ([]models.User, error) {
 		var userID int64
 		rows.Scan(&userID)
 
-		singleUser, err := DumbGetUser(userID)
+		singleUser, _, err := DumbGetUser(userID)
 		if err != nil {
 			return make([]models.User, 0), err
 		}
@@ -105,9 +104,16 @@ func GetALLUsers() ([]models.User, error) {
 	return users, nil
 }
 
-//PatchUser patches the given user. It DOES NOT update permissions and the password
+//PatchUser patches the given user. It DOES NOT update permissions, settings and the password
 func PatchUser(User models.User) error {
 	_, err := Connection.Exec(`UPDATE "Users" SET "Username" = $1, "Firstname" = $2, "Lastname" = $3, "Mail" = $4 WHERE "ID" = $5`, User.Username, User.Firstname, User.Lastname, User.Mail, User.ID)
+	return err
+}
+
+//PatchSettings persists the current settings struct in the user struct
+func PatchSettings(User models.User) error {
+	rawBytes, _ := json.Marshal(User.Settings)
+	_, err := Connection.Exec(`UPDATE "Users" SET "Settings" = $1 WHERE "ID" = $2`, string(rawBytes), User.ID)
 	return err
 }
 
@@ -158,8 +164,13 @@ func CreateUser(User models.User, Password string) (int64, error) {
 		return 0, err
 	}
 
+	settingsJSON, err := json.Marshal(User.Settings)
+	if err != nil {
+		return 0, err
+	}
+
 	var newID int64
-	err = Connection.QueryRow(`INSERT INTO "Users" ("Username", "Password", "Mail", "Permissions", "Firstname", "Lastname") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "ID"`, User.Username, string(hash), User.Mail, permsJSON, User.Firstname, User.Lastname).Scan(&newID)
+	err = Connection.QueryRow(`INSERT INTO "Users" ("Username", "Password", "Mail", "Permissions", "Firstname", "Lastname", "Settings") VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING "ID"`, User.Username, string(hash), User.Mail, permsJSON, User.Firstname, User.Lastname, settingsJSON).Scan(&newID)
 	if err != nil {
 		return 0, err
 	}

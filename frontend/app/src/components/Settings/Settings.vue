@@ -30,10 +30,10 @@
           </v-tab>
 
           <v-tab-item class="overflow-y-auto" style="max-height: calc(100vh - 130px);">
-            <Personal />
+            <Personal v-bind:UserInfo="UserInfo" v-bind:ChangedProfileInfo="ChangedProfileInfo"/>
           </v-tab-item>
           <v-tab-item class="overflow-y-auto" style="max-height: calc(100vh - 130px);">
-            <Notifications />
+            <Notifications v-bind:UserInfo="UserInfo" v-on:refreshUserInfo="refreshUserInfo"/>
           </v-tab-item>
           <v-tab-item class="overflow-y-auto" style="max-height: calc(100vh - 130px);">
             <Instance />
@@ -78,6 +78,22 @@ interface Permissions {
 }
 let Permissions: Permissions
 
+
+
+interface User {
+ID:          number;
+Username:    string;
+Mail:        string;
+Firstname:   string;
+Lastname:    string;
+Password:    string;
+Settings:     {};
+}
+const UserInfo = {} as User
+
+//Initialize seperately so we don't create a reference
+const ChangedProfileInfo = {} as User
+
 export default Vue.extend({
   name: "Settings",
   components: {
@@ -93,13 +109,19 @@ export default Vue.extend({
   data: function() {
     return {
       Permissions,
-      SelectedTab: 0
+      SelectedTab: 0,
+      UserInfo,
+      ChangedProfileInfo
     };
   },
   mounted: async function() {
     const user = await Vue.prototype.$Request("GET", "/api/v1/profile");
     this.Permissions = await Vue.prototype.$Request("GET", "/api/v1/user/" + user.ID + "/permissions")
     this.SelectRightTab()
+
+    //Assign so we dont create a reference here
+    Object.assign(this.UserInfo, user);
+    Object.assign(this.ChangedProfileInfo, user);
   },
   watch:{
       $route (to, from){
@@ -123,6 +145,11 @@ export default Vue.extend({
       }finally{
         //Do nothing
       }
+    },
+    refreshUserInfo: async function(){
+      const user = await Vue.prototype.$Request("GET", "/api/v1/profile");
+      this.Permissions = await Vue.prototype.$Request("GET", "/api/v1/user/" + user.ID + "/permissions")
+      Object.assign(this.UserInfo, user);
     }
   }
 });

@@ -84,8 +84,12 @@ func migrate(ApplyMigrations bool) {
 
 			//The following is used to make debugging and developing the APP easier when used with Gitlab Auto DevOPS
 			//Detect if deployed via GITLAB
-			if len(os.Getenv("GITLAB_ENVIRONMENT_NAME")) > 0 {
-				dev.LogInfo("Instance was deployed via Gitlab. Deploying example data")
+			if len(os.Getenv("GITLAB_ENVIRONMENT_NAME")) > 0 || config.CurrentConfig.SetupDemo {
+				if !config.CurrentConfig.SetupDemo {
+					dev.LogInfo("Instance was deployed via Gitlab. Deploying example data")
+				} else {
+					dev.LogInfo("SetupDemo flag has been set! Deploying example data")
+				}
 				projectid, _ := CreateProject("Auto DevOPS", "Default project created by Gitlab Auto DevOPS")
 				qid, _ := CreateQueue("Development", projectid)
 				statusid, _ := CreateStatus(true, "Open", "green", true, projectid)

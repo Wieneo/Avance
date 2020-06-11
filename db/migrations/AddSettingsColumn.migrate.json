@@ -1,0 +1,5 @@
+{
+    "Name": "AddSettingsColumnToUserTable",
+    "Targets": ["60.sql"],
+    "After": "{{BASE}}"
+}
