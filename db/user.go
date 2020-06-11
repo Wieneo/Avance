@@ -164,8 +164,13 @@ func CreateUser(User models.User, Password string) (int64, error) {
 		return 0, err
 	}
 
+	settingsJSON, err := json.Marshal(User.Settings)
+	if err != nil {
+		return 0, err
+	}
+
 	var newID int64
-	err = Connection.QueryRow(`INSERT INTO "Users" ("Username", "Password", "Mail", "Permissions", "Firstname", "Lastname") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "ID"`, User.Username, string(hash), User.Mail, permsJSON, User.Firstname, User.Lastname).Scan(&newID)
+	err = Connection.QueryRow(`INSERT INTO "Users" ("Username", "Password", "Mail", "Permissions", "Firstname", "Lastname", "Settings") VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING "ID"`, User.Username, string(hash), User.Mail, permsJSON, User.Firstname, User.Lastname, settingsJSON).Scan(&newID)
 	if err != nil {
 		return 0, err
 	}

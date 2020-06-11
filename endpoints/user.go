@@ -406,6 +406,14 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 		Firstname: req.Firstname,
 		Lastname:  req.Lastname,
 		Mail:      req.Mail,
+		Settings: models.UserSettings{
+			Notification: models.NotificationSettings{
+				MailNotificationEnabled:     true,
+				NotificationAboutNewTickets: false,
+				NotificationAboutUpdates:    true,
+				NotificationFrequency:       300,
+			},
+		},
 	}
 
 	newUser.ID, err = db.CreateUser(newUser, req.Password)
