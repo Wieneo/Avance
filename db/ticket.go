@@ -44,6 +44,11 @@ func GetTicket(TicketID int64, ResolveRelations bool) (models.Ticket, bool, erro
 		return models.Ticket{}, true, err
 	}
 
+	ticket.Recipients, err = GetRecipients(ticket.ID)
+	if err != nil {
+		return models.Ticket{}, true, err
+	}
+
 	return ticket, true, nil
 }
 

@@ -118,7 +118,35 @@ type Ticket struct {
 	Meta         string //Needs to be changed later!
 	Relations    []Relation
 	Actions      []Action
+	Recipients   RecipientCollection
 }
+
+//RecipientCollection stores all recipients assigned to a single ticket
+type RecipientCollection struct {
+	Requestors, Readers, Admins []Recipient
+}
+
+//Recipient stores a single recipient (mail / known user)
+type Recipient struct {
+	ID   int64
+	User struct {
+		Valid bool
+		Value User
+	}
+	Mail string
+}
+
+//RecipientType is only used to map entries from the database into the 3 arrays used in the RecipientCollection struct
+type RecipientType int
+
+const (
+	//Requestors -> See RecipientCollection
+	Requestors RecipientType = iota
+	//Readers -> See RecipientCollection
+	Readers
+	//Admins -> See RecipientCollection
+	Admins
+)
 
 //Action stores a single update about a ticket
 type Action struct {
