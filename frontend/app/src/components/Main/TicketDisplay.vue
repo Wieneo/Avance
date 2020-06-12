@@ -63,7 +63,32 @@
                   </div>
                   <div style="margin-top: 10px;">
                     <hr style="margin-bottom: 3px;">
-                    Recipients || PLACEHOLDER
+                    <span v-for="req in AllRecipients" :key="req.ID">
+                      <span class="TicketDisplayProperty" title="Requestor" v-if="req.Type == 0"><v-icon>mdi-human-child</v-icon></span>
+                      <span class="TicketDisplayProperty" title="Reader" v-if="req.Type == 1"><v-icon>mdi-magnify</v-icon></span>
+                      <span class="TicketDisplayProperty" title="Admin" v-if="req.Type == 2"><v-icon>mdi-head-minus-outline</v-icon></span>
+                      <i v-if="!req.User.Valid" style="margin-left: 10px;">{{req.Mail}}</i>
+                      <v-menu :offset-x=true :offset-y=true :open-on-hover=true :nudge-width="200" v-else>
+                        <template v-slot:activator="{ on }">
+                          <a style="margin-left: 10px;" v-on="on">{{req.User.Value.Username}}</a>
+                        </template>
+                        <v-card style="text-align: center; overflow-y: hidden;">
+                          <v-card-title primary-title class="justify-center">
+                            <v-list-item-avatar>
+                              <v-img :src="getUserAvatarLink(req.User.Value.ID)"></v-img>
+                            </v-list-item-avatar>
+                            {{req.User.Value.Username}}
+                          </v-card-title>
+                          <v-card-text>
+                            {{req.User.Value.Firstname}} {{req.User.Value.Lastname}}
+                            <br>
+                            Status: <span style="color: green;">TBI</span><br>
+                            Last Seen: <span style="color: green;">TBI</span>
+                          </v-card-text>
+                        </v-card>
+                      </v-menu>
+                      <br>
+                    </span>
                   </div>
                   </v-card-text>
                 </v-col>
@@ -77,6 +102,24 @@
   export default Vue.extend({
     name: 'TicketDisplay',
     props: ["CurrentTicket", "TicketLoading"],
+    computed:{
+      AllRecipients(){
+        const data = []
+        this.CurrentTicket.Recipients.Requestors.forEach(element => {
+          element.Type = 0
+          data.push(element)
+        });
+        this.CurrentTicket.Recipients.Readers.forEach(element => {
+          element.Type = 1
+          data.push(element)
+        });
+        this.CurrentTicket.Recipients.Admins.forEach(element => {
+          element.Type = 2
+          data.push(element)
+        });
+        return data
+      }
+    },
     methods:{
       GoToTicket: async function(TicketID: number){
           try{
@@ -84,7 +127,10 @@
           }finally{
             //Do nothing
           }
-        }
+        },
+      getUserAvatarLink(UserID: number){
+        return '/api/v1/user/' + UserID + '/avatar?' + performance.now()
+      }
     }
   })
 </script>
