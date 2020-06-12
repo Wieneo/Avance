@@ -84,11 +84,24 @@ func GetTicketRelations(TicketID int64) ([]models.Relation, error) {
 func AddRelation(Ticket1, Ticket2 int64, Type models.RelationType) (int64, error) {
 	var newID int64
 	err := Connection.QueryRow(`INSERT INTO "Relations" ("Ticket1", "Ticket2", "Type") VALUES ($1, $2, $3) RETURNING "ID"`, Ticket1, Ticket2, Type).Scan(&newID)
+	if err == nil {
+		err = TicketWasModified(Ticket1)
+		if err == nil {
+			err = TicketWasModified(Ticket2)
+		}
+	}
 	return newID, err
 }
 
 //DeleteRelation deletes a relation to a ticket
 func DeleteRelation(ID int64) error {
-	_, err := Connection.Exec(`DELETE FROM "Relations" WHERE "ID" = $1`, ID)
+	var ticket1, ticket2 int64
+	err := Connection.QueryRow(`DELETE FROM "Relations" WHERE "ID" = $1 RETURNING "Ticket1", "Ticket2"`, ID).Scan(&ticket1, &ticket2)
+	if err == nil {
+		err = TicketWasModified(ticket1)
+		if err == nil {
+			err = TicketWasModified(ticket2)
+		}
+	}
 	return err
 }
