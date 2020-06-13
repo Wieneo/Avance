@@ -104,16 +104,16 @@
     props: ["CurrentTicket", "TicketLoading"],
     computed:{
       AllRecipients(){
-        const data = []
-        this.CurrentTicket.Recipients.Requestors.forEach(element => {
+        const data: any[] = []
+        this.CurrentTicket.Recipients.Requestors.forEach((element: any) => {
           element.Type = 0
           data.push(element)
         });
-        this.CurrentTicket.Recipients.Readers.forEach(element => {
+        this.CurrentTicket.Recipients.Readers.forEach((element: any) => {
           element.Type = 1
           data.push(element)
         });
-        this.CurrentTicket.Recipients.Admins.forEach(element => {
+        this.CurrentTicket.Recipients.Admins.forEach((element: any) => {
           element.Type = 2
           data.push(element)
         });
