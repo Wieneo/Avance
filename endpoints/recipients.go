@@ -78,8 +78,6 @@ func AddRecipient(w http.ResponseWriter, r *http.Request) {
 
 	var created []int64
 
-	//ToDo: Prevent the same user being added multiple times in one request
-
 	//Error-Check first
 	for i, k := range req {
 		if utils.IsEmpty(k.Mail) && utils.IsEmpty(k.User) {
@@ -160,6 +158,36 @@ func AddRecipient(w http.ResponseWriter, r *http.Request) {
 				}
 			}
 
+			//Dummy recipient
+			newRecipient := models.Recipient{
+				User: struct {
+					Valid bool
+					Value models.User
+				}{
+					Valid: true,
+					Value: models.User{
+						ID: userid,
+					},
+				},
+			}
+			switch k.Type {
+			case models.Admins:
+				{
+					ticket.Recipients.Admins = append(ticket.Recipients.Admins, newRecipient)
+					break
+				}
+			case models.Requestors:
+				{
+					ticket.Recipients.Requestors = append(ticket.Recipients.Requestors, newRecipient)
+					break
+				}
+			case models.Readers:
+				{
+					ticket.Recipients.Readers = append(ticket.Recipients.Readers, newRecipient)
+					break
+				}
+			}
+
 		} else {
 			for _, exist := range recipientsWithType(ticket.Recipients, k.Type) {
 				if !exist.User.Valid {
@@ -208,6 +236,27 @@ func AddRecipient(w http.ResponseWriter, r *http.Request) {
 				}
 			}
 
+			//Dummy recipient
+			newRecipient := models.Recipient{
+				Mail: k.Mail,
+			}
+			switch k.Type {
+			case models.Admins:
+				{
+					ticket.Recipients.Admins = append(ticket.Recipients.Admins, newRecipient)
+					break
+				}
+			case models.Requestors:
+				{
+					ticket.Recipients.Requestors = append(ticket.Recipients.Requestors, newRecipient)
+					break
+				}
+			case models.Readers:
+				{
+					ticket.Recipients.Readers = append(ticket.Recipients.Readers, newRecipient)
+					break
+				}
+			}
 		}
 	}
 	//ToDo: Rollback if something fails here!
