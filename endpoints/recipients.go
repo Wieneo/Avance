@@ -2,6 +2,7 @@ package endpoints
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strconv"
@@ -309,4 +310,89 @@ func recipientsWithType(Recipients models.RecipientCollection, Type models.Recip
 	}
 
 	return make([]models.Recipient, 0)
+}
+
+func allRecipients(Ticket models.Ticket) []models.Recipient {
+	all := append(Ticket.Recipients.Requestors, Ticket.Recipients.Admins...)
+	all = append(all, Ticket.Recipients.Readers...)
+	return all
+}
+
+//DeleteRecipient removes a recipient from the ticket
+func DeleteRecipient(w http.ResponseWriter, r *http.Request) {
+	projectid, _ := strconv.ParseInt(strings.Split(r.RequestURI, "/")[4], 10, 64)
+	queueid, _ := strconv.ParseInt(strings.Split(r.URL.String(), "/")[6], 10, 64)
+	ticketid, _ := strconv.ParseInt(strings.Split(r.URL.String(), "/")[8], 10, 64)
+	recipientid, _ := strconv.ParseInt(strings.Split(r.URL.String(), "/")[10], 10, 64)
+
+	queue, found, err := db.GetQueue(projectid, queueid)
+	if err != nil {
+		w.WriteHeader(500)
+		dev.ReportError(err, w, err.Error())
+		return
+	}
+
+	if !found {
+		w.WriteHeader(404)
+		dev.ReportUserError(w, "Project/Queue not found")
+		return
+	}
+
+	user, err := utils.GetUser(r, w)
+	if err != nil {
+		w.WriteHeader(500)
+		dev.ReportError(err, w, err.Error())
+		return
+	}
+
+	allperms, perms, err := perms.GetPermissionsToQueue(user, queue)
+	if err != nil {
+		w.WriteHeader(500)
+		dev.ReportError(err, w, err.Error())
+		return
+	}
+
+	if !allperms.Admin && !perms.CanEditTicket {
+		w.WriteHeader(403)
+		dev.ReportUserError(w, "You are not allowed to patch tickets in that queue.")
+		return
+	}
+
+	ticket, found, err := db.GetTicket(ticketid, queueid, false)
+	if err != nil {
+		w.WriteHeader(500)
+		dev.ReportError(err, w, err.Error())
+		return
+	}
+
+	if !found {
+		w.WriteHeader(404)
+		dev.ReportUserError(w, "Ticket not found")
+		return
+	}
+
+	found = false
+	for _, k := range allRecipients(ticket) {
+		if k.ID == recipientid {
+			found = true
+			break
+		}
+	}
+
+	if !found {
+		w.WriteHeader(404)
+		dev.ReportUserError(w, "Recipient not found")
+		return
+	}
+
+	if err := db.RemoveRecipient(recipientid); err != nil {
+		w.WriteHeader(500)
+		dev.ReportError(err, w, err.Error())
+	} else {
+		json.NewEncoder(w).Encode(struct {
+			Recipient string
+		}{
+			fmt.Sprintf("Recipient %d deleted", recipientid),
+		})
+	}
 }

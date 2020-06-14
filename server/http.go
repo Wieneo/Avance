@@ -89,6 +89,7 @@ func HTTPInit() {
 	router.HandleFunc("/api/v1/project/{[0-9]{*}}/queue/{[0-9]{*}}/ticket/{[0-9]{*}}/relation/{[0-9]{*}}", endpoints.DeleteRelation).Methods("DELETE")
 
 	router.HandleFunc("/api/v1/project/{[0-9]{*}}/queue/{[0-9]{*}}/ticket/{[0-9]{*}}/recipients", endpoints.AddRecipient).Methods("POST")
+	router.HandleFunc("/api/v1/project/{[0-9]{*}}/queue/{[0-9]{*}}/ticket/{[0-9]{*}}/recipient/{[0-9]{*}}", endpoints.DeleteRecipient).Methods("DELETE")
 
 	router.HandleFunc("/api/v1/project/{[0-9]{*}}/queue/{[0-9]{*}}/ticket/{[0-9]{*}}/actions", endpoints.CreateAction).Methods("POST")
 

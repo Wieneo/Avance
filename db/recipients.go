@@ -84,3 +84,9 @@ func AddMailRecipient(TicketID int64, Mail string, Type models.RecipientType) (i
 
 	return newID, err
 }
+
+//RemoveRecipient removes a specified recipient
+func RemoveRecipient(RecipientID int64) error {
+	_, err := Connection.Exec(`DELETE FROM "Recipients" WHERE "ID" = $1`, RecipientID)
+	return err
+}
