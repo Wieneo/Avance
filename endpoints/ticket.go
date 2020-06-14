@@ -11,6 +11,7 @@ import (
 
 	"gitlab.gnaucke.dev/tixter/tixter-app/v2/db"
 	"gitlab.gnaucke.dev/tixter/tixter-app/v2/dev"
+	"gitlab.gnaucke.dev/tixter/tixter-app/v2/models"
 	"gitlab.gnaucke.dev/tixter/tixter-app/v2/perms"
 	"gitlab.gnaucke.dev/tixter/tixter-app/v2/utils"
 )
@@ -19,7 +20,7 @@ import (
 func GetTicket(w http.ResponseWriter, r *http.Request) {
 	ticketid, _ := strconv.ParseInt(strings.Split(r.URL.String(), "/")[4], 10, 64)
 
-	ticket, found, err := db.GetTicket(ticketid, true)
+	ticket, found, err := db.GetTicketUnsafe(ticketid, true)
 	if err != nil {
 		w.WriteHeader(500)
 		dev.ReportError(err, w, err.Error())
@@ -111,7 +112,7 @@ func GetTicketFullPath(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if allperms.Admin || perms.CanSee {
-		ticket, found, err := db.GetTicket(ticketid, true)
+		ticket, found, err := db.GetTicket(ticketid, queueid, true)
 		if err != nil {
 			w.WriteHeader(500)
 			dev.ReportError(err, w, err.Error())
@@ -348,7 +349,7 @@ func CreateTicketsInQueue(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ticket, found, err := db.GetTicket(id, true)
+	ticket, found, err := db.GetTicket(id, queueid, true)
 	if err != nil || !found {
 		w.WriteHeader(500)
 		dev.ReportError(err, w, err.Error())
@@ -407,7 +408,7 @@ func PatchTicketsInQueue(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ticket, found, err := db.GetTicket(ticketid, true)
+	ticket, found, err := db.GetTicket(ticketid, queueid, true)
 	if err != nil {
 		w.WriteHeader(500)
 		dev.ReportError(err, w, err.Error())
@@ -555,7 +556,7 @@ func DeletePropertyFromTicket(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ticket, found, err := db.GetTicket(ticketid, true)
+	ticket, found, err := db.GetTicket(ticketid, queueid, true)
 	if err != nil {
 		w.WriteHeader(500)
 		dev.ReportError(err, w, err.Error())
@@ -597,4 +598,10 @@ func DeletePropertyFromTicket(w http.ResponseWriter, r *http.Request) {
 	}
 
 	json.NewEncoder(w).Encode(ticket)
+}
+
+type recipientRequest struct {
+	Type models.RecipientType
+	User string
+	Mail string
 }

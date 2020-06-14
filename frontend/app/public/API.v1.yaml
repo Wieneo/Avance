@@ -1757,6 +1757,8 @@ paths:
             examples: {}
         description: "Image via FORM Upload ('avatar' as property)"
       description: 'Allowed filetypes: .png, .jpg, .jpeg, .gif'
+      tags:
+        - Users
     delete:
       summary: Delete Profile Picture
       operationId: delete-api-v1-profile-avatar
@@ -1766,6 +1768,8 @@ paths:
       description: Resets the current profile picture back to the placeholder.
       security:
         - Session Key: []
+      tags:
+        - Users
   '/api/v1/user/{userid}':
     parameters:
       - schema:
@@ -1861,6 +1865,154 @@ paths:
       parameters: []
       security:
         - Session Key: []
+  '/api/v1/project/{projectid}/queue/{queueid}/ticket/{ticketid}/recipients':
+    parameters:
+      - schema:
+          type: string
+        name: projectid
+        in: path
+        required: true
+      - schema:
+          type: string
+        name: queueid
+        in: path
+        required: true
+      - schema:
+          type: string
+        name: ticketid
+        in: path
+        required: true
+    post:
+      summary: Create Recipient
+      operationId: post-api-v1-project-projectid-queue-queueid-ticket-ticketid-recipients
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Recipients:
+                    type: array
+                    description: Returns all recipients created
+                    items:
+                      type: integer
+        '400':
+          description: JSON Body is malformed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Error:
+                    type: string
+        '403':
+          description: User is not allowed to edit tickets
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Error:
+                    type: string
+        '404':
+          description: "Specified Project/Queue/Ticket/User wasn't found"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Error:
+                    type: string
+        '406':
+          description: Neither User or Mail property was specified OR a recipient constraint occured
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Error:
+                    type: string
+      security:
+        - Session Key: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                Mail:
+                  type: string
+                User:
+                  type: string
+                  description: Username of the wanted recipient
+                Type:
+                  type: integer
+                  description: |-
+                    0 = Requestor
+                    1 = Reader
+                    2 = Admin
+      tags:
+        - Tickets
+  '/api/v1/project/{projectid}/queue/{queueid}/ticket/{ticketid}/recipient/{recipientid}':
+    parameters:
+      - schema:
+          type: string
+        name: projectid
+        in: path
+        required: true
+      - schema:
+          type: string
+        name: queueid
+        in: path
+        required: true
+      - schema:
+          type: string
+        name: ticketid
+        in: path
+        required: true
+      - schema:
+          type: string
+        name: recipientid
+        in: path
+        required: true
+    delete:
+      summary: Delete Recipient
+      operationId: delete-api-v1-project-projectid-queue-queueid-ticket-ticketid-recipient-recipientid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Recipient:
+                    type: string
+        '403':
+          description: User is not allowed to edit tickets
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Error:
+                    type: string
+        '404':
+          description: "Specified Project/Queue/Ticket/Recipient wasn't found"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Error:
+                    type: string
+      security:
+        - Session Key: []
+      tags:
+        - Tickets
+      description: ''
 components:
   schemas:
     Project:

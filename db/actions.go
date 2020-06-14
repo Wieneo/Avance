@@ -47,5 +47,10 @@ func AddAction(TicketID int64, Type models.ActionType, Title, Content string, Is
 	}
 
 	err := Connection.QueryRow(`INSERT INTO "Actions" ("Type", "Title", "Content", "Ticket", "IssuedAt", "IssuedBy") VALUES ($1,$2,$3,$4,$5,$6) RETURNING "ID"`, Type, Title, Content, TicketID, time.Now(), issuedByReal).Scan(&newID)
+
+	if err == nil {
+		err = TicketWasModified(TicketID)
+	}
+
 	return newID, err
 }
