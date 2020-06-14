@@ -9,10 +9,26 @@ import (
 	"gitlab.gnaucke.dev/tixter/tixter-app/v2/models"
 )
 
+//GetTicketUnsafe ignores if the queue matches the tickets queue
+func GetTicketUnsafe(TicketID int64, ResolveRelations bool) (models.Ticket, bool, error) {
+	var queueID int64
+	err := Connection.QueryRow(`SELECT "Queue" FROM "Tickets" WHERE "ID" = $1`, TicketID).Scan(&queueID)
+	if err != nil {
+		if err.Error() == "sql: no rows in result set" {
+			return models.Ticket{}, false, nil
+		}
+
+		dev.LogError(err, err.Error())
+		return models.Ticket{}, true, err
+	}
+
+	return GetTicket(TicketID, queueID, ResolveRelations)
+}
+
 //GetTicket returns the populated ticket struct from models
-func GetTicket(TicketID int64, ResolveRelations bool) (models.Ticket, bool, error) {
+func GetTicket(TicketID int64, QueueID int64, ResolveRelations bool) (models.Ticket, bool, error) {
 	var ticket models.Ticket
-	err := Connection.QueryRow(`SELECT "t"."ID", "t"."Title", "t"."Description", "t"."Queue" AS "QueueID", "t"."Owner" AS "OwnerID", "t"."Severity" AS "SeverityID", "t"."Status" AS "StatusID","t"."CreatedAt","t"."LastModified","t"."StalledUntil","t"."Meta" FROM "Tickets" AS "t" WHERE "ID" = $1`, TicketID).Scan(&ticket.ID, &ticket.Title, &ticket.Description, &ticket.QueueID, &ticket.OwnerID, &ticket.SeverityID, &ticket.StatusID, &ticket.CreatedAt, &ticket.LastModified, &ticket.StalledUntil, &ticket.Meta)
+	err := Connection.QueryRow(`SELECT "t"."ID", "t"."Title", "t"."Description", "t"."Queue" AS "QueueID", "t"."Owner" AS "OwnerID", "t"."Severity" AS "SeverityID", "t"."Status" AS "StatusID","t"."CreatedAt","t"."LastModified","t"."StalledUntil","t"."Meta" FROM "Tickets" AS "t" WHERE "ID" = $1 AND "Queue" = $2`, TicketID, QueueID).Scan(&ticket.ID, &ticket.Title, &ticket.Description, &ticket.QueueID, &ticket.OwnerID, &ticket.SeverityID, &ticket.StatusID, &ticket.CreatedAt, &ticket.LastModified, &ticket.StalledUntil, &ticket.Meta)
 	if err != nil {
 		if err.Error() == "sql: no rows in result set" {
 			return models.Ticket{}, false, nil
@@ -103,7 +119,7 @@ func PatchTicket(Ticket models.Ticket) (models.Ticket, error) {
 		return models.Ticket{}, err
 	}
 
-	ticket, _, err := GetTicket(Ticket.ID, true)
+	ticket, _, err := GetTicketUnsafe(Ticket.ID, true)
 	if err != nil {
 		return models.Ticket{}, err
 	}

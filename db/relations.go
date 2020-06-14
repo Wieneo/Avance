@@ -26,7 +26,7 @@ func GetTicketRelations(TicketID int64) ([]models.Relation, error) {
 		//GetTicket is used with false ResolveRelations property to prevent possibly resolving hundrets of ticket relations
 
 		if ticket1 == TicketID {
-			ticket, _, err := GetTicket(ticket2, false)
+			ticket, _, err := GetTicketUnsafe(ticket2, false)
 
 			if err != nil {
 				return make([]models.Relation, 0), err
@@ -35,7 +35,7 @@ func GetTicketRelations(TicketID int64) ([]models.Relation, error) {
 			singleRelation.OtherTicket = ticket
 			singleRelation.Type = relationType
 		} else {
-			ticket, _, err := GetTicket(ticket1, false)
+			ticket, _, err := GetTicketUnsafe(ticket1, false)
 
 			if err != nil {
 				return make([]models.Relation, 0), err

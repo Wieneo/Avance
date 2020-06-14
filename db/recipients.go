@@ -60,3 +60,27 @@ func GetRecipients(TicketID int64) (models.RecipientCollection, error) {
 
 	return recipients, nil
 }
+
+//AddUserRecipient appends a new recipient in form of a existing user to the ticket
+func AddUserRecipient(TicketID, UserID int64, Type models.RecipientType) (int64, error) {
+	var newID int64
+	err := Connection.QueryRow(`INSERT INTO "Recipients" ("Type", "User", "Ticket") VALUES ($1, $2, $3) RETURNING "ID"`, Type, UserID, TicketID).Scan(&newID)
+
+	if err == nil {
+		err = TicketWasModified(TicketID)
+	}
+
+	return newID, err
+}
+
+//AddMailRecipient appends a new recipient in form of a mail address
+func AddMailRecipient(TicketID int64, Mail string, Type models.RecipientType) (int64, error) {
+	var newID int64
+	err := Connection.QueryRow(`INSERT INTO "Recipients" ("Type", "Mail", "Ticket") VALUES ($1, $2, $3) RETURNING "ID"`, Type, Mail, TicketID).Scan(&newID)
+
+	if err == nil {
+		err = TicketWasModified(TicketID)
+	}
+
+	return newID, err
+}

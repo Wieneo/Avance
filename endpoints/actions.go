@@ -58,7 +58,7 @@ func CreateAction(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, found, err = db.GetTicket(ticketid, true)
+	_, found, err = db.GetTicket(ticketid, queueid, true)
 	if err != nil {
 		w.WriteHeader(500)
 		dev.ReportError(err, w, err.Error())

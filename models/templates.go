@@ -2,6 +2,7 @@ package models
 
 import (
 	"database/sql"
+	"fmt"
 	"time"
 )
 
@@ -147,6 +148,19 @@ const (
 	//Admins -> See RecipientCollection
 	Admins
 )
+
+func (e RecipientType) String() string {
+	switch e {
+	case Requestors:
+		return "Requestors"
+	case Readers:
+		return "Readers"
+	case Admins:
+		return "Admins"
+	default:
+		return fmt.Sprintf("%d", int(e))
+	}
+}
 
 //Action stores a single update about a ticket
 type Action struct {
