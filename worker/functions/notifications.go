@@ -32,7 +32,10 @@ func SendNotifications(Task models.WorkerTask) error {
 
 func sendMailNotification(Task models.WorkerTask, Notifications models.NotificationCollection) error {
 	var realRecipient string
+	//Task.Recipient is either an ID (the user-id) OR a string containing the unknown e-mail address
+	//Trying to check which one of the options was specififed
 	if userid, err := strconv.ParseInt(Task.Recipient.String, 10, 64); err != nil {
+		//Unknown E-mail
 		realRecipient = Task.Recipient.String
 	} else {
 		user, found, err := db.GetUser(userid)
@@ -53,6 +56,7 @@ func sendMailNotification(Task models.WorkerTask, Notifications models.Notificat
 
 	var content string
 
+	//ToDo: Templating System for E-Mail notifications
 	for _, k := range Notifications.Notifications {
 		content += "<h3>" + k.Title + "</h3>"
 		content += k.Content
@@ -70,6 +74,7 @@ func sendMailNotification(Task models.WorkerTask, Notifications models.Notificat
 	for k, v := range headers {
 		message += fmt.Sprintf("%s: %s\r\n", k, v)
 	}
+	//Mime needs to be appended last in order to make the headers before it work
 	message += "MIME-version: 1.0;\nContent-Type: text/html; charset=\"UTF-8\";\n\n\r\n" + content
 
 	auth := smtp.PlainAuth("", config.CurrentConfig.SMTP.User, config.CurrentConfig.SMTP.Password, config.CurrentConfig.SMTP.Host)
