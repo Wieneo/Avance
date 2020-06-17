@@ -97,6 +97,7 @@ spec:
 {{- end }}
           initialDelaySeconds: {{ .Values.worker.livenessProbe.initialDelaySeconds }}
           timeoutSeconds: {{ .Values.worker.livenessProbe.timeoutSeconds }}
+          periodSeconds: {{ .Values.worker.livenessProbe.periodSeconds }}
         readinessProbe:
 {{- if eq .Values.worker.readinessProbe.probeType "httpGet" }}
           httpGet:
@@ -113,6 +114,7 @@ spec:
 {{- end }}
           initialDelaySeconds: {{ .Values.worker.readinessProbe.initialDelaySeconds }}
           timeoutSeconds: {{ .Values.worker.readinessProbe.timeoutSeconds }}
+          periodSeconds: {{ .Values.worker.readinessProbe.periodSeconds }}
         resources:
 {{ toYaml .Values.resources | indent 12 }}
 {{- end -}}
