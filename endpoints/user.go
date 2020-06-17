@@ -531,7 +531,7 @@ func DeactivateUser(w http.ResponseWriter, r *http.Request) {
 	RemoveProfilePicture(w, r)
 
 	data, _ := json.Marshal(req)
-	taskid, err := db.CreateTask(models.DeleteUser, string(data), sql.NullInt32{Valid: false})
+	taskid, err := db.CreateTask(models.DeleteUser, string(data), sql.NullInt32{Valid: false}, sql.NullString{Valid: false}, sql.NullInt64{Valid: false})
 	if err != nil {
 		w.WriteHeader(500)
 		dev.ReportError(err, w, err.Error())

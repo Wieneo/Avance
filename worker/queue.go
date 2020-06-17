@@ -1,6 +1,7 @@
 package worker
 
 import (
+	"errors"
 	"fmt"
 	"strconv"
 	"strings"
@@ -53,9 +54,20 @@ func StartQueueService() {
 								Error = functions.DeleteUser(task)
 								break
 							}
+						case models.SendNotification:
+							{
+								Error = functions.SendNotifications(task)
+								task.Interval.Valid = false
+								break
+							}
 						case models.Debug:
 							{
 								dev.LogInfo("Debug Task triggered")
+								break
+							}
+						default:
+							{
+								Error = errors.New("Unknown task type encountered: " + task.Type.String())
 								break
 							}
 						}

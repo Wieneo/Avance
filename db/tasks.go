@@ -16,9 +16,9 @@ func ReserveTask() (int64, error) {
 }
 
 //CreateTask queues a task
-func CreateTask(Type models.WorkerTaskType, Data string, Interval sql.NullInt32) (int64, error) {
+func CreateTask(Type models.WorkerTaskType, Data string, Interval sql.NullInt32, Recipient sql.NullString, Ticket sql.NullInt64) (int64, error) {
 	var taskID int64
-	err := Connection.QueryRow(`INSERT INTO "Tasks" ("Task", "QueuedAt", "Status", "Type", "Interval") VALUES ($1, $2, $3, $4, $5) RETURNING "ID"`, Data, time.Now(), models.Idle, Type, Interval).Scan(&taskID)
+	err := Connection.QueryRow(`INSERT INTO "Tasks" ("Task", "QueuedAt", "Status", "Type", "Interval", "Recipient", "Ticket", "LastRun") VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING "ID"`, Data, time.Now(), models.Idle, Type, Interval, Recipient, Ticket, time.Now()).Scan(&taskID)
 	return taskID, err
 }
 

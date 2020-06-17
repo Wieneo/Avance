@@ -2,8 +2,10 @@ package db
 
 import (
 	"database/sql"
+	"fmt"
 	"time"
 
+	"gitlab.gnaucke.dev/tixter/tixter-app/v2/dev"
 	"gitlab.gnaucke.dev/tixter/tixter-app/v2/models"
 )
 
@@ -50,6 +52,19 @@ func AddAction(TicketID int64, Type models.ActionType, Title, Content string, Is
 
 	if err == nil {
 		err = TicketWasModified(TicketID)
+	}
+
+	ticket, _, err := GetTicketUnsafe(TicketID, false)
+	if err == nil {
+		dev.LogDebug(fmt.Sprintf("Preparing Notifications for ticket %d", TicketID))
+		go QueueNotification(ticket, models.Action{
+			ID:       newID,
+			Title:    Title,
+			Content:  Content,
+			Type:     Type,
+			IssuedBy: IssuedBy,
+			IssuedAt: time.Now(),
+		})
 	}
 
 	return newID, err

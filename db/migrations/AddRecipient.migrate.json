@@ -1,0 +1,5 @@
+{
+    "Name": "AddRecipientForTasks",
+    "Targets": ["53.sql"],
+    "After": "AddTasks"
+}
