@@ -1,0 +1,5 @@
+{
+    "Name": "AddNotificationTypeToTasks",
+    "Targets": ["53_2.sql"],
+    "After": "AddTasks"
+}
