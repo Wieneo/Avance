@@ -16,13 +16,15 @@ type Worker struct {
 
 //WorkerTask is the generic task for a worker
 type WorkerTask struct {
-	ID       int64
-	Type     WorkerTaskType
-	Data     string
-	QueuedAt time.Time
-	Status   WorkerTaskStatus
-	Interval sql.NullInt32
-	LastRun  sql.NullTime
+	ID        int64
+	Type      WorkerTaskType
+	Data      string
+	QueuedAt  time.Time
+	Status    WorkerTaskStatus
+	Interval  sql.NullInt32
+	LastRun   sql.NullTime
+	Recipient sql.NullString
+	Ticket    sql.NullInt64
 }
 
 //Notification stores a single notificaiton

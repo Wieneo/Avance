@@ -25,7 +25,7 @@ func CreateTask(Type models.WorkerTaskType, Data string, Interval sql.NullInt32,
 //GetTask returns the task to a give ID
 func GetTask(TaskID int64) (models.WorkerTask, error) {
 	var workerTask models.WorkerTask
-	err := Connection.QueryRow(`SELECT "ID", "Task", "QueuedAt", "Status", "Type", "Interval", "LastRun" FROM "Tasks" WHERE "ID" = $1`, TaskID).Scan(&workerTask.ID, &workerTask.Data, &workerTask.QueuedAt, &workerTask.Status, &workerTask.Type, &workerTask.Interval, &workerTask.LastRun)
+	err := Connection.QueryRow(`SELECT "ID", "Task", "QueuedAt", "Status", "Type", "Interval", "LastRun", "Recipient", "Ticket" FROM "Tasks" WHERE "ID" = $1`, TaskID).Scan(&workerTask.ID, &workerTask.Data, &workerTask.QueuedAt, &workerTask.Status, &workerTask.Type, &workerTask.Interval, &workerTask.LastRun, &workerTask.Recipient, &workerTask.Ticket)
 	if err != nil {
 		return models.WorkerTask{}, err
 	}
