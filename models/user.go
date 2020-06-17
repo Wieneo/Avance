@@ -20,8 +20,8 @@ type UserSettings struct {
 type NotificationSettings struct {
 	MailNotificationEnabled bool
 	//NotificationFrequency defines the frequency in which notifications should be send (in seconds)
-	NotificationFrequency       int
-	NotificationAboutNewTickets bool
-	NotificationAboutUpdates    bool
-	NotificationAfterInvolvment bool
+	MailNotificationFrequency       int
+	MailNotificationAboutNewTickets bool
+	MailNotificationAboutUpdates    bool
+	MailNotificationAfterInvolvment bool
 }

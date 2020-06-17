@@ -3,6 +3,7 @@ package functions
 import (
 	"crypto/tls"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/smtp"
 	"strconv"
@@ -21,6 +22,15 @@ func SendNotifications(Task models.WorkerTask) error {
 		return err
 	}
 
+	switch Notifications.NotifyType {
+	case models.Mail:
+		return sendMailNotification(Task, Notifications)
+	}
+
+	return errors.New("No action was taken")
+}
+
+func sendMailNotification(Task models.WorkerTask, Notifications models.NotificationCollection) error {
 	var realRecipient string
 	if userid, err := strconv.ParseInt(Task.Recipient.String, 10, 64); err != nil {
 		realRecipient = Task.Recipient.String
@@ -53,7 +63,7 @@ func SendNotifications(Task models.WorkerTask) error {
 	headers := make(map[string]string)
 	headers["From"] = config.CurrentConfig.SMTP.From
 	headers["To"] = realRecipient
-	headers["Subject"] = "[Avance] OH No...."
+	headers["Subject"] = "[Avance] " + Notifications.Subject
 
 	// Setup message
 	message := ""

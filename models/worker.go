@@ -29,6 +29,7 @@ type WorkerTask struct {
 
 //NotificationCollection contains all collected notifications about a ticket
 type NotificationCollection struct {
+	NotifyType    NotificationType
 	Subject       string
 	Notifications []Notification
 }
@@ -37,6 +38,16 @@ type NotificationCollection struct {
 type Notification struct {
 	Title, Content string
 }
+
+//NotificationType is stored with the task to determine if E-mail or telegram should be used
+type NotificationType int
+
+const (
+	//Mail is set if E-mail is used
+	Mail NotificationType = iota
+	//Telegram is set if Telegram is used
+	Telegram
+)
 
 //WorkerTaskType stores the type of the worker task
 type WorkerTaskType int

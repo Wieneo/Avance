@@ -19,13 +19,16 @@ func QueueActionNotification(Ticket models.Ticket, Action models.Action) error {
 			//Answer to requestors and readers
 			((k.Type == models.Requestors || k.Type == models.Readers) && Action.Type == models.Answer) {
 			dev.LogDebug(fmt.Sprintf("Sending notification to %d (Local-ID)", k.ID))
-			Error = sendActionNotificationIntoQueue(Ticket, Action, k)
+			Error = sendMailActionNotificationIntoQueue(Ticket, Action, k)
+			if Error != nil {
+				dev.LogError(Error, fmt.Sprintf("Couldn't queue notification task: %s", Error.Error()))
+			}
 		}
 	}
 	return Error
 }
 
-func sendActionNotificationIntoQueue(Ticket models.Ticket, Action models.Action, Recipient models.Recipient) error {
+func sendMailActionNotificationIntoQueue(Ticket models.Ticket, Action models.Action, Recipient models.Recipient) error {
 	var trueRecipient string
 	if Recipient.User.Valid {
 		trueRecipient = strconv.FormatInt(Recipient.User.Value.ID, 10)
@@ -33,7 +36,7 @@ func sendActionNotificationIntoQueue(Ticket models.Ticket, Action models.Action,
 		trueRecipient = Recipient.Mail
 	}
 
-	rows, err := Connection.Query(`SELECT "ID", "Task" FROM "Tasks" WHERE "Ticket" = $1 AND "Recipient" = $2 AND "Status" = 0`, Ticket.ID, trueRecipient)
+	rows, err := Connection.Query(`SELECT "ID", "Task" FROM "Tasks" WHERE "Ticket" = $1 AND "Recipient" = $2 AND "Status" = 0 AND "NotifiationType" = $3`, Ticket.ID, trueRecipient, models.Mail)
 	if err != nil {
 		return err
 	}
@@ -69,6 +72,8 @@ func sendActionNotificationIntoQueue(Ticket models.Ticket, Action models.Action,
 		rows.Close()
 		dev.LogDebug(fmt.Sprintf(`Found no preceeding notification for recipient %d -> Creating new task`, Recipient.ID))
 		var notifications models.NotificationCollection
+		notifications.Subject = fmt.Sprintf("Update about ticket %d", Ticket.ID)
+		notifications.NotifyType = models.Mail
 		notifications.Notifications = append(notifications.Notifications, models.Notification{
 			Title:   Action.Title,
 			Content: Action.Content,
@@ -86,12 +91,12 @@ func sendActionNotificationIntoQueue(Ticket models.Ticket, Action models.Action,
 				return err
 			}
 
-			Interval.Int32 = int32(Recipient.User.Value.Settings.Notification.NotificationFrequency)
+			Interval.Int32 = int32(Recipient.User.Value.Settings.Notification.MailNotificationFrequency)
 		} else {
 			Interval.Int32 = 30
 		}
 
-		if _, err := CreateTask(models.SendNotification, string(rawJSON), Interval, sql.NullString{Valid: true, String: trueRecipient}, sql.NullInt64{Valid: true, Int64: Ticket.ID}); err != nil {
+		if _, err := CreateTask(models.SendNotification, string(rawJSON), Interval, sql.NullString{Valid: true, String: trueRecipient}, sql.NullInt64{Valid: true, Int64: Ticket.ID}, sql.NullInt32{Valid: true, Int32: int32(models.Mail)}); err != nil {
 			return err
 		}
 	}
