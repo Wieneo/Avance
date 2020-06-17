@@ -52,7 +52,7 @@ func sendMailNotification(Task models.WorkerTask, Notifications models.Notificat
 		realRecipient = user.Mail
 	}
 
-	//Reference https://gist.github.com/jim3ma/b5c9edeac77ac92157f8f8affa290f45
+	//Reference https://gist.github.com/chrisgillis/10888032
 
 	var content string
 
