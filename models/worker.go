@@ -25,6 +25,12 @@ type WorkerTask struct {
 	LastRun  sql.NullTime
 }
 
+//Notification stores a single notificaiton
+type Notification struct {
+	ReqTicket Ticket
+	ReqAction Action
+}
+
 //WorkerTaskType stores the type of the worker task
 type WorkerTaskType int
 
@@ -33,12 +39,16 @@ const (
 	DeleteUser WorkerTaskType = iota
 	//Debug is used during development to test worker behaviour
 	Debug
+	//SendNotification informs the user about ticket updates
+	SendNotification
 )
 
 func (e WorkerTaskType) String() string {
 	switch e {
 	case DeleteUser:
 		return "Delete User"
+	case SendNotification:
+		return "Send Notification"
 	case Debug:
 		return "Debug"
 	default:
