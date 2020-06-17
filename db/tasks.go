@@ -33,7 +33,7 @@ func GetTask(TaskID int64) (models.WorkerTask, error) {
 	dev.LogDebug(fmt.Sprintf("[DB] Getting task %d", TaskID))
 
 	var workerTask models.WorkerTask
-	err := Connection.QueryRow(`SELECT "ID", "Task", "QueuedAt", "Status", "Type", "Interval", "LastRun" FROM "Tasks" WHERE "ID" = $1`, TaskID).Scan(&workerTask.ID, &workerTask.Data, &workerTask.QueuedAt, &workerTask.Status, &workerTask.Type, &workerTask.Interval, &workerTask.LastRun)
+	err := Connection.QueryRow(`SELECT "ID", "Task", "QueuedAt", "Status", "Type", "Interval", "LastRun", "Recipient", "Ticket" FROM "Tasks" WHERE "ID" = $1`, TaskID).Scan(&workerTask.ID, &workerTask.Data, &workerTask.QueuedAt, &workerTask.Status, &workerTask.Type, &workerTask.Interval, &workerTask.LastRun, &workerTask.Recipient, &workerTask.Ticket)
 	if err != nil {
 		dev.LogDebug(fmt.Sprintf("[DB] Error happened while retrieving task %d -> Returning empty task struct: %s", TaskID, err.Error()))
 		return models.WorkerTask{}, err

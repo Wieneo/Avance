@@ -34,6 +34,13 @@ type SampleConfig struct {
 			Endpoints []string
 		}
 	}
+	SMTP struct {
+		Host     string
+		Port     int
+		From     string
+		User     string
+		Password string
+	}
 	Sentry struct {
 		DSN         string
 		Environment string
@@ -100,7 +107,7 @@ func LoadConfig() {
 
 		CurrentConfig.Redis.Host = os.Getenv("TIX_Redis_Host")
 		//Parse Redis Database to int
-		CurrentConfig.Redis.Port, Error = strconv.Atoi(os.Getenv("TIX_Redis_Database"))
+		CurrentConfig.Redis.Database, Error = strconv.Atoi(os.Getenv("TIX_Redis_Database"))
 		if Error != nil {
 			dev.LogWarn("Redis database is not a number! Using 0 as default")
 			CurrentConfig.Redis.Database = 0
@@ -130,6 +137,24 @@ func LoadConfig() {
 				}
 			}
 
+		}
+
+		CurrentConfig.SMTP.Host = os.Getenv("TIX_SMTP_Host")
+		CurrentConfig.SMTP.From = os.Getenv("TIX_SMTP_From")
+		CurrentConfig.SMTP.User = os.Getenv("TIX_SMTP_User")
+		CurrentConfig.SMTP.Password = os.Getenv("TIX_SMTP_Password")
+		//Parse Redis Database to int
+		CurrentConfig.SMTP.Port, Error = strconv.Atoi(os.Getenv("TIX_SMTP_Port"))
+		if Error != nil {
+			dev.LogWarn("SMTP port is not a number! Using 465 as default")
+			CurrentConfig.SMTP.Port = 0
+		}
+
+		//Parse Redis Port to int
+		CurrentConfig.Redis.Port, Error = strconv.Atoi(os.Getenv("TIX_Redis_Port"))
+		if Error != nil {
+			dev.LogWarn("Redis port is not a number! Using 6379 as default")
+			CurrentConfig.Redis.Port = 6379
 		}
 
 		CurrentConfig.Sentry.DSN = os.Getenv("TIX_Sentry_DSN")
