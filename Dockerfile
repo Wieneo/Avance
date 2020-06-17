@@ -8,9 +8,14 @@ WORKDIR /frontend
 COPY ./frontend/app .
 RUN npm install && npm run build && rm -rf src/
 
+FROM alpine:latest as certs
+RUN apk --update add ca-certificates
+
 FROM scratch
 WORKDIR /app
-COPY --from=backend /backend/avance-app /app/
+
+COPY --from=certs /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+COPY --from=backend /backend/tixter-app /app/
 COPY --from=backend /backend/db/migrations /app/db/migrations
 COPY --from=backend /backend/userData/sampleData /app/userData/sampleData
 COPY --from=frontend /frontend /app/frontend/app
