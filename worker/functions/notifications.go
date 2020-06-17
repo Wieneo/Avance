@@ -52,7 +52,6 @@ func SendNotifications(Task models.WorkerTask) error {
 	headers := make(map[string]string)
 	headers["From"] = config.CurrentConfig.SMTP.From
 	headers["To"] = realRecipient
-	headers["Mime"] = "MIME-version: 1.0;\nContent-Type: text/html; charset=\"UTF-8\";\n\n"
 	headers["Subject"] = "[Avance] OH No...."
 
 	// Setup message
@@ -60,7 +59,7 @@ func SendNotifications(Task models.WorkerTask) error {
 	for k, v := range headers {
 		message += fmt.Sprintf("%s: %s\r\n", k, v)
 	}
-	message += "\r\n" + content
+	message += "MIME-version: 1.0;\nContent-Type: text/html; charset=\"UTF-8\";\n\n\r\n" + content
 
 	auth := smtp.PlainAuth("", config.CurrentConfig.SMTP.User, config.CurrentConfig.SMTP.Password, config.CurrentConfig.SMTP.Host)
 	// TLS config
