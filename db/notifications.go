@@ -33,7 +33,7 @@ func sendNotificationIntoQueue(Ticket models.Ticket, Action models.Action, Recip
 		trueRecipient = Recipient.Mail
 	}
 
-	rows, err := Connection.Query(`SELECT "ID", "Task" FROM "Tasks" WHERE "Ticket" = $1 AND "Recipient" = $2`, Ticket.ID, trueRecipient)
+	rows, err := Connection.Query(`SELECT "ID", "Task" FROM "Tasks" WHERE "Ticket" = $1 AND "Recipient" = $2 AND "Status" = 0`, Ticket.ID, trueRecipient)
 	if err != nil {
 		return err
 	}
@@ -44,6 +44,7 @@ func sendNotificationIntoQueue(Ticket models.Ticket, Action models.Action, Recip
 		var oldNotifications []models.Notification
 		var rawOldNotifications string
 		rows.Scan(&oldTaskID, &rawOldNotifications)
+		rows.Close()
 
 		err := json.Unmarshal([]byte(rawOldNotifications), &oldNotifications)
 		if err != nil {
@@ -65,6 +66,7 @@ func sendNotificationIntoQueue(Ticket models.Ticket, Action models.Action, Recip
 		dev.LogDebug(fmt.Sprintf("Task %d expanded to %d notifications", oldTaskID, len(oldNotifications)))
 
 	} else {
+		rows.Close()
 		dev.LogDebug(fmt.Sprintf(`Found no preceeding notification for recipient %d -> Creating new task`, Recipient.ID))
 		notifications := make([]models.Notification, 0)
 		notifications = append(notifications, models.Notification{
