@@ -19,7 +19,20 @@ func QueueActionNotification(Ticket models.Ticket, Action models.Action) error {
 			//Answer to requestors and readers
 			((k.Type == models.Requestors || k.Type == models.Readers) && Action.Type == models.Answer) {
 			dev.LogDebug(fmt.Sprintf("Sending notification to %d (Local-ID)", k.ID))
-			Error = sendMailActionNotificationIntoQueue(Ticket, Action, k)
+
+			if k.User.Valid {
+				Error = GetSettings(&k.User.Value)
+				if Error != nil {
+					dev.LogError(Error, fmt.Sprintf("Couldn't get notification settings for task: %s", Error.Error()))
+					return Error
+				}
+				if k.User.Value.Settings.Notification.MailNotificationEnabled && k.User.Value.Settings.Notification.MailNotificationAboutUpdates {
+					Error = sendMailActionNotificationIntoQueue(Ticket, Action, k)
+				}
+			} else {
+				Error = sendMailActionNotificationIntoQueue(Ticket, Action, k)
+			}
+			//	Telegram maybe to follow
 			if Error != nil {
 				dev.LogError(Error, fmt.Sprintf("Couldn't queue notification task: %s", Error.Error()))
 			}
