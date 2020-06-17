@@ -15,7 +15,7 @@ import (
 
 //SendNotifications send the notifications specified in the notification task
 func SendNotifications(Task models.WorkerTask) error {
-	var Notifications []models.Notification
+	var Notifications models.NotificationCollection
 	err := json.Unmarshal([]byte(Task.Data), &Notifications)
 	if err != nil {
 		return err
@@ -43,8 +43,9 @@ func SendNotifications(Task models.WorkerTask) error {
 
 	var content string
 
-	for _, k := range Notifications {
-		content += k.ReqAction.Content
+	for _, k := range Notifications.Notifications {
+		content += "<h3>" + k.Title + "</h3>"
+		content += k.Content
 		content += "<br>"
 	}
 

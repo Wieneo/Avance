@@ -10,8 +10,8 @@ import (
 	"gitlab.gnaucke.dev/tixter/tixter-app/v2/models"
 )
 
-//QueueNotification send all needed notifications into the queue
-func QueueNotification(Ticket models.Ticket, Action models.Action) error {
+//QueueActionNotification send all needed notifications into the queue
+func QueueActionNotification(Ticket models.Ticket, Action models.Action) error {
 	var Error error
 	for _, k := range Ticket.AllRecipients() {
 		//Admins get all
@@ -19,13 +19,13 @@ func QueueNotification(Ticket models.Ticket, Action models.Action) error {
 			//Answer to requestors and readers
 			((k.Type == models.Requestors || k.Type == models.Readers) && Action.Type == models.Answer) {
 			dev.LogDebug(fmt.Sprintf("Sending notification to %d (Local-ID)", k.ID))
-			Error = sendNotificationIntoQueue(Ticket, Action, k)
+			Error = sendActionNotificationIntoQueue(Ticket, Action, k)
 		}
 	}
 	return Error
 }
 
-func sendNotificationIntoQueue(Ticket models.Ticket, Action models.Action, Recipient models.Recipient) error {
+func sendActionNotificationIntoQueue(Ticket models.Ticket, Action models.Action, Recipient models.Recipient) error {
 	var trueRecipient string
 	if Recipient.User.Valid {
 		trueRecipient = strconv.FormatInt(Recipient.User.Value.ID, 10)
@@ -41,7 +41,7 @@ func sendNotificationIntoQueue(Ticket models.Ticket, Action models.Action, Recip
 	if rows.Next() {
 		//GetOldTask
 		var oldTaskID int64
-		var oldNotifications []models.Notification
+		var oldNotifications models.NotificationCollection
 		var rawOldNotifications string
 		rows.Scan(&oldTaskID, &rawOldNotifications)
 		rows.Close()
@@ -52,9 +52,9 @@ func sendNotificationIntoQueue(Ticket models.Ticket, Action models.Action, Recip
 			return err
 		}
 
-		oldNotifications = append(oldNotifications, models.Notification{
-			ReqTicket: Ticket,
-			ReqAction: Action,
+		oldNotifications.Notifications = append(oldNotifications.Notifications, models.Notification{
+			Title:   Action.Title,
+			Content: Action.Content,
 		})
 
 		rawJSON, _ := json.Marshal(oldNotifications)
@@ -63,15 +63,15 @@ func sendNotificationIntoQueue(Ticket models.Ticket, Action models.Action, Recip
 			return err
 		}
 
-		dev.LogDebug(fmt.Sprintf("Task %d expanded to %d notifications", oldTaskID, len(oldNotifications)))
+		dev.LogDebug(fmt.Sprintf("Task %d expanded to %d notifications", oldTaskID, len(oldNotifications.Notifications)))
 
 	} else {
 		rows.Close()
 		dev.LogDebug(fmt.Sprintf(`Found no preceeding notification for recipient %d -> Creating new task`, Recipient.ID))
-		notifications := make([]models.Notification, 0)
-		notifications = append(notifications, models.Notification{
-			ReqTicket: Ticket,
-			ReqAction: Action,
+		var notifications models.NotificationCollection
+		notifications.Notifications = append(notifications.Notifications, models.Notification{
+			Title:   Action.Title,
+			Content: Action.Content,
 		})
 		rawJSON, _ := json.Marshal(notifications)
 

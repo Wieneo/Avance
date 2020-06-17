@@ -27,10 +27,15 @@ type WorkerTask struct {
 	Ticket    sql.NullInt64
 }
 
+//NotificationCollection contains all collected notifications about a ticket
+type NotificationCollection struct {
+	Subject       string
+	Notifications []Notification
+}
+
 //Notification stores a single notificaiton
 type Notification struct {
-	ReqTicket Ticket
-	ReqAction Action
+	Title, Content string
 }
 
 //WorkerTaskType stores the type of the worker task
