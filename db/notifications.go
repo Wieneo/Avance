@@ -20,6 +20,11 @@ func QueueActionNotification(Ticket models.Ticket, Action models.Action) error {
 			((k.Type == models.Requestors || k.Type == models.Readers) && Action.Type == models.Answer) {
 			dev.LogDebug(fmt.Sprintf("Sending notification to %d (Local-ID)", k.ID))
 
+			/*Currently we assume that there is only E-Mail as notification type
+			This should probably later changed to something more dynamic (numbers / handles for telegram, etc...)
+			*/
+
+			//Check if user / unknown e-mail was specified
 			if k.User.Valid {
 				Error = GetSettings(&k.User.Value)
 				if Error != nil {
@@ -32,7 +37,7 @@ func QueueActionNotification(Ticket models.Ticket, Action models.Action) error {
 			} else {
 				Error = sendMailActionNotificationIntoQueue(Ticket, Action, k)
 			}
-			//	Telegram maybe to follow
+
 			if Error != nil {
 				dev.LogError(Error, fmt.Sprintf("Couldn't queue notification task: %s", Error.Error()))
 			}
@@ -49,11 +54,13 @@ func sendMailActionNotificationIntoQueue(Ticket models.Ticket, Action models.Act
 		trueRecipient = Recipient.Mail
 	}
 
+	//Check if there already is a notification task with the e-mail type
 	rows, err := Connection.Query(`SELECT "ID", "Task" FROM "Tasks" WHERE "Ticket" = $1 AND "Recipient" = $2 AND "Status" = 0 AND "NotifiationType" = $3`, Ticket.ID, trueRecipient, models.Mail)
 	if err != nil {
 		return err
 	}
 
+	//We expand the existing task
 	if rows.Next() {
 		//GetOldTask
 		var oldTaskID int64
@@ -65,6 +72,7 @@ func sendMailActionNotificationIntoQueue(Ticket models.Ticket, Action models.Act
 		err := json.Unmarshal([]byte(rawOldNotifications), &oldNotifications)
 		if err != nil {
 			dev.LogError(err, fmt.Sprintf("Notification Task for %d seems to be corrupt!", Recipient.ID))
+			//ToDo: Better Error Handling -> Reject Request / Remove corrupt notification task
 			return err
 		}
 
@@ -75,6 +83,7 @@ func sendMailActionNotificationIntoQueue(Ticket models.Ticket, Action models.Act
 
 		rawJSON, _ := json.Marshal(oldNotifications)
 
+		//Append new notification in database
 		if _, err := Connection.Exec(`UPDATE "Tasks" SET "Task" = $1 WHERE "ID" = $2`, string(rawJSON), oldTaskID); err != nil {
 			return err
 		}
@@ -82,10 +91,12 @@ func sendMailActionNotificationIntoQueue(Ticket models.Ticket, Action models.Act
 		dev.LogDebug(fmt.Sprintf("Task %d expanded to %d notifications", oldTaskID, len(oldNotifications.Notifications)))
 
 	} else {
+		//We need to create a brand new notification task
 		rows.Close()
 		dev.LogDebug(fmt.Sprintf(`Found no preceeding notification for recipient %d -> Creating new task`, Recipient.ID))
 		var notifications models.NotificationCollection
-		notifications.Subject = fmt.Sprintf("Update about ticket %d", Ticket.ID)
+		notifications.Subject = fmt.Sprintf("Update about ticket %d", Ticket.ID) //ToDo: Make more dynamic later? Maybe we want to set other subjects then "UPDATE" -> Ticket creation?
+		//Later used be worker to determine what to do
 		notifications.NotifyType = models.Mail
 		notifications.Notifications = append(notifications.Notifications, models.Notification{
 			Title:   Action.Title,
@@ -93,6 +104,7 @@ func sendMailActionNotificationIntoQueue(Ticket models.Ticket, Action models.Act
 		})
 		rawJSON, _ := json.Marshal(notifications)
 
+		//Interval is always true and is set to the users preference / the default (30 Sec.) -> ToDo: Maybe make that configurable via the general settings?
 		Interval := sql.NullInt32{
 			Valid: true,
 		}

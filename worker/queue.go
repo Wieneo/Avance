@@ -57,6 +57,11 @@ func StartQueueService() {
 						case models.SendNotification:
 							{
 								Error = functions.SendNotifications(task)
+								/*We abuse the reoccuring task system here to make tasks execute at a later date
+								by setting the lastrun to the current date when scheduling and the interval to the users frequency setting
+
+								Setting the Interval to Invalid here in order to prevent "rescheduling" of the task
+								*/
 								task.Interval.Valid = false
 								break
 							}
