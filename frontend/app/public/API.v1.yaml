@@ -32,12 +32,9 @@ paths:
                     items:
                       type: string
               examples: {}
-        '': {}
       operationId: get-api-v1-health
       description: Returns the current health of the instance
       parameters: []
-      security:
-        - Session Key: []
       requestBody: {}
   /api/v1/login:
     post:
@@ -461,7 +458,9 @@ paths:
           application/json:
             schema:
               type: object
-              properties: {}
+              properties:
+                Name:
+                  type: string
       tags:
         - Queues
   '/api/v1/project{projectid}/queue/{queueid}':
