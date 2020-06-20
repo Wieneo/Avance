@@ -35,6 +35,7 @@ type SampleConfig struct {
 		}
 	}
 	SMTP struct {
+		Enabled  bool
 		Host     string
 		Port     int
 		From     string
@@ -139,22 +140,31 @@ func LoadConfig() {
 
 		}
 
-		CurrentConfig.SMTP.Host = os.Getenv("TIX_SMTP_Host")
-		CurrentConfig.SMTP.From = os.Getenv("TIX_SMTP_From")
-		CurrentConfig.SMTP.User = os.Getenv("TIX_SMTP_User")
-		CurrentConfig.SMTP.Password = os.Getenv("TIX_SMTP_Password")
-		//Parse Redis Database to int
-		CurrentConfig.SMTP.Port, Error = strconv.Atoi(os.Getenv("TIX_SMTP_Port"))
-		if Error != nil {
-			dev.LogWarn("SMTP port is not a number! Using 465 as default")
-			CurrentConfig.SMTP.Port = 0
-		}
-
 		//Parse Redis Port to int
 		CurrentConfig.Redis.Port, Error = strconv.Atoi(os.Getenv("TIX_Redis_Port"))
 		if Error != nil {
 			dev.LogWarn("Redis port is not a number! Using 6379 as default")
 			CurrentConfig.Redis.Port = 6379
+		}
+
+		CurrentConfig.SMTP.Enabled, Error = strconv.ParseBool(os.Getenv("TIX_SMTP_Enabled"))
+		if Error != nil {
+			dev.LogWarn("SMTP Enabled is not a boolean! Using true as default")
+			CurrentConfig.SMTP.Enabled = true
+		}
+
+		if CurrentConfig.SMTP.Enabled {
+			CurrentConfig.SMTP.Host = os.Getenv("TIX_SMTP_Host")
+			CurrentConfig.SMTP.From = os.Getenv("TIX_SMTP_From")
+			CurrentConfig.SMTP.User = os.Getenv("TIX_SMTP_User")
+			CurrentConfig.SMTP.Password = os.Getenv("TIX_SMTP_Password")
+			//Parse Redis Database to int
+			CurrentConfig.SMTP.Port, Error = strconv.Atoi(os.Getenv("TIX_SMTP_Port"))
+			if Error != nil {
+				dev.LogWarn("SMTP port is not a number! Using 465 as default")
+				CurrentConfig.SMTP.Port = 0
+			}
+
 		}
 
 		CurrentConfig.Sentry.DSN = os.Getenv("TIX_Sentry_DSN")

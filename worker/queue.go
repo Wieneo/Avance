@@ -56,13 +56,22 @@ func StartQueueService() {
 							}
 						case models.SendNotification:
 							{
-								Error = functions.SendNotifications(task)
+								retry, err := functions.SendNotifications(task)
+								Error = err
 								/*We abuse the reoccuring task system here to make tasks execute at a later date
 								by setting the lastrun to the current date when scheduling and the interval to the users frequency setting
-
-								Setting the Interval to Invalid here in order to prevent "rescheduling" of the task
 								*/
-								task.Interval.Valid = false
+
+								if !retry {
+									//Setting the Interval to Invalid here in order to prevent "rescheduling" of the task
+									task.Interval.Valid = false
+								} else {
+									//If an error while connecting to the mailserver happened and the procedure says we can retry -> Set Interval not to false and retry in 300 Seconds
+									//This also has the effect that nnew notifications still get appended to the one that couldn't be delivered -> Not flooding the user with e-mails
+									dev.LogWarn("A notification delivery failed! Retrying in 300 Seconds...")
+									Error = nil
+									task.Interval.Int32 = 300
+								}
 								break
 							}
 						case models.Debug:
