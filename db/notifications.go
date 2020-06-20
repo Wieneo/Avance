@@ -80,11 +80,6 @@ func sendMailActionNotificationIntoQueue(Ticket models.Ticket, Action models.Act
 			Title:   Action.Title,
 			Content: Action.Content,
 		})
-
-		rawJSON, _ := json.Marshal(oldNotifications)
-
-		//Append new notification in database
-		if _, err := Connection.Exec(`UPDATE "Tasks" SET "Task" = $1 WHERE "ID" = $2`, string(rawJSON), oldTaskID); err != nil {
 			return err
 		}
 
