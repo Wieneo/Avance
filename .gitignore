@@ -5,3 +5,4 @@ debug.json
 .vscode
 userData/avatar/*
 !userData/avatar/default.png
+.VSCodeCounter
