@@ -6,6 +6,13 @@ import (
 	"time"
 )
 
+//WorkerHealth is used to store the current state the worker is in
+type WorkerHealth struct {
+	DBAlive   bool
+	SMTPAlive bool
+	Errors    []string
+}
+
 //Worker represents a single worker from the database
 type Worker struct {
 	ID       int

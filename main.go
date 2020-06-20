@@ -31,18 +31,7 @@ func main() {
 			}
 		case "--worker":
 			{
-				dev.LogInfo("Starting Worker Version", utils.WorkerVersion, utils.WorkerChannel)
-				hostname, _ := os.Hostname()
-				dev.LogInfo("Hostname: " + hostname)
-				config.LoadConfig()
-				db.Init(false)
-				db.RegisterWorker()
-				worker.StartQueueService()
-				if config.CurrentConfig.Worker.Listen {
-					worker.StartServing()
-				} else {
-					select {}
-				}
+				worker.InitWorker()
 				break
 			}
 		default:
