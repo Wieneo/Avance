@@ -12,5 +12,13 @@
         "Host": "localhost",
         "Port": 6379,
         "Database": 0
+    },
+    "SMTP":{
+        "Enabled": true,
+        "Host": "mymailprovider.com",
+        "Port": 465,
+        "From": "my-email@mymailprovider.com",
+        "User": "my-email@mymailprovider.com",
+        "Password": "debugpwd"
     }
 }
