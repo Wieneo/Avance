@@ -44,6 +44,10 @@ type NotificationCollection struct {
 //Notification stores a single notificaiton
 type Notification struct {
 	Title, Content string
+	Action         struct {
+		Valid bool
+		Value Action
+	}
 }
 
 //NotificationType is stored with the task to determine if E-mail or telegram should be used

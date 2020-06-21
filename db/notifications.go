@@ -96,11 +96,18 @@ func sendMailActionNotificationIntoQueue(Ticket models.Ticket, Action models.Act
 		dev.LogDebug(fmt.Sprintf(`Found no preceeding notification for recipient %d -> Creating new task`, Recipient.ID))
 		var notifications models.NotificationCollection
 		notifications.Subject = fmt.Sprintf("Update about ticket %d", Ticket.ID) //ToDo: Make more dynamic later? Maybe we want to set other subjects then "UPDATE" -> Ticket creation?
-		//Later used be worker to determine what to do
+		//Later used by worker to determine what to do
 		notifications.NotifyType = models.Mail
 		notifications.Notifications = append(notifications.Notifications, models.Notification{
 			Title:   Action.Title,
 			Content: Action.Content,
+			Action: struct {
+				Valid bool
+				Value models.Action
+			}{
+				Valid: true,
+				Value: Action,
+			},
 		})
 		rawJSON, _ := json.Marshal(notifications)
 
