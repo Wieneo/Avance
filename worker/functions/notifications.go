@@ -59,11 +59,19 @@ func sendMailNotification(Task models.WorkerTask, Notifications models.Notificat
 
 	var content string
 
-	//ToDo: Templating System for E-Mail notifications
+	//ToDo: Templating System for E-Mail notifications -> Load General E-Mail Template
 	for _, k := range Notifications.Notifications {
-		content += "<h3>" + k.Title + "</h3>"
-		content += k.Content
-		content += "<br>"
+		//Check if we send ticket notifications
+		if k.Action.Valid {
+			//ToDo: Load Single Templates for Action - Notifications
+			content += "<h3>" + k.Title + "</h3>"
+			content += k.Content
+			content += "<br>"
+		} else {
+			content += "<h3>" + k.Title + "</h3>"
+			content += k.Content
+			content += "<br>"
+		}
 	}
 
 	err := smtp.SendMail(realRecipient, Notifications.Subject, content)
