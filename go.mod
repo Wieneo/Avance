@@ -1,4 +1,4 @@
-module gitlab.gnaucke.dev/tixter/tixter-app/v2
+module gitlab.gnaucke.dev/avance/avance-app/v2
 
 go 1.14
 

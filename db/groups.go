@@ -3,8 +3,8 @@ package db
 import (
 	"encoding/json"
 
-	"gitlab.gnaucke.dev/tixter/tixter-app/v2/dev"
-	"gitlab.gnaucke.dev/tixter/tixter-app/v2/models"
+	"gitlab.gnaucke.dev/avance/avance-app/v2/dev"
+	"gitlab.gnaucke.dev/avance/avance-app/v2/models"
 )
 
 //GetALLGroups returns all groups from the database. This should be used with caution as it can cause many cpu cycles

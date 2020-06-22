@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"github.com/getsentry/sentry-go"
-	"gitlab.gnaucke.dev/tixter/tixter-app/v2/dev"
+	"gitlab.gnaucke.dev/avance/avance-app/v2/dev"
 )
 
 //SampleConfig templates the used config
