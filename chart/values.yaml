@@ -34,7 +34,7 @@ service:
   annotations: {}
   name: web
   type: ClusterIP
-  url: http://tixter-tixter-app-staging.gnaucke.dev
+  url: http://avance-avance-app-staging.gnaucke.dev
   additionalHosts:
   commonName:
   externalPort: 5000
