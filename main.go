@@ -3,13 +3,13 @@ package main
 import (
 	"os"
 
-	"gitlab.gnaucke.dev/tixter/tixter-app/v2/config"
-	"gitlab.gnaucke.dev/tixter/tixter-app/v2/db"
-	"gitlab.gnaucke.dev/tixter/tixter-app/v2/dev"
-	"gitlab.gnaucke.dev/tixter/tixter-app/v2/redis"
-	"gitlab.gnaucke.dev/tixter/tixter-app/v2/server"
-	"gitlab.gnaucke.dev/tixter/tixter-app/v2/utils"
-	"gitlab.gnaucke.dev/tixter/tixter-app/v2/worker"
+	"gitlab.gnaucke.dev/avance/avance-app/v2/config"
+	"gitlab.gnaucke.dev/avance/avance-app/v2/db"
+	"gitlab.gnaucke.dev/avance/avance-app/v2/dev"
+	"gitlab.gnaucke.dev/avance/avance-app/v2/redis"
+	"gitlab.gnaucke.dev/avance/avance-app/v2/server"
+	"gitlab.gnaucke.dev/avance/avance-app/v2/utils"
+	"gitlab.gnaucke.dev/avance/avance-app/v2/worker"
 
 	//Imported to be used with database/sql
 	_ "github.com/lib/pq"

@@ -7,12 +7,12 @@ import (
 	"strings"
 	"time"
 
-	"gitlab.gnaucke.dev/tixter/tixter-app/v2/worker/functions"
+	"gitlab.gnaucke.dev/avance/avance-app/v2/worker/functions"
 
-	"gitlab.gnaucke.dev/tixter/tixter-app/v2/models"
+	"gitlab.gnaucke.dev/avance/avance-app/v2/models"
 
-	"gitlab.gnaucke.dev/tixter/tixter-app/v2/db"
-	"gitlab.gnaucke.dev/tixter/tixter-app/v2/dev"
+	"gitlab.gnaucke.dev/avance/avance-app/v2/db"
+	"gitlab.gnaucke.dev/avance/avance-app/v2/dev"
 )
 
 //StartQueueService starts the main thread for queue execution

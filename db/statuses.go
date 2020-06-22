@@ -1,7 +1,7 @@
 package db
 
 import (
-	"gitlab.gnaucke.dev/tixter/tixter-app/v2/models"
+	"gitlab.gnaucke.dev/avance/avance-app/v2/models"
 )
 
 //SearchStatus searches for a status and returns the ID, if a status was found and maybe an error
