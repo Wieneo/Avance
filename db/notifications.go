@@ -80,8 +80,6 @@ func sendMailActionNotificationIntoQueue(Ticket models.Ticket, Action models.Act
 			Title:   Action.Title,
 			Content: Action.Content,
 		})
-			return err
-		}
 
 		dev.LogDebug(fmt.Sprintf("Task %d expanded to %d notifications", oldTaskID, len(oldNotifications.Notifications)))
 
