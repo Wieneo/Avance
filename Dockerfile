@@ -15,7 +15,7 @@ FROM scratch
 WORKDIR /app
 
 COPY --from=certs /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
-COPY --from=backend /backend/tixter-app /app/
+COPY --from=backend /backend/avance-app /app/
 COPY --from=backend /backend/db/migrations /app/db/migrations
 COPY --from=backend /backend/userData/sampleData /app/userData/sampleData
 COPY --from=frontend /frontend /app/frontend/app
