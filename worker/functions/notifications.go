@@ -6,11 +6,11 @@ import (
 	"fmt"
 	"strconv"
 
-	"gitlab.gnaucke.dev/tixter/tixter-app/v2/config"
-	"gitlab.gnaucke.dev/tixter/tixter-app/v2/db"
-	"gitlab.gnaucke.dev/tixter/tixter-app/v2/dev"
-	"gitlab.gnaucke.dev/tixter/tixter-app/v2/models"
-	"gitlab.gnaucke.dev/tixter/tixter-app/v2/worker/smtp"
+	"gitlab.gnaucke.dev/avance/avance-app/v2/config"
+	"gitlab.gnaucke.dev/avance/avance-app/v2/db"
+	"gitlab.gnaucke.dev/avance/avance-app/v2/dev"
+	"gitlab.gnaucke.dev/avance/avance-app/v2/models"
+	"gitlab.gnaucke.dev/avance/avance-app/v2/worker/smtp"
 )
 
 //SendNotifications send the notifications specified in the notification task

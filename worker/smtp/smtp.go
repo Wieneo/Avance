@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"net/smtp"
 
-	"gitlab.gnaucke.dev/tixter/tixter-app/v2/config"
-	"gitlab.gnaucke.dev/tixter/tixter-app/v2/dev"
+	"gitlab.gnaucke.dev/avance/avance-app/v2/config"
+	"gitlab.gnaucke.dev/avance/avance-app/v2/dev"
 )
 
 //Login connects to the SMTP server and returns the SMTP Client struct
