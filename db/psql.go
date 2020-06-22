@@ -80,7 +80,7 @@ func migrate(ApplyMigrations bool) {
 				Permissions: models.Permissions{
 					Admin: true,
 				},
-			}, "tixter")
+			}, "avance")
 
 			//The following is used to make debugging and developing the APP easier when used with Gitlab Auto DevOPS
 			//Detect if deployed via GITLAB

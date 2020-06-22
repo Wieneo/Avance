@@ -6,7 +6,7 @@
         "Port": 5432,
         "Username": "postgres",
         "Password": "debug",
-        "Database": "tixter"
+        "Database": "avance"
     },
     "Redis":{
         "Host": "localhost",

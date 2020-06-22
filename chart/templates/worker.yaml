@@ -48,7 +48,7 @@ spec:
       - name: {{ .Chart.Name }}
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
-        args: ["/app/tixter-app", "--worker"]
+        args: ["/app/avance-app", "--worker"]
         {{- if .Values.application.secretName }}
         envFrom:
         - secretRef:
