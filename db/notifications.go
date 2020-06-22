@@ -79,7 +79,21 @@ func sendMailActionNotificationIntoQueue(Ticket models.Ticket, Action models.Act
 		oldNotifications.Notifications = append(oldNotifications.Notifications, models.Notification{
 			Title:   Action.Title,
 			Content: Action.Content,
+			Action: struct {
+				Valid bool
+				Value models.Action
+			}{
+				Valid: true,
+				Value: Action,
+			},
 		})
+
+		rawJSON, _ := json.Marshal(oldNotifications)
+
+		//Append new notification in database
+		if _, err := Connection.Exec(`UPDATE "Tasks" SET "Task" = $1 WHERE "ID" = $2`, string(rawJSON), oldTaskID); err != nil {
+			return err
+		}
 
 		dev.LogDebug(fmt.Sprintf("Task %d expanded to %d notifications", oldTaskID, len(oldNotifications.Notifications)))
 
