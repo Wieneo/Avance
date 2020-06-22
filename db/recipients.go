@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"errors"
 
-	"gitlab.gnaucke.dev/tixter/tixter-app/v2/models"
+	"gitlab.gnaucke.dev/avance/avance-app/v2/models"
 )
 
 //GetRecipients returns all recipients assigned to the ticket

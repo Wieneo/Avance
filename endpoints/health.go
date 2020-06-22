@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"net/http"
 
-	"gitlab.gnaucke.dev/tixter/tixter-app/v2/db"
-	"gitlab.gnaucke.dev/tixter/tixter-app/v2/redis"
-	"gitlab.gnaucke.dev/tixter/tixter-app/v2/utils"
+	"gitlab.gnaucke.dev/avance/avance-app/v2/db"
+	"gitlab.gnaucke.dev/avance/avance-app/v2/redis"
+	"gitlab.gnaucke.dev/avance/avance-app/v2/utils"
 )
 
 //GetInstanceHealth returns the current state of the instance

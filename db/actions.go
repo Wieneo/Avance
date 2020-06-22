@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"time"
 
-	"gitlab.gnaucke.dev/tixter/tixter-app/v2/models"
+	"gitlab.gnaucke.dev/avance/avance-app/v2/models"
 )
 
 //GetActions returns all actions associated with a ticket

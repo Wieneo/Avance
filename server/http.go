@@ -8,12 +8,12 @@ import (
 	"strings"
 	"time"
 
-	"gitlab.gnaucke.dev/tixter/tixter-app/v2/perms"
+	"gitlab.gnaucke.dev/avance/avance-app/v2/perms"
 
-	"gitlab.gnaucke.dev/tixter/tixter-app/v2/config"
-	"gitlab.gnaucke.dev/tixter/tixter-app/v2/dev"
-	"gitlab.gnaucke.dev/tixter/tixter-app/v2/endpoints"
-	"gitlab.gnaucke.dev/tixter/tixter-app/v2/redis"
+	"gitlab.gnaucke.dev/avance/avance-app/v2/config"
+	"gitlab.gnaucke.dev/avance/avance-app/v2/dev"
+	"gitlab.gnaucke.dev/avance/avance-app/v2/endpoints"
+	"gitlab.gnaucke.dev/avance/avance-app/v2/redis"
 
 	"github.com/gorilla/mux"
 )

@@ -3,7 +3,7 @@ package db
 import (
 	"errors"
 
-	"gitlab.gnaucke.dev/tixter/tixter-app/v2/models"
+	"gitlab.gnaucke.dev/avance/avance-app/v2/models"
 )
 
 //GetProject returns the project struct to a given projectid

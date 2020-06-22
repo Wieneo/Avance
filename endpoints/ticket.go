@@ -9,11 +9,11 @@ import (
 	"strings"
 	"time"
 
-	"gitlab.gnaucke.dev/tixter/tixter-app/v2/db"
-	"gitlab.gnaucke.dev/tixter/tixter-app/v2/dev"
-	"gitlab.gnaucke.dev/tixter/tixter-app/v2/models"
-	"gitlab.gnaucke.dev/tixter/tixter-app/v2/perms"
-	"gitlab.gnaucke.dev/tixter/tixter-app/v2/utils"
+	"gitlab.gnaucke.dev/avance/avance-app/v2/db"
+	"gitlab.gnaucke.dev/avance/avance-app/v2/dev"
+	"gitlab.gnaucke.dev/avance/avance-app/v2/models"
+	"gitlab.gnaucke.dev/avance/avance-app/v2/perms"
+	"gitlab.gnaucke.dev/avance/avance-app/v2/utils"
 )
 
 //GetTicket returns the requested ticket

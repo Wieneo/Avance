@@ -6,7 +6,7 @@ strategyType:
 enableSelector:
 deploymentApiVersion: apps/v1
 image:
-  repository: gitlab.gnaucke.dev/tixter/tixter-app
+  repository: gitlab.gnaucke.dev/avance/avance-app
   tag: stable
   pullPolicy: IfNotPresent
   secrets:
