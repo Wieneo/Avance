@@ -12,7 +12,9 @@ import (
 
 //QueueActionNotification send all needed notifications into the queue
 func QueueActionNotification(Ticket models.Ticket, Action models.Action) error {
+	dev.LogDebug(fmt.Sprintf("[DB] Queueing notification for ticket %d", Ticket.ID))
 	var Error error
+	dev.LogDebug(fmt.Sprintf("[DB] Retrieving all recipients for ticket %d", Ticket.ID))
 	for _, k := range Ticket.AllRecipients() {
 		//Admins get all
 		if k.Type == models.Admins ||
@@ -47,10 +49,14 @@ func QueueActionNotification(Ticket models.Ticket, Action models.Action) error {
 }
 
 func sendMailActionNotificationIntoQueue(Ticket models.Ticket, Action models.Action, Recipient models.Recipient) error {
+	dev.LogDebug(fmt.Sprintf("[DB] Queueing Mail Notification for ticket %d", Ticket.ID))
+
 	var trueRecipient string
 	if Recipient.User.Valid {
+		dev.LogDebug(fmt.Sprintf("[DB] Recipient is user %d", Recipient.User.Value.ID))
 		trueRecipient = strconv.FormatInt(Recipient.User.Value.ID, 10)
 	} else {
+		dev.LogDebug(fmt.Sprintf("[DB] Recipient is mail %s", Recipient.Mail))
 		trueRecipient = Recipient.Mail
 	}
 
@@ -68,6 +74,8 @@ func sendMailActionNotificationIntoQueue(Ticket models.Ticket, Action models.Act
 		var rawOldNotifications string
 		rows.Scan(&oldTaskID, &rawOldNotifications)
 		rows.Close()
+
+		dev.LogDebug(fmt.Sprintf("[DB] Parsing previous notifications"))
 
 		err := json.Unmarshal([]byte(rawOldNotifications), &oldNotifications)
 		if err != nil {
@@ -88,7 +96,11 @@ func sendMailActionNotificationIntoQueue(Ticket models.Ticket, Action models.Act
 			},
 		})
 
+		dev.LogDebug(fmt.Sprintf("[DB] Mahrshalling new notificaitons struct for ticket %d", Ticket.ID))
+
 		rawJSON, _ := json.Marshal(oldNotifications)
+
+		dev.LogDebug(fmt.Sprintf("[DB] Updating notification struct for ticket %d", Ticket.ID))
 
 		//Append new notification in database
 		if _, err := Connection.Exec(`UPDATE "Tasks" SET "Task" = $1 WHERE "ID" = $2`, string(rawJSON), oldTaskID); err != nil {
@@ -134,6 +146,9 @@ func sendMailActionNotificationIntoQueue(Ticket models.Ticket, Action models.Act
 		} else {
 			Interval.Int32 = 30
 		}
+
+		dev.LogDebug(fmt.Sprintf("[DB] Struct is ready to be dumped to the database for ticket %d", Ticket.ID))
+		dev.LogDebug(fmt.Sprintf("[DB] Creating task for notification for ticket %d", Ticket.ID))
 
 		if _, err := CreateTask(models.SendNotification, string(rawJSON), Interval, sql.NullString{Valid: true, String: trueRecipient}, sql.NullInt64{Valid: true, Int64: Ticket.ID}, sql.NullInt32{Valid: true, Int32: int32(models.Mail)}); err != nil {
 			return err
