@@ -82,9 +82,9 @@ func GetTicket(TicketID int64, QueueID int64, ResolveRelations bool) (models.Tic
 		return models.Ticket{}, true, err
 	}
 
-	end := time.Since(started)
+	end := time.Now()
 
-	dev.LogDebug(fmt.Sprintf("[DB] Retrieving ticket %d took %dms (%d Seconds)", TicketID, end*time.Millisecond, end*time.Second))
+	dev.LogDebug(fmt.Sprintf("[DB] Retrieving ticket %d took %s", TicketID, end.Sub(started)))
 	return ticket, true, nil
 }
 
