@@ -119,7 +119,10 @@ func CreateSeverity(Enabled bool, Name, DisplayColor string, Priority int, Proje
 func PatchSeverity(Severity models.Severity) error {
 	dev.LogDebug(fmt.Sprintf("[DB] Patching severity %d", Severity.ID))
 	_, err := Connection.Exec(`UPDATE "Severities" SET "Enabled" = $1, "Name" = $2, "DisplayColor" = $3, "Priority" = $4 WHERE "ID" = $5`, Severity.Enabled, Severity.Name, Severity.DisplayColor, Severity.Priority, Severity.ID)
-	dev.LogDebug(fmt.Sprintf("[DB] Patched Severity %d", Severity.ID))
+
+	if err == nil {
+		dev.LogDebug(fmt.Sprintf("[DB] Patched Severity %d", Severity.ID))
+	}
 	return err
 }
 
@@ -129,6 +132,9 @@ func RemoveSeverity(Project int64, Severity int64) error {
 	//I know that project isn't really needed as severity ids are unique anyway
 	//Its just a safety measure ;)
 	_, err := Connection.Exec(`DELETE FROM "Severities" WHERE "ID" = $1 AND "Project" = $2`, Severity, Project)
-	dev.LogDebug(fmt.Sprintf("[DB] Severity %d in project %d deleted", Severity, Project))
+
+	if err == nil {
+		dev.LogDebug(fmt.Sprintf("[DB] Severity %d in project %d deleted", Severity, Project))
+	}
 	return err
 }
