@@ -22,15 +22,9 @@ func ReserveTask() (int64, error) {
 }
 
 //CreateTask queues a task
-func CreateTask(Type models.WorkerTaskType, Data string, Interval sql.NullInt32) (int64, error) {
-	dev.LogDebug(fmt.Sprintf("[DB] Creating task with type %d", Type))
+func CreateTask(Type models.WorkerTaskType, Data string, Interval sql.NullInt32, Recipient sql.NullString, Ticket sql.NullInt64, NotificationType sql.NullInt32) (int64, error) {
 	var taskID int64
-	err := Connection.QueryRow(`INSERT INTO "Tasks" ("Task", "QueuedAt", "Status", "Type", "Interval") VALUES ($1, $2, $3, $4, $5) RETURNING "ID"`, Data, time.Now(), models.Idle, Type, Interval).Scan(&taskID)
-
-	if err == nil {
-		dev.LogDebug(fmt.Sprintf("[DB] Created task with id %d", taskID))
-	}
-
+	err := Connection.QueryRow(`INSERT INTO "Tasks" ("Task", "QueuedAt", "Status", "Type", "Interval", "Recipient", "Ticket", "LastRun", "NotifiationType") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING "ID"`, Data, time.Now(), models.Idle, Type, Interval, Recipient, Ticket, time.Now(), NotificationType).Scan(&taskID)
 	return taskID, err
 }
 
@@ -39,7 +33,7 @@ func GetTask(TaskID int64) (models.WorkerTask, error) {
 	dev.LogDebug(fmt.Sprintf("[DB] Getting task %d", TaskID))
 
 	var workerTask models.WorkerTask
-	err := Connection.QueryRow(`SELECT "ID", "Task", "QueuedAt", "Status", "Type", "Interval", "LastRun" FROM "Tasks" WHERE "ID" = $1`, TaskID).Scan(&workerTask.ID, &workerTask.Data, &workerTask.QueuedAt, &workerTask.Status, &workerTask.Type, &workerTask.Interval, &workerTask.LastRun)
+	err := Connection.QueryRow(`SELECT "ID", "Task", "QueuedAt", "Status", "Type", "Interval", "LastRun", "Recipient", "Ticket" FROM "Tasks" WHERE "ID" = $1`, TaskID).Scan(&workerTask.ID, &workerTask.Data, &workerTask.QueuedAt, &workerTask.Status, &workerTask.Type, &workerTask.Interval, &workerTask.LastRun, &workerTask.Recipient, &workerTask.Ticket)
 	if err != nil {
 		dev.LogDebug(fmt.Sprintf("[DB] Error happened while retrieving task %d -> Returning empty task struct: %s", TaskID, err.Error()))
 		return models.WorkerTask{}, err

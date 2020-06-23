@@ -129,7 +129,9 @@ type RecipientCollection struct {
 
 //Recipient stores a single recipient (mail / known user)
 type Recipient struct {
-	ID   int64
+	ID int64
+	//RecipientType is only populated when used with AllRecipients
+	Type RecipientType
 	User struct {
 		Valid bool
 		Value User
@@ -160,6 +162,24 @@ func (e RecipientType) String() string {
 	default:
 		return fmt.Sprintf("%d", int(e))
 	}
+}
+
+//AllRecipients returns all recipients from admins, requestors, readers
+func (e Ticket) AllRecipients() []Recipient {
+	allrecp := make([]Recipient, 0)
+	for _, k := range e.Recipients.Admins {
+		k.Type = Admins
+		allrecp = append(allrecp, k)
+	}
+	for _, k := range e.Recipients.Requestors {
+		k.Type = Requestors
+		allrecp = append(allrecp, k)
+	}
+	for _, k := range e.Recipients.Readers {
+		k.Type = Readers
+		allrecp = append(allrecp, k)
+	}
+	return allrecp
 }
 
 //Action stores a single update about a ticket
