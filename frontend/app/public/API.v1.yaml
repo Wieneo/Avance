@@ -2243,5 +2243,3 @@ components:
       name: Authorization
       type: apiKey
       in: header
-security:
-  - Session Key: []
