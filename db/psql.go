@@ -89,7 +89,7 @@ func migrate(ApplyMigrations bool) {
 						NotificationFrequency:       30,
 					},
 				},
-			}, "tixter")
+			}, "avance")
 
 			//The following is used to make debugging and developing the APP easier when used with Gitlab Auto DevOPS
 			//Detect if deployed via GITLAB
