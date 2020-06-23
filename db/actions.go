@@ -71,5 +71,18 @@ func AddAction(TicketID int64, Type models.ActionType, Title, Content string, Is
 		})
 	}
 
+	ticket, _, err := GetTicketUnsafe(TicketID, false)
+	if err == nil {
+		dev.LogDebug(fmt.Sprintf("Preparing Notifications for ticket %d", TicketID))
+		go QueueActionNotification(ticket, models.Action{
+			ID:       newID,
+			Title:    Title,
+			Content:  Content,
+			Type:     Type,
+			IssuedBy: IssuedBy,
+			IssuedAt: time.Now(),
+		})
+	}
+
 	return newID, err
 }
