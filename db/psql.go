@@ -80,6 +80,15 @@ func migrate(ApplyMigrations bool) {
 				Permissions: models.Permissions{
 					Admin: true,
 				},
+				Settings: models.UserSettings{
+					Notification: models.NotificationSettings{
+						MailNotificationAboutNewTickets: true,
+						MailNotificationAboutUpdates:    true,
+						MailNotificationAfterInvolvment: false,
+						MailNotificationEnabled:         true,
+						MailNotificationFrequency:       300,
+					},
+				},
 			}, "avance")
 
 			//The following is used to make debugging and developing the APP easier when used with Gitlab Auto DevOPS
