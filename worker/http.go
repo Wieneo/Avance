@@ -2,15 +2,15 @@ package worker
 
 import (
 	//Imported to be used with database/sql
+
 	"encoding/json"
 	"net/http"
 	"strconv"
 	"time"
 
 	"github.com/gorilla/mux"
-	"gitlab.gnaucke.dev/tixter/tixter-app/v2/config"
-	"gitlab.gnaucke.dev/tixter/tixter-app/v2/db"
-	"gitlab.gnaucke.dev/tixter/tixter-app/v2/dev"
+	"gitlab.gnaucke.dev/avance/avance-app/v2/config"
+	"gitlab.gnaucke.dev/avance/avance-app/v2/dev"
 )
 
 //StartServing starts serving the health endpoint
@@ -44,25 +44,9 @@ func loggingMiddleware(next http.Handler) http.Handler {
 //This is mainly used to check if requests function
 //Output should look something like this: {"DB":true,"Redis":true,"Errors":[]}
 func getInstanceHealth(w http.ResponseWriter, r *http.Request) {
-	errors := make([]string, 0)
-
-	var dummyDBVersion string
-
-	dBAlive := true
-	err := db.Connection.QueryRow(`SELECT "Name" FROM "Patches" LIMIT 1`).Scan(&dummyDBVersion)
-	if err != nil {
-		dBAlive = false
-		errors = append(errors, err.Error())
-	}
-	if !dBAlive {
+	state := getHealthState()
+	if len(state.Errors) > 0 {
 		w.WriteHeader(500)
 	}
-
-	json.NewEncoder(w).Encode(struct {
-		DB     bool
-		Errors []string
-	}{
-		dBAlive,
-		errors,
-	})
+	json.NewEncoder(w).Encode(state)
 }

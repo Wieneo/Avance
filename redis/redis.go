@@ -11,8 +11,8 @@ import (
 
 	"github.com/go-redis/redis"
 	"github.com/google/uuid"
-	"gitlab.gnaucke.dev/tixter/tixter-app/v2/config"
-	"gitlab.gnaucke.dev/tixter/tixter-app/v2/dev"
+	"gitlab.gnaucke.dev/avance/avance-app/v2/config"
+	"gitlab.gnaucke.dev/avance/avance-app/v2/dev"
 )
 
 //Connection stores the current redis connection

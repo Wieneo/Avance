@@ -7,10 +7,10 @@ import (
 	"strconv"
 	"strings"
 
-	"gitlab.gnaucke.dev/tixter/tixter-app/v2/db"
-	"gitlab.gnaucke.dev/tixter/tixter-app/v2/dev"
-	"gitlab.gnaucke.dev/tixter/tixter-app/v2/perms"
-	"gitlab.gnaucke.dev/tixter/tixter-app/v2/utils"
+	"gitlab.gnaucke.dev/avance/avance-app/v2/db"
+	"gitlab.gnaucke.dev/avance/avance-app/v2/dev"
+	"gitlab.gnaucke.dev/avance/avance-app/v2/perms"
+	"gitlab.gnaucke.dev/avance/avance-app/v2/utils"
 )
 
 //GetProjects returns all projects visible to that user

@@ -25,7 +25,7 @@
                             <v-progress-circular indeterminate size="64"></v-progress-circular>
                         </v-overlay>
                         <v-text-field
-                            v-model="UserInfo.Settings.Notification.NotificationFrequency"
+                            v-model="UserInfo.Settings.Notification.MailNotificationFrequency"
                             :rules="frequencyRules"
                             label="Frequency (Seconds)"
                             required
@@ -33,9 +33,9 @@
                             @keydown="ResetMailSettingsTimer"
                             type="number"
                         ></v-text-field>
-                        <v-checkbox v-model="UserInfo.Settings.Notification.NotificationAboutNewTickets" label="Notify about new tickets" @change="UpdateMailSettings"></v-checkbox>
-                        <v-checkbox v-model="UserInfo.Settings.Notification.NotificationAboutUpdates" label="Notify about updates in tickets" @change="UpdateMailSettings"></v-checkbox>
-                        <v-checkbox v-model="UserInfo.Settings.Notification.NotificationAfterInvolvment" label="Notify about updates in tickets you have been involved in" @change="UpdateMailSettings"></v-checkbox>
+                        <v-checkbox v-model="UserInfo.Settings.Notification.MailNotificationAboutNewTickets" label="Notify about new tickets" @change="UpdateMailSettings"></v-checkbox>
+                        <v-checkbox v-model="UserInfo.Settings.Notification.MailNotificationAboutUpdates" label="Notify about updates in tickets" @change="UpdateMailSettings"></v-checkbox>
+                        <v-checkbox v-model="UserInfo.Settings.Notification.MailNotificationAfterInvolvment" label="Notify about updates in tickets you have been involved in" @change="UpdateMailSettings"></v-checkbox>
                     </v-card-text>
                 </v-card>
             </v-col>
@@ -87,7 +87,7 @@ export default Vue.extend({
         },
         Update: async function(): Promise<boolean>{
             //Fix Typings
-            this.UserInfo.Settings.Notification.NotificationFrequency = Number.parseInt(this.UserInfo.Settings.Notification.NotificationFrequency)
+            this.UserInfo.Settings.Notification.MailNotificationFrequency = Number.parseInt(this.UserInfo.Settings.Notification.MailNotificationFrequency)
 
             const result = await Vue.prototype.$Request("PATCH", "/api/v1/profile/settings", this.UserInfo.Settings)
             if (result.Error == undefined){

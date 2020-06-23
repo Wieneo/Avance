@@ -1,17 +1,18 @@
 package worker
 
 import (
+	"errors"
 	"fmt"
 	"strconv"
 	"strings"
 	"time"
 
-	"gitlab.gnaucke.dev/tixter/tixter-app/v2/worker/functions"
+	"gitlab.gnaucke.dev/avance/avance-app/v2/worker/functions"
 
-	"gitlab.gnaucke.dev/tixter/tixter-app/v2/models"
+	"gitlab.gnaucke.dev/avance/avance-app/v2/models"
 
-	"gitlab.gnaucke.dev/tixter/tixter-app/v2/db"
-	"gitlab.gnaucke.dev/tixter/tixter-app/v2/dev"
+	"gitlab.gnaucke.dev/avance/avance-app/v2/db"
+	"gitlab.gnaucke.dev/avance/avance-app/v2/dev"
 )
 
 //StartQueueService starts the main thread for queue execution
@@ -53,9 +54,34 @@ func StartQueueService() {
 								Error = functions.DeleteUser(task)
 								break
 							}
+						case models.SendNotification:
+							{
+								retry, err := functions.SendNotifications(task)
+								Error = err
+								/*We abuse the reoccuring task system here to make tasks execute at a later date
+								by setting the lastrun to the current date when scheduling and the interval to the users frequency setting
+								*/
+
+								if !retry {
+									//Setting the Interval to Invalid here in order to prevent "rescheduling" of the task
+									task.Interval.Valid = false
+								} else {
+									//If an error while connecting to the mailserver happened and the procedure says we can retry -> Set Interval not to false and retry in 300 Seconds
+									//This also has the effect that nnew notifications still get appended to the one that couldn't be delivered -> Not flooding the user with e-mails
+									dev.LogWarn("A notification delivery failed! Retrying in 300 Seconds...")
+									Error = nil
+									task.Interval.Int32 = 300
+								}
+								break
+							}
 						case models.Debug:
 							{
 								dev.LogInfo("Debug Task triggered")
+								break
+							}
+						default:
+							{
+								Error = errors.New("Unknown task type encountered: " + task.Type.String())
 								break
 							}
 						}

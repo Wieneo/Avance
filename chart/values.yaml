@@ -6,7 +6,7 @@ strategyType:
 enableSelector:
 deploymentApiVersion: apps/v1
 image:
-  repository: gitlab.gnaucke.dev/tixter/tixter-app
+  repository: gitlab.gnaucke.dev/avance/avance-app
   tag: stable
   pullPolicy: IfNotPresent
   secrets:
@@ -34,7 +34,7 @@ service:
   annotations: {}
   name: web
   type: ClusterIP
-  url: http://tixter-tixter-app-staging.gnaucke.dev
+  url: http://avance-avance-app-staging.gnaucke.dev
   additionalHosts:
   commonName:
   externalPort: 5000
@@ -117,12 +117,14 @@ worker:
     timeoutSeconds: 15
     scheme: "HTTP"
     probeType: "httpGet"
+    periodSeconds: 30
   readinessProbe:
     path: "/api/v1/health"
     initialDelaySeconds: 5
     timeoutSeconds: 3
     scheme: "HTTP"
     probeType: "httpGet"
+    periodSeconds: 30
   replicaCount: 1
   tier: worker
 

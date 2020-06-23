@@ -11,14 +11,14 @@ import (
 	"strconv"
 	"strings"
 
-	"gitlab.gnaucke.dev/tixter/tixter-app/v2/db"
-	"gitlab.gnaucke.dev/tixter/tixter-app/v2/models"
-	"gitlab.gnaucke.dev/tixter/tixter-app/v2/perms"
-	"gitlab.gnaucke.dev/tixter/tixter-app/v2/redis"
-	"gitlab.gnaucke.dev/tixter/tixter-app/v2/utils"
+	"gitlab.gnaucke.dev/avance/avance-app/v2/db"
+	"gitlab.gnaucke.dev/avance/avance-app/v2/models"
+	"gitlab.gnaucke.dev/avance/avance-app/v2/perms"
+	"gitlab.gnaucke.dev/avance/avance-app/v2/redis"
+	"gitlab.gnaucke.dev/avance/avance-app/v2/utils"
 	"golang.org/x/crypto/bcrypt"
 
-	"gitlab.gnaucke.dev/tixter/tixter-app/v2/dev"
+	"gitlab.gnaucke.dev/avance/avance-app/v2/dev"
 )
 
 //GetProfile returns the profile of the currently logged in user to the client
@@ -104,7 +104,7 @@ func PatchSettings(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if newSettings.Notification.NotificationFrequency < 0 {
+	if newSettings.Notification.MailNotificationFrequency < 0 {
 		w.WriteHeader(400)
 		dev.ReportUserError(w, "Notification Frequency can't be negative")
 		return
@@ -408,10 +408,10 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 		Mail:      req.Mail,
 		Settings: models.UserSettings{
 			Notification: models.NotificationSettings{
-				MailNotificationEnabled:     true,
-				NotificationAboutNewTickets: false,
-				NotificationAboutUpdates:    true,
-				NotificationFrequency:       300,
+				MailNotificationEnabled:         true,
+				MailNotificationAboutNewTickets: false,
+				MailNotificationAboutUpdates:    true,
+				MailNotificationFrequency:       300,
 			},
 		},
 	}
@@ -531,7 +531,7 @@ func DeactivateUser(w http.ResponseWriter, r *http.Request) {
 	RemoveProfilePicture(w, r)
 
 	data, _ := json.Marshal(req)
-	taskid, err := db.CreateTask(models.DeleteUser, string(data), sql.NullInt32{Valid: false})
+	taskid, err := db.CreateTask(models.DeleteUser, string(data), sql.NullInt32{Valid: false}, sql.NullString{Valid: false}, sql.NullInt64{Valid: false}, sql.NullInt32{Valid: false})
 	if err != nil {
 		w.WriteHeader(500)
 		dev.ReportError(err, w, err.Error())

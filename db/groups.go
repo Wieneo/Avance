@@ -2,13 +2,15 @@ package db
 
 import (
 	"encoding/json"
+	"fmt"
 
-	"gitlab.gnaucke.dev/tixter/tixter-app/v2/dev"
-	"gitlab.gnaucke.dev/tixter/tixter-app/v2/models"
+	"gitlab.gnaucke.dev/avance/avance-app/v2/dev"
+	"gitlab.gnaucke.dev/avance/avance-app/v2/models"
 )
 
 //GetALLGroups returns all groups from the database. This should be used with caution as it can cause many cpu cycles
 func GetALLGroups() ([]models.Group, error) {
+	dev.LogDebug(fmt.Sprintf("[DB] Getting ALL Groups"))
 	groups := make([]models.Group, 0)
 	rows, err := Connection.Query(`SELECT "Name" FROM "Groups"`)
 	if err != nil {
@@ -22,11 +24,14 @@ func GetALLGroups() ([]models.Group, error) {
 		groups = append(groups, singleUser)
 	}
 
+	dev.LogDebug(fmt.Sprintf("[DB] Got %d groups", len(groups)))
+
 	return groups, nil
 }
 
 //CreateGroup creates a group in the database
 func CreateGroup(Group models.Group) (int64, error) {
+	dev.LogDebug(fmt.Sprintf("[DB] Creating group '%s'", Group.Name))
 	permsJSON, err := json.Marshal(Group.Permissions)
 	if err != nil {
 		return 0, err
@@ -37,6 +42,8 @@ func CreateGroup(Group models.Group) (int64, error) {
 	if err != nil {
 		return 0, err
 	}
+
+	dev.LogDebug(fmt.Sprintf("[DB] Created group %d", newID))
 
 	return newID, nil
 }
