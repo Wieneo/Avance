@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"os"
 	"time"
 
 	"gitlab.gnaucke.dev/avance/avance-app/v2/dev"
@@ -11,15 +12,35 @@ import (
 )
 
 //ReserveTask reserves a task for this worker
-func ReserveTask() (int64, error) {
+func ReserveTask() (models.WorkerTask, error) {
 	dev.LogDebug(fmt.Sprintf("[DB] Reserving task via public.'GetTask'()"))
 	var newID int64
 	err := Connection.QueryRow(`SELECT public."GetTask"();`).Scan(&newID)
 
-	if err == nil {
-		dev.LogDebug(fmt.Sprintf("[DB] Got task id %d", newID))
+	if err != nil {
+		return models.WorkerTask{}, err
 	}
-	return newID, err
+
+	dev.LogDebug(fmt.Sprintf("[DB] Got task id %d", newID))
+
+	dev.LogDebug(fmt.Sprintf("[DB] Looking up task %d", newID))
+	task, err := GetTask(newID)
+
+	if err != nil {
+		dev.LogDebug(fmt.Sprintf("[DB] Error while looking up task %d -> Returning empty task struct: %s", newID, err.Error()))
+		return models.WorkerTask{}, err
+	}
+
+	dev.LogDebug(fmt.Sprintf("[DB] Updating task %d to reflect pickup", newID))
+	hostname, _ := os.Hostname()
+	err = AddResult(&task, "Job picked up by worker "+hostname)
+
+	if err != nil {
+		dev.LogDebug(fmt.Sprintf("[DB] Error while adding result to task %d -> Returning empty task struct: %s", newID, err.Error()))
+		return models.WorkerTask{}, err
+	}
+
+	return task, err
 }
 
 //CreateTask queues a task
@@ -60,5 +81,17 @@ func PatchTask(Task models.WorkerTask) error {
 	if err == nil {
 		dev.LogDebug(fmt.Sprintf("[DB] Patched task %d", Task.ID))
 	}
+	return err
+}
+
+//AddResult adds a result to the results array of the task
+func AddResult(Task *models.WorkerTask, Result string) error {
+	dev.LogDebug(fmt.Sprintf("[DB] Adding result to task %d", Task.ID))
+	Task.Results = append(Task.Results, Result)
+
+	rawJSON, _ := json.Marshal(Task.Results)
+	_, err := Connection.Exec(`UPDATE "Tasks" SET "Results" = $1 WHERE "ID" = $2`, rawJSON, Task.ID)
+
+	dev.LogDebug(fmt.Sprintf("[DB] Added result to task %d", Task.ID))
 	return err
 }
