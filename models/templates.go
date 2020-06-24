@@ -190,6 +190,7 @@ type Action struct {
 	Content  string
 	IssuedAt time.Time
 	IssuedBy Issuer
+	Tasks    []int64
 }
 
 //Issuer stores wheter a action has a valid issuer and which one

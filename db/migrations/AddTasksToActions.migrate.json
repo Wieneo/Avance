@@ -1,0 +1,5 @@
+{
+    "Name": "AddTasksToActions",
+    "Targets": ["47_2.sql"],
+    "After": "AddTasks"
+}

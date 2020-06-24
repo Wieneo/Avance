@@ -109,6 +109,11 @@ func sendMailActionNotificationIntoQueue(Ticket models.Ticket, Action models.Act
 
 		dev.LogDebug(fmt.Sprintf("Task %d expanded to %d notifications", oldTaskID, len(oldNotifications.Notifications)))
 
+		err = addTasksToAction(oldTaskID, Action)
+		if err != nil {
+			return err
+		}
+
 	} else {
 		//We need to create a brand new notification task
 		rows.Close()
@@ -150,10 +155,46 @@ func sendMailActionNotificationIntoQueue(Ticket models.Ticket, Action models.Act
 		dev.LogDebug(fmt.Sprintf("[DB] Struct is ready to be dumped to the database for ticket %d", Ticket.ID))
 		dev.LogDebug(fmt.Sprintf("[DB] Creating task for notification for ticket %d", Ticket.ID))
 
-		if _, err := CreateTask(models.SendNotification, string(rawJSON), Interval, sql.NullString{Valid: true, String: trueRecipient}, sql.NullInt64{Valid: true, Int64: Ticket.ID}, sql.NullInt32{Valid: true, Int32: int32(models.Mail)}); err != nil {
+		if newTaskID, err := CreateTask(models.SendNotification, string(rawJSON), Interval, sql.NullString{Valid: true, String: trueRecipient}, sql.NullInt64{Valid: true, Int64: Ticket.ID}, sql.NullInt32{Valid: true, Int32: int32(models.Mail)}); err == nil {
+			err = addTasksToAction(newTaskID, Action)
+			if err != nil {
+				return err
+			}
+		} else {
 			return err
 		}
+
 	}
 
+	return nil
+}
+
+func addTasksToAction(TaskID int64, Action models.Action) error {
+	//As the Action struct is only temporary we get the current tasks from the database
+	var rawJSON sql.NullString
+	dev.LogDebug(fmt.Sprintf("[DB] Retrieving previous tasks for action %d", Action.ID))
+	err := Connection.QueryRow(`SELECT "Tasks" FROM "Actions" WHERE "ID" = $1`, Action.ID).Scan(&rawJSON)
+
+	if err != nil {
+		dev.LogDebug(fmt.Sprintf("[DB] Error happened while retrieving previous tasks for action %d: %s", Action.ID, err.Error()))
+		return err
+	}
+
+	tasks := make([]int64, 0)
+	if rawJSON.Valid {
+		err = json.Unmarshal([]byte(rawJSON.String), &tasks)
+	}
+
+	if err != nil {
+		dev.LogDebug(fmt.Sprintf("[DB] Parsing previous tasks for action %d failed: %s", Action.ID, err.Error()))
+		return err
+	}
+
+	tasks = append(tasks, TaskID)
+
+	newJSON, _ := json.Marshal(tasks)
+
+	dev.LogDebug(fmt.Sprintf("[DB] Expanding tasks of action %d to %d tasks", Action.ID, len(tasks)))
+	Connection.Exec(`UPDATE "Actions" SET "Tasks" = $1 WHERE "ID" = $2`, string(newJSON), Action.ID)
 	return nil
 }

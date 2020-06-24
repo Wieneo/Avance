@@ -2,6 +2,7 @@ package db
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"time"
 
@@ -13,7 +14,7 @@ import (
 func GetActions(TicketID int64) ([]models.Action, error) {
 	dev.LogDebug(fmt.Sprintf("[DB] Getting Actions for ticket %d", TicketID))
 	actions := make([]models.Action, 0)
-	rows, err := Connection.Query(`SELECT "ID", "Type", "Title", "Content", "IssuedAt", "IssuedBy" FROM "Actions" WHERE "Ticket" = $1 ORDER BY "ID" DESC`, TicketID)
+	rows, err := Connection.Query(`SELECT "ID", "Type", "Title", "Content", "IssuedAt", "IssuedBy", "Tasks" FROM "Actions" WHERE "Ticket" = $1 ORDER BY "ID" DESC`, TicketID)
 	if err != nil {
 		return actions, err
 	}
@@ -21,7 +22,8 @@ func GetActions(TicketID int64) ([]models.Action, error) {
 	for rows.Next() {
 		var singleAction models.Action
 		var rawUserID sql.NullInt64
-		rows.Scan(&singleAction.ID, &singleAction.Type, &singleAction.Title, &singleAction.Content, &singleAction.IssuedAt, &rawUserID)
+		var rawTasks sql.NullString
+		rows.Scan(&singleAction.ID, &singleAction.Type, &singleAction.Title, &singleAction.Content, &singleAction.IssuedAt, &rawUserID, &rawTasks)
 
 		if rawUserID.Valid {
 			user, _, err := GetUser(rawUserID.Int64)
@@ -31,6 +33,15 @@ func GetActions(TicketID int64) ([]models.Action, error) {
 
 			singleAction.IssuedBy.Valid = true
 			singleAction.IssuedBy.Issuer = user
+		}
+
+		if rawTasks.Valid {
+			err = json.Unmarshal([]byte(rawTasks.String), &singleAction.Tasks)
+			if err != nil {
+				return make([]models.Action, 0), err
+			}
+		} else {
+			singleAction.Tasks = make([]int64, 0)
 		}
 
 		actions = append(actions, singleAction)
