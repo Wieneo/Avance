@@ -98,6 +98,8 @@ func HTTPInit() {
 	router.HandleFunc("/api/v1/workers", endpoints.GetWorkers).Methods("GET")
 	router.HandleFunc("/api/v1/worker/{[0-9]{*}}", endpoints.ToggleWorker).Methods("PATCH")
 
+	router.HandleFunc("/api/v1/task/{[0-9]{*}}", endpoints.GetTaskInfo).Methods("GET")
+
 	//Needs to be at the bottom!
 	router.PathPrefix("/").HandlerFunc(endpoints.ServeAssets).Methods("GET")
 

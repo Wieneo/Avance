@@ -1,0 +1,77 @@
+package endpoints
+
+import (
+	"encoding/json"
+	"net/http"
+	"strconv"
+	"strings"
+
+	"gitlab.gnaucke.dev/avance/avance-app/v2/db"
+	"gitlab.gnaucke.dev/avance/avance-app/v2/dev"
+	"gitlab.gnaucke.dev/avance/avance-app/v2/perms"
+	"gitlab.gnaucke.dev/avance/avance-app/v2/utils"
+)
+
+//GetTaskInfo returns info about a task
+func GetTaskInfo(w http.ResponseWriter, r *http.Request) {
+	user, err := utils.GetUser(r, w)
+	if err != nil {
+		w.WriteHeader(500)
+		dev.ReportError(err, w, err.Error())
+		return
+	}
+
+	taskID, _ := strconv.ParseInt(strings.Split(r.URL.String(), "/")[4], 10, 64)
+
+	task, found, err := db.GetTask(taskID)
+
+	if err != nil {
+		w.WriteHeader(500)
+		dev.ReportError(err, w, err.Error())
+		return
+	}
+
+	if !found {
+		w.WriteHeader(404)
+		dev.ReportUserError(w, "Specified task wasn't found")
+		return
+	}
+
+	if task.Ticket.Valid {
+		ticket, _, err := db.GetTicketUnsafe(task.Ticket.Int64, false)
+		if err != nil {
+			w.WriteHeader(500)
+			dev.ReportError(err, w, err.Error())
+			return
+		}
+
+		allperms, perms, err := perms.GetPermissionsToQueue(user, ticket.Queue)
+		if err != nil {
+			w.WriteHeader(500)
+			dev.ReportError(err, w, err.Error())
+			return
+		}
+
+		if !perms.CanSee && !allperms.Admin {
+			w.WriteHeader(401)
+			dev.ReportUserError(w, "You are not authorized to view tasks in that queue")
+			return
+		}
+	} else {
+		allperms, err := perms.CombinePermissions(user)
+		if err != nil {
+			w.WriteHeader(500)
+			dev.ReportError(err, w, err.Error())
+			return
+		}
+
+		if !allperms.Admin {
+			w.WriteHeader(401)
+			dev.ReportUserError(w, "You are not allowed to view global tasks")
+			return
+		}
+	}
+
+	json.NewEncoder(w).Encode(task)
+
+}
