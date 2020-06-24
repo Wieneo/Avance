@@ -60,6 +60,7 @@ func StartQueueService() {
 							} else {
 								//If an error while connecting to the mailserver happened and the procedure says we can retry -> Set Interval not to false and retry in 300 Seconds
 								//This also has the effect that nnew notifications still get appended to the one that couldn't be delivered -> Not flooding the user with e-mails
+								db.AddResult(&task, "Mail delivery failed! Retrying in 5 Minutes.")
 								dev.LogWarn("A notification delivery failed! Retrying in 300 Seconds...")
 								Error = nil
 								task.Interval.Int32 = 300
