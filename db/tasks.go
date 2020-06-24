@@ -2,6 +2,7 @@ package db
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"time"
 
@@ -32,11 +33,20 @@ func CreateTask(Type models.WorkerTaskType, Data string, Interval sql.NullInt32,
 func GetTask(TaskID int64) (models.WorkerTask, error) {
 	dev.LogDebug(fmt.Sprintf("[DB] Getting task %d", TaskID))
 
+	var rawResults sql.NullString
 	var workerTask models.WorkerTask
-	err := Connection.QueryRow(`SELECT "ID", "Task", "QueuedAt", "Status", "Type", "Interval", "LastRun", "Recipient", "Ticket" FROM "Tasks" WHERE "ID" = $1`, TaskID).Scan(&workerTask.ID, &workerTask.Data, &workerTask.QueuedAt, &workerTask.Status, &workerTask.Type, &workerTask.Interval, &workerTask.LastRun, &workerTask.Recipient, &workerTask.Ticket)
+	err := Connection.QueryRow(`SELECT "ID", "Task", "QueuedAt", "Status", "Type", "Interval", "LastRun", "Recipient", "Ticket", "Results" FROM "Tasks" WHERE "ID" = $1`, TaskID).Scan(&workerTask.ID, &workerTask.Data, &workerTask.QueuedAt, &workerTask.Status, &workerTask.Type, &workerTask.Interval, &workerTask.LastRun, &workerTask.Recipient, &workerTask.Ticket, &rawResults)
 	if err != nil {
 		dev.LogDebug(fmt.Sprintf("[DB] Error happened while retrieving task %d -> Returning empty task struct: %s", TaskID, err.Error()))
 		return models.WorkerTask{}, err
+	}
+
+	if rawResults.Valid {
+		err = json.Unmarshal([]byte(rawResults.String), &workerTask.Results)
+		if err != nil {
+			dev.LogDebug(fmt.Sprintf("[DB] Error happened while parsing results of task %d -> Returning empty task struct: %s", TaskID, err.Error()))
+			return models.WorkerTask{}, err
+		}
 	}
 
 	dev.LogDebug(fmt.Sprintf("[DB] Got task %d", workerTask.ID))
