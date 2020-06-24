@@ -73,6 +73,8 @@ func GetTask(TaskID int64) (models.WorkerTask, bool, error) {
 			dev.LogDebug(fmt.Sprintf("[DB] Error happened while parsing results of task %d -> Returning empty task struct: %s", TaskID, err.Error()))
 			return models.WorkerTask{}, true, err
 		}
+	} else {
+		workerTask.Results = make([]models.TaskResult, 0)
 	}
 
 	dev.LogDebug(fmt.Sprintf("[DB] Got task %d", workerTask.ID))
@@ -92,7 +94,7 @@ func PatchTask(Task models.WorkerTask) error {
 //AddResult adds a result to the results array of the task
 func AddResult(Task *models.WorkerTask, Result string) error {
 	dev.LogDebug(fmt.Sprintf("[DB] Adding result to task %d", Task.ID))
-	Task.Results = append(Task.Results, Result)
+	Task.Results = append(Task.Results, models.TaskResult{IssuedAt: time.Now(), Result: Result})
 
 	rawJSON, _ := json.Marshal(Task.Results)
 	_, err := Connection.Exec(`UPDATE "Tasks" SET "Results" = $1 WHERE "ID" = $2`, rawJSON, Task.ID)

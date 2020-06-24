@@ -32,7 +32,13 @@ type WorkerTask struct {
 	LastRun   sql.NullTime
 	Recipient sql.NullString
 	Ticket    sql.NullInt64
-	Results   []string
+	Results   []TaskResult
+}
+
+//TaskResult stores a single result of a task
+type TaskResult struct {
+	Result   string
+	IssuedAt time.Time
 }
 
 //NotificationCollection contains all collected notifications about a ticket
