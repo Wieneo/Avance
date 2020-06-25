@@ -11,6 +11,8 @@
                 <span v-if="action.IssuedBy.Valid">{{action.IssuedBy.Issuer.Firstname}} {{action.IssuedBy.Issuer.Lastname}} ({{action.IssuedBy.Issuer.Username}})</span>
                 <span v-else><b>System</b></span>
                 <br>{{action.IssuedAt | moment("dddd, MM/DD/YYYY HH:mm:ss")}}
+                <p v-if="TasksLoading">Tasks loading...</p>
+                <p v-if="RunningTasks.get(action.ID) && !TasksLoading">Test</p>
               </v-card-subtitle>
               <v-card-text style="color: black;" v-html="action.Content"></v-card-text>
             </div>
@@ -23,5 +25,29 @@
    export default Vue.extend({
     name: 'ActionDisplay',
     props: ["CurrentTicket", "TicketLoading"],
+    data: function(){
+        return {
+            TasksLoading: true
+        }
+    },
+    computed:{
+      RunningTasks:{
+        cache: false,
+        get (){
+          const actionTasks = new Map<bigint, boolean>()
+          this.CurrentTicket.Actions.forEach(element => {
+            actionTasks.set(element.ID, element.TaskRunning)
+          });
+
+          return actionTasks
+        }
+      }
+    },
+    methods:{
+      tasksLoaded: function(){
+        this.$forceUpdate();
+        this.TasksLoading = false
+      }
+    }
   })
 </script>

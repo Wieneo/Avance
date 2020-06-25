@@ -19,7 +19,7 @@
                         <v-tab><v-icon left>mdi-account</v-icon>Interactions</v-tab>
                         <v-tab><v-icon left>mdi-history</v-icon>Actions</v-tab>
 
-                        <v-tab-item class="overflow-y-auto" style="max-height: calc(100vh - 130px);"><ActionDisplay v-bind:CurrentTicket="CurrentTicket" v-bind:TicketLoading="TicketLoading"/></v-tab-item>
+                        <v-tab-item class="overflow-y-auto" style="max-height: calc(100vh - 130px);"><ActionDisplay v-bind:CurrentTicket="CurrentTicket" v-bind:TicketLoading="TicketLoading" ref="ActionDisplay"/></v-tab-item>
                         <v-tab-item class="overflow-y-auto" style="max-height: calc(100vh - 130px);"><TimelineDisplay v-bind:CurrentTicket="CurrentTicket" v-bind:TicketLoading="TicketLoading"/></v-tab-item>
                     </v-tabs>
                 </v-col>
@@ -100,7 +100,49 @@ export default Vue.extend({
             this.TicketLoading = true
             this.CurrentTicket = (await Vue.prototype.$Request("GET", "/api/v1/ticket/" + TicketID))
             this.TicketLoading = false
-        }
+
+
+            const taskIDs = []
+            //GetTasks
+            this.CurrentTicket.Actions.forEach(element => {
+                element.Tasks.forEach(task => {
+                    let found = false
+                    taskIDs.forEach(cachedTask => {
+                        if (task == cachedTask){
+                            found = true
+                        }
+                    });
+
+                    if (!found){
+                        taskIDs.push(task)
+                    }
+                });
+            });
+
+            const tasks = new Map<bigint, any>()
+
+            console.log("Need to get " + taskIDs.length + " tasks")
+            await this.asyncForEach(taskIDs, async (element) => {
+                tasks.set(element, (await Vue.prototype.$Request("GET", "/api/v1/task/" + element)))
+            });
+
+            this.CurrentTicket.Actions.forEach((element: any, index: number) => {
+                element.Tasks.forEach(task => {
+                    const realTask = tasks.get(task)
+                    if (realTask.Status == 0 || realTask.Status == 1){
+                        this.CurrentTicket.Actions[index].TaskRunning = true
+                    }
+                });
+            });
+
+            console.log("Got all tasks")
+            this.$refs.ActionDisplay.tasksLoaded()
+        },
+        asyncForEach: async function (array: any, callback: any) {
+            for (let index = 0; index < array.length; index++) {
+                await callback(array[index], index, array);
+            }
+        },
     }
 })
 </script>
