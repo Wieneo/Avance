@@ -101,6 +101,7 @@ export default Vue.extend({
             this.CurrentTicket = (await Vue.prototype.$Request("GET", "/api/v1/ticket/" + TicketID))
             this.TicketLoading = false
 
+            this.$refs.ActionDisplay.resetTasks()
 
             const taskIDs = []
             //GetTasks
@@ -127,11 +128,13 @@ export default Vue.extend({
             });
 
             this.CurrentTicket.Actions.forEach((element: any, index: number) => {
+                this.CurrentTicket.Actions[index].ResolvedTasks = []
                 element.Tasks.forEach(task => {
                     const realTask = tasks.get(task)
                     if (realTask.Status == 0 || realTask.Status == 1){
                         this.CurrentTicket.Actions[index].TaskRunning = true
                     }
+                    this.CurrentTicket.Actions[index].ResolvedTasks.push(realTask)
                 });
             });
 
