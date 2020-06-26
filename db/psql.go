@@ -53,7 +53,7 @@ func migrate(ApplyMigrations bool) {
 
 	rows, err := Connection.Query(`SELECT "Name" FROM "Patches"`)
 	if err != nil {
-		dev.LogError(err, err.Error())
+		//dev.LogError(err, err.Error())
 		//If table doesn't exist
 		if strings.Contains(err.Error(), "does not exist") && ApplyMigrations {
 			//Fix for old instances
