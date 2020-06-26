@@ -19,6 +19,8 @@ func GetActions(TicketID int64) ([]models.Action, error) {
 		return actions, err
 	}
 
+	cachedUsers := make(map[int64]models.User, 0)
+
 	for rows.Next() {
 		var singleAction models.Action
 		var rawUserID sql.NullInt64
@@ -26,13 +28,19 @@ func GetActions(TicketID int64) ([]models.Action, error) {
 		rows.Scan(&singleAction.ID, &singleAction.Type, &singleAction.Title, &singleAction.Content, &singleAction.IssuedAt, &rawUserID, &rawTasks)
 
 		if rawUserID.Valid {
-			user, _, err := GetUser(rawUserID.Int64)
-			if err != nil {
-				return make([]models.Action, 0), err
+
+			//If user is not cached
+			if _, found := cachedUsers[rawUserID.Int64]; !found {
+				user, _, err := GetUser(rawUserID.Int64)
+				if err != nil {
+					return make([]models.Action, 0), err
+				}
+
+				cachedUsers[rawUserID.Int64] = user
 			}
 
 			singleAction.IssuedBy.Valid = true
-			singleAction.IssuedBy.Issuer = user
+			singleAction.IssuedBy.Issuer = cachedUsers[rawUserID.Int64]
 		}
 
 		if rawTasks.Valid {
@@ -69,7 +77,7 @@ func AddAction(TicketID int64, Type models.ActionType, Title, Content string, Is
 		dev.LogDebug(fmt.Sprintf("[DB] Created action %d for ticket %d", newID, TicketID))
 	}
 
-	ticket, _, err := GetTicketUnsafe(TicketID, false)
+	ticket, _, err := GetTicketUnsafe(TicketID, models.WantedProperties{Recipients: true})
 	if err == nil {
 		dev.LogDebug(fmt.Sprintf("Preparing Notifications for ticket %d", TicketID))
 		go QueueActionNotification(ticket, models.Action{

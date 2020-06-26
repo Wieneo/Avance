@@ -58,7 +58,7 @@
         cache: false,
         get (){
           const actionTasks = new Map<bigint, boolean>()
-          this.CurrentTicket.Actions.forEach(element => {
+          this.CurrentTicket.Actions.forEach((element: any) => {
             actionTasks.set(element.ID, element.TaskRunning)
           });
 
@@ -76,9 +76,9 @@
       },
       hasFailedTasks: function(ActionID: bigint): boolean{
         let foundFaulty = false
-        this.CurrentTicket.Actions.forEach(element => {
+        this.CurrentTicket.Actions.forEach((element: any) => {
           if (element.ID == ActionID){
-            element.ResolvedTasks.forEach(task => {
+            element.ResolvedTasks.forEach((task: any) => {
               if (task.Status == 2){
                 foundFaulty = true
               }

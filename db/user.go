@@ -237,7 +237,7 @@ func GetTicketsOfUser(UserID int64) ([]models.Ticket, error) {
 	for rows.Next() {
 		var id int64
 		rows.Scan(&id)
-		ticket, _, err := GetTicketUnsafe(id, false)
+		ticket, _, err := GetTicketUnsafe(id, models.WantedProperties{})
 		if err != nil {
 			dev.LogError(err, "Couldn't get ticket: "+err.Error())
 		}

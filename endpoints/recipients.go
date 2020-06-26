@@ -64,7 +64,7 @@ func AddRecipient(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ticket, found, err := db.GetTicket(ticketid, queueid, false)
+	ticket, found, err := db.GetTicket(ticketid, queueid, models.WantedProperties{Recipients: true})
 	if err != nil {
 		w.WriteHeader(500)
 		dev.ReportError(err, w, err.Error())
@@ -358,7 +358,7 @@ func DeleteRecipient(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ticket, found, err := db.GetTicket(ticketid, queueid, false)
+	ticket, found, err := db.GetTicket(ticketid, queueid, models.WantedProperties{Recipients: true})
 	if err != nil {
 		w.WriteHeader(500)
 		dev.ReportError(err, w, err.Error())

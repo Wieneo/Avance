@@ -8,6 +8,7 @@ import (
 
 	"gitlab.gnaucke.dev/avance/avance-app/v2/db"
 	"gitlab.gnaucke.dev/avance/avance-app/v2/dev"
+	"gitlab.gnaucke.dev/avance/avance-app/v2/models"
 	"gitlab.gnaucke.dev/avance/avance-app/v2/perms"
 	"gitlab.gnaucke.dev/avance/avance-app/v2/utils"
 )
@@ -38,7 +39,7 @@ func GetTaskInfo(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if task.Ticket.Valid {
-		ticket, _, err := db.GetTicketUnsafe(task.Ticket.Int64, false)
+		ticket, _, err := db.GetTicketUnsafe(task.Ticket.Int64, models.WantedProperties{Queue: true})
 		if err != nil {
 			w.WriteHeader(500)
 			dev.ReportError(err, w, err.Error())

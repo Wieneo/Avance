@@ -99,16 +99,16 @@ export default Vue.extend({
         GetTicket: async function(TicketID: number){
             this.TicketLoading = true
             this.CurrentTicket = (await Vue.prototype.$Request("GET", "/api/v1/ticket/" + TicketID))
-            this.TicketLoading = false
+            this.TicketLoading = false;
 
-            this.$refs.ActionDisplay.resetTasks()
+            (this.$refs.ActionDisplay as Vue & { resetTasks: () => any }).resetTasks()
 
-            const taskIDs = []
+            const taskIDs: any[] = [];
             //GetTasks
-            this.CurrentTicket.Actions.forEach(element => {
-                element.Tasks.forEach(task => {
+            (this.CurrentTicket as any).Actions.forEach((element: any) => {
+                element.Tasks.forEach((task: any) => {
                     let found = false
-                    taskIDs.forEach(cachedTask => {
+                    taskIDs.forEach((cachedTask: any) => {
                         if (task == cachedTask){
                             found = true
                         }
@@ -123,23 +123,23 @@ export default Vue.extend({
             const tasks = new Map<bigint, any>()
 
             console.log("Need to get " + taskIDs.length + " tasks")
-            await this.asyncForEach(taskIDs, async (element) => {
+            await this.asyncForEach(taskIDs, async (element: any) => {
                 tasks.set(element, (await Vue.prototype.$Request("GET", "/api/v1/task/" + element)))
             });
 
-            this.CurrentTicket.Actions.forEach((element: any, index: number) => {
-                this.CurrentTicket.Actions[index].ResolvedTasks = []
-                element.Tasks.forEach(task => {
+            (this.CurrentTicket as any).Actions.forEach((element: any, index: number) => {
+                (this.CurrentTicket as any).Actions[index].ResolvedTasks = []
+                element.Tasks.forEach((task: any) => {
                     const realTask = tasks.get(task)
                     if (realTask.Status == 0 || realTask.Status == 1){
-                        this.CurrentTicket.Actions[index].TaskRunning = true
+                        (this.CurrentTicket as any).Actions[index].TaskRunning = true
                     }
-                    this.CurrentTicket.Actions[index].ResolvedTasks.push(realTask)
+                    (this.CurrentTicket as any).Actions[index].ResolvedTasks.push(realTask)
                 });
             });
 
-            console.log("Got all tasks")
-            this.$refs.ActionDisplay.tasksLoaded()
+            console.log("Got all tasks");
+            (this.$refs.ActionDisplay as Vue & { tasksLoaded: () => any }).tasksLoaded()
         },
         asyncForEach: async function (array: any, callback: any) {
             for (let index = 0; index < array.length; index++) {

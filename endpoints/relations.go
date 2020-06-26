@@ -59,7 +59,7 @@ func CreateRelation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ticket, found, err := db.GetTicket(ticketid, queueid, true)
+	ticket, found, err := db.GetTicket(ticketid, queueid, models.WantedProperties{Relations: true})
 	if err != nil {
 		w.WriteHeader(500)
 		dev.ReportError(err, w, err.Error())
@@ -82,7 +82,7 @@ func CreateRelation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, found, err = db.GetTicket(relation.OtherTicket, queueid, false)
+	_, found, err = db.GetTicket(relation.OtherTicket, queueid, models.WantedProperties{Relations: true})
 	if err != nil {
 		w.WriteHeader(500)
 		dev.ReportError(err, w, err.Error())
@@ -177,7 +177,7 @@ func DeleteRelation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ticket, found, err := db.GetTicket(ticketid, queueid, true)
+	ticket, found, err := db.GetTicket(ticketid, queueid, models.WantedProperties{Relations: true})
 	if err != nil {
 		w.WriteHeader(500)
 		dev.ReportError(err, w, err.Error())
