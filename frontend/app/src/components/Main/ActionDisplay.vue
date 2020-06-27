@@ -25,7 +25,7 @@
                     ></v-progress-linear>
                   <!--If no task is running for that action-->
                   <span v-else style="animation: 1s ease-out 0s 1 scaleOut;">
-                    <v-btn icon v-if="!RunningTasks.get(action.ID)">
+                    <v-btn icon v-if="!RunningTasks.get(action.ID)" @click="showTasksDetailed(action)">
                       <v-icon v-if="!hasFailedTasks(action.ID)" style="color: #0174ff;" >mdi-check</v-icon>
                       <v-icon v-else style="color: rgba(255, 52, 52, 0.76);" >mdi-exclamation-thick</v-icon>
                     </v-btn>
@@ -33,13 +33,47 @@
                       style="height: 24px; cursor: pointer;"
                       indeterminate
                       color="primary"
-                      @click="testLoaderClick"
+                      @click="showTasksDetailed(action)"
                     ></v-progress-circular>
                   </span>
                 </v-col>
               </v-row>
             </div>
           </v-card>
+          <v-dialog
+            v-model="ShowTaskDetails"
+            width="500"
+            @input="ShowTaskDetails = false"
+          >
+          <v-card>
+              <v-card-title
+                class="headline grey lighten-2"
+                primary-title
+              >
+                Tasks
+              </v-card-title>
+
+              <v-card-text>
+                <v-list two-line>
+                  <template v-if="CurrentTaskAction.Tasks != undefined">
+                    <div v-if="CurrentTaskAction.Tasks.length > 0">
+                    <v-list-item v-for="task in CurrentTaskAction.Tasks" :key="task.ID">
+                      <v-list-item-content>
+                        <v-list-item-title>{{task.ID}}</v-list-item-title>
+                        <v-list-item-subtitle>{{task.ID}}</v-list-item-subtitle>
+                      </v-list-item-content>
+                    </v-list-item>
+                    </div>
+                    <div v-else>
+                      <v-list-item-subtitle>There are no tasks assigned to that action.</v-list-item-subtitle>
+                    </div>
+                  </template>
+                </v-list>
+              </v-card-text>
+
+              <v-divider></v-divider>
+            </v-card>
+          </v-dialog>
     </div>
 </template>
 <script lang="ts">
@@ -50,7 +84,9 @@
     props: ["CurrentTicket", "TicketLoading"],
     data: function(){
         return {
-            TasksLoading: true
+            TasksLoading: true,
+            CurrentTaskAction: {},
+            ShowTaskDetails: false
         }
     },
     computed:{
@@ -88,8 +124,9 @@
 
         return foundFaulty
       },
-      testLoaderClick: function(){
-        console.log("OK")
+      showTasksDetailed: function(Action: any){
+        this.CurrentTaskAction = Action;
+        this.ShowTaskDetails = true
       }
     }
   })
