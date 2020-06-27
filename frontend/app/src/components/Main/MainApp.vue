@@ -134,6 +134,8 @@ export default Vue.extend({
                     if (realTask.Status == 0 || realTask.Status == 1){
                         (this.CurrentTicket as any).Actions[index].TaskRunning = true
                     }
+
+                    realTask.Data = JSON.parse(realTask.Data);
                     (this.CurrentTicket as any).Actions[index].ResolvedTasks.push(realTask)
                 });
             });

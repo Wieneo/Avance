@@ -42,7 +42,7 @@
           </v-card>
           <v-dialog
             v-model="ShowTaskDetails"
-            width="500"
+            width="800"
             @input="ShowTaskDetails = false"
           >
           <v-card>
@@ -57,11 +57,37 @@
                 <v-list two-line>
                   <template v-if="CurrentTaskAction.Tasks != undefined">
                     <div v-if="CurrentTaskAction.Tasks.length > 0">
-                    <v-list-item v-for="task in CurrentTaskAction.Tasks" :key="task.ID">
+                    <v-list-item v-for="task in CurrentTaskAction.ResolvedTasks" :key="task.ID">
+                      <v-list-item-avatar>
+                        <v-progress-circular v-if="task.Status == 1 || task.Status == 0"
+                          style="height: 24px; cursor: pointer;"
+                          indeterminate
+                          color="primary"
+                          title="Task is still running"
+                        ></v-progress-circular>
+                         <v-icon v-if="task.Status == 3" style="color: #0174ff;" title="Task succeded">mdi-check</v-icon>
+                         <v-icon v-if="task.Status == 2" style="color: rgba(255, 52, 52, 0.76);" title="Task has failed">mdi-exclamation-thick</v-icon>
+                      </v-list-item-avatar>
                       <v-list-item-content>
-                        <v-list-item-title>{{task.ID}}</v-list-item-title>
-                        <v-list-item-subtitle>{{task.ID}}</v-list-item-subtitle>
+                        <v-list-item-title>Notify {{task.Recipient.String}} about updates</v-list-item-title>
+                        <v-list-item-subtitle v-if="task.Data.NotifyType == 0">Answer was added</v-list-item-subtitle>
+                        <v-list-item-subtitle v-if="task.Data.NotifyType == 1">Comment was added</v-list-item-subtitle>
+
+                        <v-divider></v-divider>
+                        <v-expansion-panels accordion flat hover>
+                            <v-expansion-panel>
+                              <v-expansion-panel-header>Results</v-expansion-panel-header>
+                              <v-expansion-panel-content>
+                                <ul>
+                                  <li>[{{task.QueuedAt | moment("dddd, MM/DD/YYYY HH:mm:ss")}}] Job queued</li>
+                                  <li v-for="result in task.Results" :key="result.Result">[{{result.IssuedAt | moment("dddd, MM/DD/YYYY HH:mm:ss")}}] {{result.Result}}</li>
+                                </ul>
+                              </v-expansion-panel-content>
+                            </v-expansion-panel>
+                          </v-expansion-panels>
+                          <v-divider></v-divider>
                       </v-list-item-content>
+
                     </v-list-item>
                     </div>
                     <div v-else>
