@@ -31,6 +31,7 @@ func SendNotifications(Task models.WorkerTask) (bool, error) {
 
 func sendMailNotification(Task models.WorkerTask, Notifications models.NotificationCollection) (bool, error) {
 	if !config.CurrentConfig.SMTP.Enabled {
+		db.AddResult(&Task, "Couldn't send notification because SMTP is not configured")
 		err := errors.New("Mail Notification without SMTP")
 		dev.LogError(err, "Mail Notification was queued without having SMTP configured! Ignoring Task!")
 		return false, err
@@ -51,6 +52,7 @@ func sendMailNotification(Task models.WorkerTask, Notifications models.Notificat
 
 		if !found {
 			dev.LogWarn(fmt.Sprintf(`User %d wasn't found anymore -> Skipping notification`, userid))
+			db.AddResult(&Task, "Message was skipped because of missing user")
 			return false, nil
 		}
 
@@ -74,10 +76,13 @@ func sendMailNotification(Task models.WorkerTask, Notifications models.Notificat
 		}
 	}
 
+	db.AddResult(&Task, "Sending Message to MTA")
 	err := smtp.SendMail(realRecipient, Notifications.Subject, content)
 	if err != nil {
 		return true, err
 	}
+
+	db.AddResult(&Task, "Mail got send to the MTA")
 
 	return false, nil
 }

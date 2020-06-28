@@ -2,6 +2,7 @@ package db
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"time"
 
@@ -13,24 +14,42 @@ import (
 func GetActions(TicketID int64) ([]models.Action, error) {
 	dev.LogDebug(fmt.Sprintf("[DB] Getting Actions for ticket %d", TicketID))
 	actions := make([]models.Action, 0)
-	rows, err := Connection.Query(`SELECT "ID", "Type", "Title", "Content", "IssuedAt", "IssuedBy" FROM "Actions" WHERE "Ticket" = $1 ORDER BY "ID" DESC`, TicketID)
+	rows, err := Connection.Query(`SELECT "ID", "Type", "Title", "Content", "IssuedAt", "IssuedBy", "Tasks" FROM "Actions" WHERE "Ticket" = $1 ORDER BY "ID" DESC`, TicketID)
 	if err != nil {
 		return actions, err
 	}
 
+	cachedUsers := make(map[int64]models.User, 0)
+
 	for rows.Next() {
 		var singleAction models.Action
 		var rawUserID sql.NullInt64
-		rows.Scan(&singleAction.ID, &singleAction.Type, &singleAction.Title, &singleAction.Content, &singleAction.IssuedAt, &rawUserID)
+		var rawTasks sql.NullString
+		rows.Scan(&singleAction.ID, &singleAction.Type, &singleAction.Title, &singleAction.Content, &singleAction.IssuedAt, &rawUserID, &rawTasks)
 
 		if rawUserID.Valid {
-			user, _, err := GetUser(rawUserID.Int64)
-			if err != nil {
-				return make([]models.Action, 0), err
+
+			//If user is not cached
+			if _, found := cachedUsers[rawUserID.Int64]; !found {
+				user, _, err := GetUser(rawUserID.Int64)
+				if err != nil {
+					return make([]models.Action, 0), err
+				}
+
+				cachedUsers[rawUserID.Int64] = user
 			}
 
 			singleAction.IssuedBy.Valid = true
-			singleAction.IssuedBy.Issuer = user
+			singleAction.IssuedBy.Issuer = cachedUsers[rawUserID.Int64]
+		}
+
+		if rawTasks.Valid {
+			err = json.Unmarshal([]byte(rawTasks.String), &singleAction.Tasks)
+			if err != nil {
+				return make([]models.Action, 0), err
+			}
+		} else {
+			singleAction.Tasks = make([]int64, 0)
 		}
 
 		actions = append(actions, singleAction)
@@ -58,7 +77,7 @@ func AddAction(TicketID int64, Type models.ActionType, Title, Content string, Is
 		dev.LogDebug(fmt.Sprintf("[DB] Created action %d for ticket %d", newID, TicketID))
 	}
 
-	ticket, _, err := GetTicketUnsafe(TicketID, false)
+	ticket, _, err := GetTicketUnsafe(TicketID, models.WantedProperties{Recipients: true})
 	if err == nil {
 		dev.LogDebug(fmt.Sprintf("Preparing Notifications for ticket %d", TicketID))
 		go QueueActionNotification(ticket, models.Action{

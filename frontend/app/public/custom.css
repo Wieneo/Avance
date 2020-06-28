@@ -27,3 +27,14 @@
 .EditProfilePicture:hover {
     opacity: 80%;
 }
+
+@keyframes scaleOut {
+    0% {
+        opacity: 0;
+        color: rgba(0, 0, 0, 0.54);
+    }
+    100% {
+        opacity: 1;
+        color: #0174ff;
+    }
+}

@@ -10,8 +10,8 @@ import (
 )
 
 //GetTicketUnsafe ignores if the queue matches the tickets queue
-func GetTicketUnsafe(TicketID int64, ResolveRelations bool) (models.Ticket, bool, error) {
-	dev.LogDebug(fmt.Sprintf("[DB] Getting queue for ticket %d in UNSAFE mode (Resolving relations: %t)", TicketID, ResolveRelations))
+func GetTicketUnsafe(TicketID int64, Wanted models.WantedProperties) (models.Ticket, bool, error) {
+	dev.LogDebug(fmt.Sprintf("[DB] Getting queue for ticket %d in UNSAFE mode (Wanted properties: %v)", TicketID, Wanted))
 
 	var queueID int64
 	err := Connection.QueryRow(`SELECT "Queue" FROM "Tickets" WHERE "ID" = $1`, TicketID).Scan(&queueID)
@@ -26,13 +26,13 @@ func GetTicketUnsafe(TicketID int64, ResolveRelations bool) (models.Ticket, bool
 	}
 
 	dev.LogDebug(fmt.Sprintf("[DB] [T: %d] Reverse lookup for queue %d succeded", TicketID, queueID))
-	return GetTicket(TicketID, queueID, ResolveRelations)
+	return GetTicket(TicketID, queueID, Wanted)
 }
 
 //GetTicket returns the populated ticket struct from models
-func GetTicket(TicketID int64, QueueID int64, ResolveRelations bool) (models.Ticket, bool, error) {
+func GetTicket(TicketID int64, QueueID int64, Wanted models.WantedProperties) (models.Ticket, bool, error) {
 	started := time.Now()
-	dev.LogDebug(fmt.Sprintf("[DB] Getting ticket %d in queue %d (Resolving relations: %t)", TicketID, QueueID, ResolveRelations))
+	dev.LogDebug(fmt.Sprintf("[DB] Getting ticket %d in queue %d (Wanted properties: %v)", TicketID, QueueID, Wanted))
 
 	var ticket models.Ticket
 	err := Connection.QueryRow(`SELECT "t"."ID", "t"."Title", "t"."Description", "t"."Queue" AS "QueueID", "t"."Owner" AS "OwnerID", "t"."Severity" AS "SeverityID", "t"."Status" AS "StatusID","t"."CreatedAt","t"."LastModified","t"."StalledUntil","t"."Meta" FROM "Tickets" AS "t" WHERE "ID" = $1 AND "Queue" = $2`, TicketID, QueueID).Scan(&ticket.ID, &ticket.Title, &ticket.Description, &ticket.QueueID, &ticket.OwnerID, &ticket.SeverityID, &ticket.StatusID, &ticket.CreatedAt, &ticket.LastModified, &ticket.StalledUntil, &ticket.Meta)
@@ -46,18 +46,29 @@ func GetTicket(TicketID int64, QueueID int64, ResolveRelations bool) (models.Tic
 		return models.Ticket{}, true, err
 	}
 
-	dev.LogDebug(fmt.Sprintf("[DB] Looking up queue for ticket %d", TicketID))
-	ticket.Queue, _, err = GetQueueUNSAFE(ticket.QueueID)
-	if ticket.OwnerID.Valid {
-		dev.LogDebug(fmt.Sprintf("[DB] Looking up owner for ticket %d", TicketID))
-		ticket.Owner, _, err = DumbGetUser(ticket.OwnerID.Int64)
+	if Wanted.Queue || Wanted.All {
+		dev.LogDebug(fmt.Sprintf("[DB] Looking up queue for ticket %d", TicketID))
+		ticket.Queue, _, err = GetQueueUNSAFE(ticket.QueueID)
 	}
-	dev.LogDebug(fmt.Sprintf("[DB] Looking up severity for ticket %d", TicketID))
-	ticket.Severity, _, err = GetSeverityUNSAFE(ticket.SeverityID)
-	dev.LogDebug(fmt.Sprintf("[DB] Looking up status for ticket %d", TicketID))
-	ticket.Status, _, err = GetStatusUNSAFE(ticket.StatusID)
 
-	if ResolveRelations {
+	if Wanted.Owner || Wanted.All {
+		if ticket.OwnerID.Valid {
+			dev.LogDebug(fmt.Sprintf("[DB] Looking up owner for ticket %d", TicketID))
+			ticket.Owner, _, err = DumbGetUser(ticket.OwnerID.Int64)
+		}
+	}
+
+	if Wanted.Severity || Wanted.All {
+		dev.LogDebug(fmt.Sprintf("[DB] Looking up severity for ticket %d", TicketID))
+		ticket.Severity, _, err = GetSeverityUNSAFE(ticket.SeverityID)
+	}
+
+	if Wanted.Status || Wanted.All {
+		dev.LogDebug(fmt.Sprintf("[DB] Looking up status for ticket %d", TicketID))
+		ticket.Status, _, err = GetStatusUNSAFE(ticket.StatusID)
+	}
+
+	if Wanted.Relations || Wanted.All {
 		dev.LogDebug(fmt.Sprintf("[DB] Looking up relations for ticket %d", TicketID))
 		ticket.Relations, err = GetTicketRelations(TicketID)
 		if err != nil {
@@ -69,17 +80,21 @@ func GetTicket(TicketID int64, QueueID int64, ResolveRelations bool) (models.Tic
 		ticket.Relations = make([]models.Relation, 0)
 	}
 
-	dev.LogDebug(fmt.Sprintf("[DB] Looking up actions for ticket %d", TicketID))
-	ticket.Actions, err = GetActions(ticket.ID)
-	if err != nil {
-		return models.Ticket{}, true, err
+	if Wanted.Actions || Wanted.All {
+		dev.LogDebug(fmt.Sprintf("[DB] Looking up actions for ticket %d", TicketID))
+		ticket.Actions, err = GetActions(ticket.ID)
+		if err != nil {
+			return models.Ticket{}, true, err
+		}
 	}
 
-	dev.LogDebug(fmt.Sprintf("[DB] Looking up recipients for ticket %d", TicketID))
-	ticket.Recipients, err = GetRecipients(ticket.ID)
-	if err != nil {
-		dev.LogDebug(fmt.Sprintf("[DB] Error while looking up recipients for ticket %d: %s", TicketID, err.Error()))
-		return models.Ticket{}, true, err
+	if Wanted.Recipients || Wanted.All {
+		dev.LogDebug(fmt.Sprintf("[DB] Looking up recipients for ticket %d", TicketID))
+		ticket.Recipients, err = GetRecipients(ticket.ID)
+		if err != nil {
+			dev.LogDebug(fmt.Sprintf("[DB] Error while looking up recipients for ticket %d: %s", TicketID, err.Error()))
+			return models.Ticket{}, true, err
+		}
 	}
 
 	end := time.Now()
@@ -148,7 +163,7 @@ func PatchTicket(Ticket models.Ticket) (models.Ticket, error) {
 	}
 
 	dev.LogDebug(fmt.Sprintf("[DB] Retrieving new ticket %d after patching", Ticket.ID))
-	ticket, _, err := GetTicketUnsafe(Ticket.ID, true)
+	ticket, _, err := GetTicketUnsafe(Ticket.ID, models.WantedProperties{All: true})
 	if err != nil {
 		dev.LogDebug(fmt.Sprintf("[DB] [1] Error happened while patching ticket %d: %s", Ticket.ID, err.Error()))
 		return models.Ticket{}, err

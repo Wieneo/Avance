@@ -44,6 +44,7 @@ func HTTPInit() {
 
 	router.HandleFunc("/api/v1/users", endpoints.GetUsers).Methods("GET")
 	router.HandleFunc("/api/v1/users", endpoints.CreateUser).Methods("POST")
+	router.HandleFunc("/api/v1/user/{[0-9]{*}}", endpoints.GetSpecificUser).Methods("GET")
 	router.HandleFunc("/api/v1/groups", endpoints.GetGroups).Methods("GET")
 	router.HandleFunc("/api/v1/groups", endpoints.CreateGroup).Methods("POST")
 
@@ -98,6 +99,8 @@ func HTTPInit() {
 	router.HandleFunc("/api/v1/workers", endpoints.GetWorkers).Methods("GET")
 	router.HandleFunc("/api/v1/worker/{[0-9]{*}}", endpoints.ToggleWorker).Methods("PATCH")
 
+	router.HandleFunc("/api/v1/task/{[0-9]{*}}", endpoints.GetTaskInfo).Methods("GET")
+
 	//Needs to be at the bottom!
 	router.PathPrefix("/").HandlerFunc(endpoints.ServeAssets).Methods("GET")
 
@@ -114,7 +117,7 @@ func HTTPInit() {
 
 func loggingMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		dev.LogDebug(r.Method, r.RemoteAddr, r.RequestURI)
+		dev.LogInfo(r.Method, r.RemoteAddr, r.RequestURI)
 		// Call the next handler, which can be another middleware in the chain, or the final handler.
 		next.ServeHTTP(w, r)
 	})

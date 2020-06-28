@@ -19,6 +19,7 @@ func DeleteUser(Task models.WorkerTask) error {
 		return err
 	}
 
+	db.AddResult(&Task, "Retrieving Tickets of user")
 	tickets, err := db.GetTicketsOfUser(tbd.ID)
 	if err != nil {
 		return err
@@ -35,6 +36,7 @@ func DeleteUser(Task models.WorkerTask) error {
 			Error = err
 		}
 		dev.LogInfo(fmt.Sprintf("[%d] Updated ticket (%d) %s -> Owner set to Nobody", Task.ID, k.ID, k.Title))
+		db.AddResult(&Task, fmt.Sprintf("Patched ticket %d", k.ID))
 	}
 
 	//As the above loop is the last step -> Return the before declared Error

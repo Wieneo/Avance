@@ -1,0 +1,5 @@
+{
+    "Name": "AddResultsToTasks",
+    "Targets": ["47.sql"],
+    "After": "AddTasks"
+}

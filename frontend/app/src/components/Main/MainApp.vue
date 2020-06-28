@@ -19,7 +19,7 @@
                         <v-tab><v-icon left>mdi-account</v-icon>Interactions</v-tab>
                         <v-tab><v-icon left>mdi-history</v-icon>Actions</v-tab>
 
-                        <v-tab-item class="overflow-y-auto" style="max-height: calc(100vh - 130px);"><ActionDisplay v-bind:CurrentTicket="CurrentTicket" v-bind:TicketLoading="TicketLoading"/></v-tab-item>
+                        <v-tab-item class="overflow-y-auto" style="max-height: calc(100vh - 130px);"><ActionDisplay v-bind:CurrentTicket="CurrentTicket" v-bind:TicketLoading="TicketLoading" ref="ActionDisplay"/></v-tab-item>
                         <v-tab-item class="overflow-y-auto" style="max-height: calc(100vh - 130px);"><TimelineDisplay v-bind:CurrentTicket="CurrentTicket" v-bind:TicketLoading="TicketLoading"/></v-tab-item>
                     </v-tabs>
                 </v-col>
@@ -99,8 +99,70 @@ export default Vue.extend({
         GetTicket: async function(TicketID: number){
             this.TicketLoading = true
             this.CurrentTicket = (await Vue.prototype.$Request("GET", "/api/v1/ticket/" + TicketID))
-            this.TicketLoading = false
-        }
+            this.TicketLoading = false;
+
+            (this.$refs.ActionDisplay as Vue & { resetTasks: () => any }).resetTasks()
+
+            const taskIDs: any[] = [];
+            //GetTasks
+            (this.CurrentTicket as any).Actions.forEach((element: any) => {
+                element.Tasks.forEach((task: any) => {
+                    let found = false
+                    taskIDs.forEach((cachedTask: any) => {
+                        if (task == cachedTask){
+                            found = true
+                        }
+                    });
+
+                    if (!found){
+                        taskIDs.push(task)
+                    }
+                });
+            });
+
+            const tasks = new Map<bigint, any>()
+            const users = new Map<number, string>()
+
+            console.log("Need to get " + taskIDs.length + " tasks")
+            await this.asyncForEach(taskIDs, async (element: any) => {
+                tasks.set(element, (await Vue.prototype.$Request("GET", "/api/v1/task/" + element)))
+            });
+
+            await this.asyncForEach((this.CurrentTicket as any).Actions, async (element: any, index: number) => {
+                (this.CurrentTicket as any).Actions[index].ResolvedTasks = []
+                await this.asyncForEach(element.Tasks, async (task: any) => {
+                    const realTask = tasks.get(task)
+                    if (realTask.Status == 0 || realTask.Status == 1){
+                        (this.CurrentTicket as any).Actions[index].TaskRunning = true
+                    }
+
+                    try{
+                        realTask.Data = JSON.parse(realTask.Data);
+                    }catch(e){
+                        //Do nothing
+                    }
+
+                    const reqUser = Number.parseInt(realTask.Recipient.String)
+                    if (!isNaN(reqUser)){
+                        if (!users.has(reqUser)){
+                            users.set(reqUser, (await Vue.prototype.$Request("GET", "/api/v1/user/" + realTask.Recipient.String)).Username)
+                        }
+
+                        realTask.Recipient.String = users.get(reqUser)
+                    }
+
+                    (this.CurrentTicket as any).Actions[index].ResolvedTasks.push(realTask)
+                });
+            });
+
+            console.log("Got all tasks");
+            (this.$refs.ActionDisplay as Vue & { tasksLoaded: () => any }).tasksLoaded()
+        },
+        asyncForEach: async function (array: any, callback: any) {
+            for (let index = 0; index < array.length; index++) {
+                await callback(array[index], index, array);
+            }
+        },
     }
 })
 </script>

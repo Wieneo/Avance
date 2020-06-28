@@ -30,7 +30,7 @@ func GetTicketRelations(TicketID int64) ([]models.Relation, error) {
 
 		if ticket1 == TicketID {
 			dev.LogDebug(fmt.Sprintf("[DB] [T: %d] Resolving related ticket %d", TicketID, ticket2))
-			ticket, _, err := GetTicketUnsafe(ticket2, false)
+			ticket, _, err := GetTicketUnsafe(ticket2, models.WantedProperties{})
 
 			if err != nil {
 				dev.LogDebug(fmt.Sprintf("[DB] [T: %d] Error getting related ticket %d -> Returning empty relations array: %s", TicketID, ticket2, err.Error()))
@@ -41,7 +41,7 @@ func GetTicketRelations(TicketID int64) ([]models.Relation, error) {
 			singleRelation.Type = relationType
 		} else {
 			dev.LogDebug(fmt.Sprintf("[DB] [T: %d] Resolving related ticket %d", TicketID, ticket1))
-			ticket, _, err := GetTicketUnsafe(ticket1, false)
+			ticket, _, err := GetTicketUnsafe(ticket1, models.WantedProperties{})
 
 			if err != nil {
 				dev.LogDebug(fmt.Sprintf("[DB] [T: %d] Error getting related ticket %d -> Returning empty relations array: %s", TicketID, ticket1, err.Error()))
