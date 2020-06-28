@@ -1820,6 +1820,27 @@ paths:
         - Users
       security:
         - Session Key: []
+    get:
+      summary: Get information about a user
+      operationId: get-api-v1-user-userid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '404':
+          description: "Specified user id wasn't found"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Error:
+                    type: string
+      security:
+        - Session Key: []
   '/api/v1/user/{userid}/permissions':
     parameters:
       - schema:

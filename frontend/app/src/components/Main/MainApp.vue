@@ -121,21 +121,36 @@ export default Vue.extend({
             });
 
             const tasks = new Map<bigint, any>()
+            const users = new Map<number, string>()
 
             console.log("Need to get " + taskIDs.length + " tasks")
             await this.asyncForEach(taskIDs, async (element: any) => {
                 tasks.set(element, (await Vue.prototype.$Request("GET", "/api/v1/task/" + element)))
             });
 
-            (this.CurrentTicket as any).Actions.forEach((element: any, index: number) => {
+            await this.asyncForEach((this.CurrentTicket as any).Actions, async (element: any, index: number) => {
                 (this.CurrentTicket as any).Actions[index].ResolvedTasks = []
-                element.Tasks.forEach((task: any) => {
+                await this.asyncForEach(element.Tasks, async (task: any) => {
                     const realTask = tasks.get(task)
                     if (realTask.Status == 0 || realTask.Status == 1){
                         (this.CurrentTicket as any).Actions[index].TaskRunning = true
                     }
 
-                    realTask.Data = JSON.parse(realTask.Data);
+                    try{
+                        realTask.Data = JSON.parse(realTask.Data);
+                    }catch(e){
+                        //Do nothing
+                    }
+
+                    const reqUser = Number.parseInt(realTask.Recipient.String)
+                    if (!isNaN(reqUser)){
+                        if (!users.has(reqUser)){
+                            users.set(reqUser, (await Vue.prototype.$Request("GET", "/api/v1/user/" + realTask.Recipient.String)).Username)
+                        }
+
+                        realTask.Recipient.String = users.get(reqUser)
+                    }
+
                     (this.CurrentTicket as any).Actions[index].ResolvedTasks.push(realTask)
                 });
             });

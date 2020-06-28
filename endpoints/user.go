@@ -459,6 +459,33 @@ func GetUsers(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(users)
 }
 
+//GetSpecificUser returns the requested user via JSON
+func GetSpecificUser(w http.ResponseWriter, r *http.Request) {
+	user, err := utils.GetUser(r, w)
+	if err != nil {
+		w.WriteHeader(500)
+		dev.ReportError(err, w, err.Error())
+		return
+	}
+
+	userid, _ := strconv.ParseInt(strings.Split(r.URL.String(), "/")[4], 10, 64)
+
+	user, found, err := db.GetUser(userid)
+	if err != nil {
+		w.WriteHeader(500)
+		dev.ReportError(err, w, err.Error())
+		return
+	}
+
+	if !found {
+		w.WriteHeader(404)
+		dev.ReportUserError(w, "Specified user wasn't found")
+		return
+	}
+
+	json.NewEncoder(w).Encode(user)
+}
+
 //DeactivateUser sets the deactivated flag for the specified user
 func DeactivateUser(w http.ResponseWriter, r *http.Request) {
 	userid, _ := strconv.ParseInt(strings.Split(r.URL.String(), "/")[4], 10, 64)
