@@ -41,6 +41,7 @@
     ID: number;
     Name: string;
     Tickets: any[];
+    SelectedTicket: number;
   }
 
   const Queues: Queue[] = []
