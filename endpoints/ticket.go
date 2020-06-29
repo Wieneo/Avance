@@ -342,8 +342,20 @@ func CreateTicketsInQueue(w http.ResponseWriter, r *http.Request) {
 		isStalled = true
 	}
 
+	newTicket := models.CreateTicket{
+		Title:         req.Title,
+		Description:   req.Description,
+		Queue:         queueid,
+		OwnedByNobody: ownedByNobody,
+		Owner:         ownerID,
+		Severity:      severity,
+		Status:        status,
+		IsStalled:     isStalled,
+		StalledUntil:  req.StalledUntil,
+	}
+
 	//Now everything should be ok
-	id, err := db.CreateTicket(req.Title, req.Description, queueid, ownedByNobody, ownerID, severity, status, isStalled, req.StalledUntil)
+	id, err := db.CreateTicket(newTicket)
 	if err != nil {
 
 		utils.ReportErrorToUser(err, w)

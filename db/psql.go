@@ -109,8 +109,28 @@ func migrate(ApplyMigrations bool) {
 				severity, _, _ := GetSeverityUNSAFE(severityid)
 				status, _, _ := GetStatusUNSAFE(statusid)
 
-				ticket1, _ := CreateTicket("Pipeline broken", "My pipeline is broken!", qid, true, 0, severity, status, false, "")
-				ticket2, _ := CreateTicket("Create User", "Please create a user for my new staff member!", qid, false, userid, severity, status, false, "")
+				newTicket1 := models.CreateTicket{
+					Title:         "Pipeline broken",
+					Description:   "My pipeline is broken!",
+					Queue:         qid,
+					OwnedByNobody: true,
+					Severity:      severity,
+					Status:        status,
+					IsStalled:     false,
+				}
+
+				newTicket2 := models.CreateTicket{
+					Title:         "Create User",
+					Description:   "Please create a user for my new staff member!",
+					Queue:         qid,
+					OwnedByNobody: true,
+					Severity:      severity,
+					Status:        status,
+					IsStalled:     false,
+				}
+
+				ticket1, _ := CreateTicket(newTicket1)
+				ticket2, _ := CreateTicket(newTicket2)
 				AddRelation(ticket1, ticket2, models.ParentOf)
 				AddRelation(ticket2, ticket1, models.ReferencedBy)
 

@@ -125,6 +125,19 @@ type Ticket struct {
 	Recipients   RecipientCollection
 }
 
+//CreateTicket is used for passing all necessary information to the db subroutine for creating tickets
+type CreateTicket struct {
+	Title         string
+	Description   string
+	Queue         int64
+	OwnedByNobody bool
+	Owner         int64
+	Severity      Severity
+	Status        Status
+	IsStalled     bool
+	StalledUntil  string
+}
+
 //RecipientCollection stores all recipients assigned to a single ticket
 type RecipientCollection struct {
 	Requestors, Readers, Admins []Recipient
