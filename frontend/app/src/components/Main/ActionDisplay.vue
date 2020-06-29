@@ -9,9 +9,9 @@
             <div v-if="action.Type == 0 || action.Type == 1">
               <v-row style="margin:0;">
                 <v-col style="margin:0;">
-                  <v-card-subtitle><b>{{action.Title}}</b><br>
+                  <v-card-subtitle><strong>{{action.Title}}</strong><br>
                     <span v-if="action.IssuedBy.Valid">{{action.IssuedBy.Issuer.Firstname}} {{action.IssuedBy.Issuer.Lastname}} ({{action.IssuedBy.Issuer.Username}})</span>
-                    <span v-else><b>System</b></span>
+                    <span v-else><strong>System</strong></span>
                     <br>{{action.IssuedAt | moment("dddd, MM/DD/YYYY HH:mm:ss")}}
                   </v-card-subtitle>
                   <v-card-text style="color: black;" v-html="action.Content"></v-card-text>
