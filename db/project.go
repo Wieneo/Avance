@@ -6,6 +6,7 @@ import (
 
 	"gitlab.gnaucke.dev/avance/avance-app/v2/dev"
 	"gitlab.gnaucke.dev/avance/avance-app/v2/models"
+	"gitlab.gnaucke.dev/avance/avance-app/v2/templates"
 )
 
 //GetProject returns the project struct to a given projectid
@@ -19,7 +20,7 @@ func GetProject(ProjectID int64) (models.Project, bool, error) {
 
 	if !rows.Next() {
 		dev.LogDebug(fmt.Sprintf("[DB] Projcet %d was not found", ProjectID))
-		return Requested, false, errors.New("Project not found")
+		return Requested, false, errors.New(templates.ProjectNotFound)
 	}
 
 	rows.Scan(&Requested.ID, &Requested.Name, &Requested.Description)

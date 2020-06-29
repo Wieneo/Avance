@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"gitlab.gnaucke.dev/avance/avance-app/v2/perms"
+	"gitlab.gnaucke.dev/avance/avance-app/v2/templates"
 	"gitlab.gnaucke.dev/avance/avance-app/v2/utils"
 
 	"gitlab.gnaucke.dev/avance/avance-app/v2/db"
@@ -40,7 +41,7 @@ func GetSeverities(w http.ResponseWriter, r *http.Request) {
 
 	if !found {
 		w.WriteHeader(404)
-		dev.ReportUserError(w, "Project not found")
+		dev.ReportUserError(w, templates.ProjectNotFound)
 		return
 	}
 
@@ -103,7 +104,7 @@ func CreateSeverity(w http.ResponseWriter, r *http.Request) {
 
 	if !found {
 		w.WriteHeader(404)
-		dev.ReportUserError(w, "Project not found")
+		dev.ReportUserError(w, templates.ProjectNotFound)
 		return
 	}
 
@@ -182,7 +183,7 @@ func PatchSeverity(w http.ResponseWriter, r *http.Request) {
 
 	if !found {
 		w.WriteHeader(404)
-		dev.ReportUserError(w, "Project not found")
+		dev.ReportUserError(w, templates.ProjectNotFound)
 		return
 	}
 
@@ -217,7 +218,7 @@ func PatchSeverity(w http.ResponseWriter, r *http.Request) {
 
 		if !found {
 			w.WriteHeader(404)
-			dev.ReportUserError(w, "Severity not found")
+			dev.ReportUserError(w, templates.SeverityNotFound)
 			return
 		}
 
@@ -247,7 +248,7 @@ func PatchSeverity(w http.ResponseWriter, r *http.Request) {
 
 		if !somethingChanged {
 			w.WriteHeader(406)
-			dev.ReportUserError(w, "Nothing changed")
+			dev.ReportUserError(w, templates.NothingChanged)
 			return
 		}
 
@@ -287,7 +288,7 @@ func DeleteSeverity(w http.ResponseWriter, r *http.Request) {
 
 	if !found {
 		w.WriteHeader(404)
-		dev.ReportUserError(w, "Project not found")
+		dev.ReportUserError(w, templates.ProjectNotFound)
 		return
 	}
 
@@ -308,7 +309,7 @@ func DeleteSeverity(w http.ResponseWriter, r *http.Request) {
 
 		if !found {
 			w.WriteHeader(404)
-			dev.ReportUserError(w, "Severity not found")
+			dev.ReportUserError(w, templates.SeverityNotFound)
 			return
 		}
 

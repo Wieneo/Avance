@@ -11,6 +11,7 @@ import (
 	"gitlab.gnaucke.dev/avance/avance-app/v2/db"
 	"gitlab.gnaucke.dev/avance/avance-app/v2/dev"
 	"gitlab.gnaucke.dev/avance/avance-app/v2/perms"
+	"gitlab.gnaucke.dev/avance/avance-app/v2/templates"
 	"gitlab.gnaucke.dev/avance/avance-app/v2/utils"
 )
 
@@ -74,7 +75,7 @@ func CreateQueue(w http.ResponseWriter, r *http.Request) {
 
 	if !found {
 		w.WriteHeader(404)
-		dev.ReportUserError(w, "Project not found")
+		dev.ReportUserError(w, templates.ProjectNotFound)
 		return
 	}
 
@@ -153,7 +154,7 @@ func PatchQueue(w http.ResponseWriter, r *http.Request) {
 
 	if !found {
 		w.WriteHeader(404)
-		dev.ReportUserError(w, "Project not found")
+		dev.ReportUserError(w, templates.ProjectNotFound)
 		return
 	}
 
@@ -188,7 +189,7 @@ func PatchQueue(w http.ResponseWriter, r *http.Request) {
 
 		if !found {
 			w.WriteHeader(404)
-			dev.ReportUserError(w, "Queue not found")
+			dev.ReportUserError(w, templates.QueueNotFound)
 			return
 		}
 
@@ -202,7 +203,7 @@ func PatchQueue(w http.ResponseWriter, r *http.Request) {
 
 		if !somethingChanged {
 			w.WriteHeader(406)
-			dev.ReportUserError(w, "Nothing changed")
+			dev.ReportUserError(w, templates.NothingChanged)
 			return
 		}
 
@@ -242,7 +243,7 @@ func DeleteQueue(w http.ResponseWriter, r *http.Request) {
 
 	if !found {
 		w.WriteHeader(404)
-		dev.ReportUserError(w, "Project not found")
+		dev.ReportUserError(w, templates.ProjectNotFound)
 		return
 	}
 
@@ -263,7 +264,7 @@ func DeleteQueue(w http.ResponseWriter, r *http.Request) {
 
 		if !found {
 			w.WriteHeader(404)
-			dev.ReportUserError(w, "Queue not found")
+			dev.ReportUserError(w, templates.QueueNotFound)
 			return
 		}
 

@@ -13,6 +13,7 @@ import (
 	"gitlab.gnaucke.dev/avance/avance-app/v2/dev"
 	"gitlab.gnaucke.dev/avance/avance-app/v2/models"
 	"gitlab.gnaucke.dev/avance/avance-app/v2/perms"
+	"gitlab.gnaucke.dev/avance/avance-app/v2/templates"
 	"gitlab.gnaucke.dev/avance/avance-app/v2/utils"
 )
 
@@ -29,7 +30,7 @@ func GetTicket(w http.ResponseWriter, r *http.Request) {
 
 	if !found {
 		w.WriteHeader(404)
-		dev.ReportUserError(w, "Ticket not found")
+		dev.ReportUserError(w, templates.TicketNotFound)
 		return
 	}
 
@@ -70,7 +71,7 @@ func GetTicket(w http.ResponseWriter, r *http.Request) {
 
 		if !qperms.CanSee {
 			w.WriteHeader(403)
-			dev.ReportUserError(w, "You don't have access to that queue!")
+			dev.ReportUserError(w, templates.QueueNoPerms)
 			return
 		}
 	}
@@ -93,7 +94,7 @@ func GetTicketFullPath(w http.ResponseWriter, r *http.Request) {
 
 	if !found {
 		w.WriteHeader(404)
-		dev.ReportUserError(w, "Project/Queue not found")
+		dev.ReportUserError(w, templates.QueueNotFound)
 		return
 	}
 
@@ -121,14 +122,14 @@ func GetTicketFullPath(w http.ResponseWriter, r *http.Request) {
 
 		if !found {
 			w.WriteHeader(404)
-			dev.ReportUserError(w, "Ticket not found")
+			dev.ReportUserError(w, templates.TicketNotFound)
 			return
 		}
 
 		json.NewEncoder(w).Encode(ticket)
 	} else {
 		w.WriteHeader(403)
-		dev.ReportUserError(w, "You don't have access to that queue!")
+		dev.ReportUserError(w, templates.QueueNoPerms)
 	}
 }
 
@@ -146,7 +147,7 @@ func GetTicketsFromQueue(w http.ResponseWriter, r *http.Request) {
 
 	if !found {
 		w.WriteHeader(404)
-		dev.ReportUserError(w, "Project/Queue not found")
+		dev.ReportUserError(w, templates.QueueNotFound)
 		return
 	}
 
@@ -186,7 +187,7 @@ func GetTicketsFromQueue(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(tickets)
 	} else {
 		w.WriteHeader(403)
-		dev.ReportUserError(w, "You don't have access to that queue!")
+		dev.ReportUserError(w, templates.QueueNoPerms)
 	}
 }
 
@@ -213,7 +214,7 @@ func CreateTicketsInQueue(w http.ResponseWriter, r *http.Request) {
 
 	if !found {
 		w.WriteHeader(404)
-		dev.ReportUserError(w, "Project/Queue not found")
+		dev.ReportUserError(w, templates.QueueNotFound)
 		return
 	}
 
@@ -331,7 +332,7 @@ func CreateTicketsInQueue(w http.ResponseWriter, r *http.Request) {
 	isStalled := false
 
 	if !utils.IsEmpty(req.StalledUntil) {
-		_, err := time.Parse("2006-01-02T15:04:05.000Z", req.StalledUntil)
+		_, err := time.Parse(models.DateFormat, req.StalledUntil)
 		if err != nil {
 			w.WriteHeader(406)
 			dev.ReportUserError(w, "StalledUntil isn't a valid date/time")
@@ -374,7 +375,7 @@ func PatchTicketsInQueue(w http.ResponseWriter, r *http.Request) {
 
 	if !found {
 		w.WriteHeader(404)
-		dev.ReportUserError(w, "Project/Queue not found")
+		dev.ReportUserError(w, templates.QueueNotFound)
 		return
 	}
 
@@ -417,7 +418,7 @@ func PatchTicketsInQueue(w http.ResponseWriter, r *http.Request) {
 
 	if !found {
 		w.WriteHeader(404)
-		dev.ReportUserError(w, "Ticket not found")
+		dev.ReportUserError(w, templates.TicketNotFound)
 		return
 	}
 
@@ -488,8 +489,8 @@ func PatchTicketsInQueue(w http.ResponseWriter, r *http.Request) {
 		somethingChanged = true
 	}
 
-	if !utils.IsEmpty(req.StalledUntil) && req.StalledUntil != ticket.StalledUntil.Time.Format("2006-01-02T15:04:05.000Z") {
-		t, err := time.Parse("2006-01-02T15:04:05.000Z", req.StalledUntil)
+	if !utils.IsEmpty(req.StalledUntil) && req.StalledUntil != ticket.StalledUntil.Time.Format(models.DateFormat) {
+		t, err := time.Parse(models.DateFormat, req.StalledUntil)
 		if err != nil {
 			w.WriteHeader(406)
 			dev.ReportUserError(w, "StalledUntil isn't a valid date/time")
@@ -503,7 +504,7 @@ func PatchTicketsInQueue(w http.ResponseWriter, r *http.Request) {
 
 	if !somethingChanged {
 		w.WriteHeader(406)
-		dev.ReportUserError(w, "Nothing changed!")
+		dev.ReportUserError(w, templates.NothingChanged)
 		return
 	}
 
@@ -532,7 +533,7 @@ func DeletePropertyFromTicket(w http.ResponseWriter, r *http.Request) {
 
 	if !found {
 		w.WriteHeader(404)
-		dev.ReportUserError(w, "Project/Queue not found")
+		dev.ReportUserError(w, templates.QueueNotFound)
 		return
 	}
 
@@ -565,14 +566,14 @@ func DeletePropertyFromTicket(w http.ResponseWriter, r *http.Request) {
 
 	if !found {
 		w.WriteHeader(404)
-		dev.ReportUserError(w, "Ticket not found")
+		dev.ReportUserError(w, templates.TicketNotFound)
 		return
 	}
 
 	if strings.Split(r.RequestURI, "/")[9] == "owner" {
 		if !ticket.OwnerID.Valid {
 			w.WriteHeader(406)
-			dev.ReportUserError(w, "Nothing changed!")
+			dev.ReportUserError(w, templates.NothingChanged)
 			return
 		}
 
@@ -582,7 +583,7 @@ func DeletePropertyFromTicket(w http.ResponseWriter, r *http.Request) {
 	} else if strings.Split(r.RequestURI, "/")[9] == "stalleduntil" {
 		if !ticket.StalledUntil.Valid {
 			w.WriteHeader(406)
-			dev.ReportUserError(w, "Nothing changed!")
+			dev.ReportUserError(w, templates.NothingChanged)
 			return
 		}
 

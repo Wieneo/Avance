@@ -12,6 +12,7 @@ import (
 	"gitlab.gnaucke.dev/avance/avance-app/v2/dev"
 	"gitlab.gnaucke.dev/avance/avance-app/v2/models"
 	"gitlab.gnaucke.dev/avance/avance-app/v2/perms"
+	"gitlab.gnaucke.dev/avance/avance-app/v2/templates"
 	"gitlab.gnaucke.dev/avance/avance-app/v2/utils"
 )
 
@@ -35,7 +36,7 @@ func CreateRelation(w http.ResponseWriter, r *http.Request) {
 
 	if !found {
 		w.WriteHeader(404)
-		dev.ReportUserError(w, "Project/Queue not found")
+		dev.ReportUserError(w, templates.QueueNotFound)
 		return
 	}
 
@@ -68,7 +69,7 @@ func CreateRelation(w http.ResponseWriter, r *http.Request) {
 
 	if !found {
 		w.WriteHeader(404)
-		dev.ReportUserError(w, "Ticket not found")
+		dev.ReportUserError(w, templates.TicketNotFound)
 		return
 	}
 
@@ -153,7 +154,7 @@ func DeleteRelation(w http.ResponseWriter, r *http.Request) {
 
 	if !found {
 		w.WriteHeader(404)
-		dev.ReportUserError(w, "Project/Queue not found")
+		dev.ReportUserError(w, templates.QueueNotFound)
 		return
 	}
 
@@ -186,7 +187,7 @@ func DeleteRelation(w http.ResponseWriter, r *http.Request) {
 
 	if !found {
 		w.WriteHeader(404)
-		dev.ReportUserError(w, "Ticket not found")
+		dev.ReportUserError(w, templates.TicketNotFound)
 		return
 	}
 
@@ -201,7 +202,7 @@ func DeleteRelation(w http.ResponseWriter, r *http.Request) {
 
 	if !found {
 		w.WriteHeader(404)
-		dev.ReportUserError(w, "Relation not found")
+		dev.ReportUserError(w, templates.RelationNotFound)
 		return
 	}
 

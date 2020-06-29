@@ -15,6 +15,7 @@ import (
 	"gitlab.gnaucke.dev/avance/avance-app/v2/models"
 	"gitlab.gnaucke.dev/avance/avance-app/v2/perms"
 	"gitlab.gnaucke.dev/avance/avance-app/v2/redis"
+	"gitlab.gnaucke.dev/avance/avance-app/v2/templates"
 	"gitlab.gnaucke.dev/avance/avance-app/v2/utils"
 	"golang.org/x/crypto/bcrypt"
 
@@ -287,7 +288,7 @@ func PatchProfile(w http.ResponseWriter, r *http.Request) {
 
 	if !somethingChanged {
 		w.WriteHeader(406)
-		dev.ReportUserError(w, "Nothing changed!")
+		dev.ReportUserError(w, templates.NothingChanged)
 		return
 	}
 

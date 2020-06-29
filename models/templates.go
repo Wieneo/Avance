@@ -6,7 +6,10 @@ import (
 	"time"
 )
 
-///Constants
+//Constants
+
+//DateFormat is used as the default format for parsing dates the user specifies
+const DateFormat = "2006-01-02T15:04:05.000Z"
 
 //GetAllowedImageFormates defines what Image formates a Prfile Picture is allowed to be
 func GetAllowedImageFormates() []string {
