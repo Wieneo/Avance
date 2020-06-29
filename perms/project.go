@@ -30,22 +30,22 @@ func CheckAccessToProject(next http.Handler) http.Handler {
 			}
 
 			if err != nil {
-				w.WriteHeader(500)
-				dev.ReportError(err, w, err.Error())
+
+				utils.ReportErrorToUser(err, w)
 				return
 			}
 
 			user, err := utils.GetUser(r, w)
 			if err != nil {
-				w.WriteHeader(500)
-				dev.ReportError(err, w, err.Error())
+
+				utils.ReportErrorToUser(err, w)
 				return
 			}
 
 			allperms, perms, err := GetPermissionsToProject(user, project)
 			if err != nil {
-				w.WriteHeader(500)
-				dev.ReportError(err, w, err.Error())
+
+				utils.ReportErrorToUser(err, w)
 				return
 			}
 

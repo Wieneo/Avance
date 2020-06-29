@@ -27,8 +27,7 @@ func CreateAction(w http.ResponseWriter, r *http.Request) {
 
 	queue, found, err := db.GetQueue(projectid, queueid)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
@@ -40,15 +39,13 @@ func CreateAction(w http.ResponseWriter, r *http.Request) {
 
 	user, err := utils.GetUser(r, w)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
 	allperms, perms, err := perms.GetPermissionsToQueue(user, queue)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
@@ -60,8 +57,7 @@ func CreateAction(w http.ResponseWriter, r *http.Request) {
 
 	_, found, err = db.GetTicket(ticketid, queueid, models.WantedProperties{})
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
@@ -101,8 +97,7 @@ func CreateAction(w http.ResponseWriter, r *http.Request) {
 
 	id, err := db.AddAction(ticketid, action.Type, title, action.Content, models.Issuer{Valid: true, Issuer: user})
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 

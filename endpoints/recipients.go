@@ -33,8 +33,8 @@ func AddRecipient(w http.ResponseWriter, r *http.Request) {
 
 	queue, found, err := db.GetQueue(projectid, queueid)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
@@ -46,15 +46,15 @@ func AddRecipient(w http.ResponseWriter, r *http.Request) {
 
 	user, err := utils.GetUser(r, w)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
 	allperms, perms, err := perms.GetPermissionsToQueue(user, queue)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
@@ -66,8 +66,8 @@ func AddRecipient(w http.ResponseWriter, r *http.Request) {
 
 	ticket, found, err := db.GetTicket(ticketid, queueid, models.WantedProperties{Recipients: true})
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
@@ -101,8 +101,8 @@ func AddRecipient(w http.ResponseWriter, r *http.Request) {
 		if !utils.IsEmpty(k.User) {
 			userid, found, err := db.SearchUser(k.User)
 			if err != nil {
-				w.WriteHeader(500)
-				dev.ReportError(err, w, err.Error())
+
+				utils.ReportErrorToUser(err, w)
 				return
 			}
 
@@ -266,15 +266,15 @@ func AddRecipient(w http.ResponseWriter, r *http.Request) {
 		if !utils.IsEmpty(k.User) {
 			userid, _, err := db.SearchUser(k.User)
 			if err != nil {
-				w.WriteHeader(500)
-				dev.ReportError(err, w, err.Error())
+
+				utils.ReportErrorToUser(err, w)
 				return
 			}
 
 			newid, err := db.AddUserRecipient(ticket.ID, userid, k.Type)
 			if err != nil {
-				w.WriteHeader(500)
-				dev.ReportError(err, w, err.Error())
+
+				utils.ReportErrorToUser(err, w)
 				return
 			}
 
@@ -282,8 +282,8 @@ func AddRecipient(w http.ResponseWriter, r *http.Request) {
 		} else {
 			newid, err := db.AddMailRecipient(ticket.ID, k.Mail, k.Type)
 			if err != nil {
-				w.WriteHeader(500)
-				dev.ReportError(err, w, err.Error())
+
+				utils.ReportErrorToUser(err, w)
 				return
 			}
 
@@ -327,8 +327,8 @@ func DeleteRecipient(w http.ResponseWriter, r *http.Request) {
 
 	queue, found, err := db.GetQueue(projectid, queueid)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
@@ -340,15 +340,15 @@ func DeleteRecipient(w http.ResponseWriter, r *http.Request) {
 
 	user, err := utils.GetUser(r, w)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
 	allperms, perms, err := perms.GetPermissionsToQueue(user, queue)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
@@ -360,8 +360,8 @@ func DeleteRecipient(w http.ResponseWriter, r *http.Request) {
 
 	ticket, found, err := db.GetTicket(ticketid, queueid, models.WantedProperties{Recipients: true})
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
@@ -386,8 +386,8 @@ func DeleteRecipient(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := db.RemoveRecipient(recipientid); err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 	} else {
 		json.NewEncoder(w).Encode(struct {
 			Recipient string

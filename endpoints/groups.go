@@ -21,15 +21,13 @@ type groupWebRequest struct {
 func GetGroups(w http.ResponseWriter, r *http.Request) {
 	user, err := utils.GetUser(r, w)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
 	perms, err := perms.CombinePermissions(user)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
@@ -42,8 +40,7 @@ func GetGroups(w http.ResponseWriter, r *http.Request) {
 
 	groups, err := db.GetALLGroups()
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
@@ -54,15 +51,13 @@ func GetGroups(w http.ResponseWriter, r *http.Request) {
 func CreateGroup(w http.ResponseWriter, r *http.Request) {
 	user, err := utils.GetUser(r, w)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
 	perms, err := perms.CombinePermissions(user)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
@@ -76,8 +71,7 @@ func CreateGroup(w http.ResponseWriter, r *http.Request) {
 
 	rawBytes, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
@@ -96,8 +90,7 @@ func CreateGroup(w http.ResponseWriter, r *http.Request) {
 
 	groups, err := db.GetALLGroups()
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
@@ -115,8 +108,7 @@ func CreateGroup(w http.ResponseWriter, r *http.Request) {
 
 	newGroup.ID, err = db.CreateGroup(newGroup)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 

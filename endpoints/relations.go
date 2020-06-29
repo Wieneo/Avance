@@ -28,8 +28,8 @@ func CreateRelation(w http.ResponseWriter, r *http.Request) {
 
 	queue, found, err := db.GetQueue(projectid, queueid)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
@@ -41,15 +41,15 @@ func CreateRelation(w http.ResponseWriter, r *http.Request) {
 
 	user, err := utils.GetUser(r, w)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
 	allperms, perms, err := perms.GetPermissionsToQueue(user, queue)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
@@ -61,8 +61,8 @@ func CreateRelation(w http.ResponseWriter, r *http.Request) {
 
 	ticket, found, err := db.GetTicket(ticketid, queueid, models.WantedProperties{Relations: true})
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
@@ -84,8 +84,8 @@ func CreateRelation(w http.ResponseWriter, r *http.Request) {
 
 	_, found, err = db.GetTicket(relation.OtherTicket, queueid, models.WantedProperties{Relations: true})
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
@@ -125,8 +125,8 @@ func CreateRelation(w http.ResponseWriter, r *http.Request) {
 
 	id, err := db.AddRelation(ticketid, relation.OtherTicket, relation.RelationType)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
@@ -146,8 +146,8 @@ func DeleteRelation(w http.ResponseWriter, r *http.Request) {
 
 	queue, found, err := db.GetQueue(projectid, queueid)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
@@ -159,15 +159,15 @@ func DeleteRelation(w http.ResponseWriter, r *http.Request) {
 
 	user, err := utils.GetUser(r, w)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
 	allperms, perms, err := perms.GetPermissionsToQueue(user, queue)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
@@ -179,8 +179,8 @@ func DeleteRelation(w http.ResponseWriter, r *http.Request) {
 
 	ticket, found, err := db.GetTicket(ticketid, queueid, models.WantedProperties{Relations: true})
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
@@ -207,8 +207,8 @@ func DeleteRelation(w http.ResponseWriter, r *http.Request) {
 
 	err = db.DeleteRelation(relationid)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 

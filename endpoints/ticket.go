@@ -22,8 +22,8 @@ func GetTicket(w http.ResponseWriter, r *http.Request) {
 
 	ticket, found, err := db.GetTicketUnsafe(ticketid, models.WantedProperties{All: true})
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
@@ -35,22 +35,22 @@ func GetTicket(w http.ResponseWriter, r *http.Request) {
 
 	user, err := utils.GetUser(r, w)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
 	project, err := db.GetProjectFromQueue(ticket.Queue.ID)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
 	allperms, pperms, err := perms.GetPermissionsToProject(user, project)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
@@ -63,8 +63,8 @@ func GetTicket(w http.ResponseWriter, r *http.Request) {
 
 		_, qperms, err := perms.GetPermissionsToQueue(user, ticket.Queue)
 		if err != nil {
-			w.WriteHeader(500)
-			dev.ReportError(err, w, err.Error())
+
+			utils.ReportErrorToUser(err, w)
 			return
 		}
 
@@ -86,8 +86,8 @@ func GetTicketFullPath(w http.ResponseWriter, r *http.Request) {
 
 	queue, found, err := db.GetQueue(projectid, queueid)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
@@ -99,23 +99,23 @@ func GetTicketFullPath(w http.ResponseWriter, r *http.Request) {
 
 	user, err := utils.GetUser(r, w)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
 	allperms, perms, err := perms.GetPermissionsToQueue(user, queue)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
 	if allperms.Admin || perms.CanSee {
 		ticket, found, err := db.GetTicket(ticketid, queueid, models.WantedProperties{All: true})
 		if err != nil {
-			w.WriteHeader(500)
-			dev.ReportError(err, w, err.Error())
+
+			utils.ReportErrorToUser(err, w)
 			return
 		}
 
@@ -139,8 +139,8 @@ func GetTicketsFromQueue(w http.ResponseWriter, r *http.Request) {
 
 	queue, found, err := db.GetQueue(projectid, queueid)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
@@ -152,15 +152,15 @@ func GetTicketsFromQueue(w http.ResponseWriter, r *http.Request) {
 
 	user, err := utils.GetUser(r, w)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
 	allperms, perms, err := perms.GetPermissionsToQueue(user, queue)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
@@ -178,8 +178,8 @@ func GetTicketsFromQueue(w http.ResponseWriter, r *http.Request) {
 
 		tickets, err := db.GetTicketsInQueue(queueid, showInvisible)
 		if err != nil {
-			w.WriteHeader(500)
-			dev.ReportError(err, w, err.Error())
+
+			utils.ReportErrorToUser(err, w)
 			return
 		}
 
@@ -206,8 +206,8 @@ func CreateTicketsInQueue(w http.ResponseWriter, r *http.Request) {
 
 	queue, found, err := db.GetQueue(projectid, queueid)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
@@ -219,15 +219,15 @@ func CreateTicketsInQueue(w http.ResponseWriter, r *http.Request) {
 
 	user, err := utils.GetUser(r, w)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
 	allperms, perms, err := perms.GetPermissionsToQueue(user, queue)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
@@ -274,8 +274,8 @@ func CreateTicketsInQueue(w http.ResponseWriter, r *http.Request) {
 	if !utils.IsEmpty(req.Owner) {
 		ownerID, found, err = db.SearchUser(req.Owner)
 		if err != nil {
-			w.WriteHeader(500)
-			dev.ReportError(err, w, err.Error())
+
+			utils.ReportErrorToUser(err, w)
 			return
 		}
 
@@ -290,8 +290,8 @@ func CreateTicketsInQueue(w http.ResponseWriter, r *http.Request) {
 
 	statusid, found, err := db.SearchStatus(projectid, req.Status)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
@@ -303,22 +303,22 @@ func CreateTicketsInQueue(w http.ResponseWriter, r *http.Request) {
 
 	severityid, found, err := db.SearchSeverity(projectid, req.Severity)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
 	severity, _, err := db.GetSeverity(projectid, severityid)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
 	status, _, err := db.GetStatus(projectid, statusid)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
@@ -344,15 +344,15 @@ func CreateTicketsInQueue(w http.ResponseWriter, r *http.Request) {
 	//Now everything should be ok
 	id, err := db.CreateTicket(req.Title, req.Description, queueid, ownedByNobody, ownerID, severity, status, isStalled, req.StalledUntil)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
 	ticket, found, err := db.GetTicket(id, queueid, models.WantedProperties{All: true})
 	if err != nil || !found {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
@@ -367,8 +367,8 @@ func PatchTicketsInQueue(w http.ResponseWriter, r *http.Request) {
 
 	queue, found, err := db.GetQueue(projectid, queueid)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
@@ -380,15 +380,15 @@ func PatchTicketsInQueue(w http.ResponseWriter, r *http.Request) {
 
 	user, err := utils.GetUser(r, w)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
 	allperms, perms, err := perms.GetPermissionsToQueue(user, queue)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
@@ -410,8 +410,8 @@ func PatchTicketsInQueue(w http.ResponseWriter, r *http.Request) {
 
 	ticket, found, err := db.GetTicket(ticketid, queueid, models.WantedProperties{All: true})
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
@@ -436,8 +436,8 @@ func PatchTicketsInQueue(w http.ResponseWriter, r *http.Request) {
 	if !utils.IsEmpty(req.Owner) && req.Owner != ticket.Owner.Username {
 		ownerID, found, err := db.SearchUser(req.Owner)
 		if err != nil {
-			w.WriteHeader(500)
-			dev.ReportError(err, w, err.Error())
+
+			utils.ReportErrorToUser(err, w)
 			return
 		}
 
@@ -455,8 +455,8 @@ func PatchTicketsInQueue(w http.ResponseWriter, r *http.Request) {
 	if !utils.IsEmpty(req.Status) && req.Status != ticket.Status.Name {
 		statusid, found, err := db.SearchStatus(projectid, req.Status)
 		if err != nil {
-			w.WriteHeader(500)
-			dev.ReportError(err, w, err.Error())
+
+			utils.ReportErrorToUser(err, w)
 			return
 		}
 
@@ -473,8 +473,8 @@ func PatchTicketsInQueue(w http.ResponseWriter, r *http.Request) {
 	if !utils.IsEmpty(req.Severity) && req.Severity != ticket.Severity.Name {
 		severityid, found, err := db.SearchSeverity(projectid, req.Severity)
 		if err != nil {
-			w.WriteHeader(500)
-			dev.ReportError(err, w, err.Error())
+
+			utils.ReportErrorToUser(err, w)
 			return
 		}
 
@@ -509,8 +509,8 @@ func PatchTicketsInQueue(w http.ResponseWriter, r *http.Request) {
 
 	ticket, err = db.PatchTicket(ticket)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
@@ -525,8 +525,8 @@ func DeletePropertyFromTicket(w http.ResponseWriter, r *http.Request) {
 
 	queue, found, err := db.GetQueue(projectid, queueid)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
@@ -538,15 +538,15 @@ func DeletePropertyFromTicket(w http.ResponseWriter, r *http.Request) {
 
 	user, err := utils.GetUser(r, w)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
 	allperms, perms, err := perms.GetPermissionsToQueue(user, queue)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
@@ -558,8 +558,8 @@ func DeletePropertyFromTicket(w http.ResponseWriter, r *http.Request) {
 
 	ticket, found, err := db.GetTicket(ticketid, queueid, models.WantedProperties{All: true})
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
@@ -592,8 +592,8 @@ func DeletePropertyFromTicket(w http.ResponseWriter, r *http.Request) {
 
 	ticket, err = db.PatchTicket(ticket)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 

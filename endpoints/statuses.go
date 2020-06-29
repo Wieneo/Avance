@@ -32,8 +32,8 @@ func GetStatuses(w http.ResponseWriter, r *http.Request) {
 
 	statuses, err := db.GetStatuses(projectid, showDisabled)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
@@ -55,8 +55,8 @@ func CreateStatus(w http.ResponseWriter, r *http.Request) {
 
 	rawBytes, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
@@ -75,15 +75,15 @@ func CreateStatus(w http.ResponseWriter, r *http.Request) {
 
 	user, err := utils.GetUser(r, w)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
 	project, found, err := db.GetProject(projectid)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
@@ -95,16 +95,16 @@ func CreateStatus(w http.ResponseWriter, r *http.Request) {
 
 	allperms, perms, err := perms.GetPermissionsToProject(user, project)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
 	if perms.CanCreateStatuses || allperms.Admin {
 		statuses, err := db.GetStatuses(project.ID, true)
 		if err != nil {
-			w.WriteHeader(500)
-			dev.ReportError(err, w, err.Error())
+
+			utils.ReportErrorToUser(err, w)
 			return
 		}
 
@@ -124,15 +124,15 @@ func CreateStatus(w http.ResponseWriter, r *http.Request) {
 
 		id, err := db.CreateStatus(req.Enabled, req.Name, req.DisplayColor, req.TicketsVisible, projectid)
 		if err != nil {
-			w.WriteHeader(500)
-			dev.ReportError(err, w, err.Error())
+
+			utils.ReportErrorToUser(err, w)
 			return
 		}
 
 		status, found, err := db.GetStatus(projectid, id)
 		if err != nil || !found {
-			w.WriteHeader(500)
-			dev.ReportError(err, w, err.Error())
+
+			utils.ReportErrorToUser(err, w)
 			return
 		}
 
@@ -153,15 +153,15 @@ func PatchStatus(w http.ResponseWriter, r *http.Request) {
 
 	user, err := utils.GetUser(r, w)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
 	project, found, err := db.GetProject(projectid)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
@@ -173,16 +173,16 @@ func PatchStatus(w http.ResponseWriter, r *http.Request) {
 
 	allperms, perms, err := perms.GetPermissionsToProject(user, project)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
 	if perms.CanModifyStatuses || allperms.Admin {
 		rawBytes, err := ioutil.ReadAll(r.Body)
 		if err != nil {
-			w.WriteHeader(500)
-			dev.ReportError(err, w, err.Error())
+
+			utils.ReportErrorToUser(err, w)
 			return
 		}
 
@@ -195,8 +195,8 @@ func PatchStatus(w http.ResponseWriter, r *http.Request) {
 
 		status, found, err := db.GetStatus(projectid, statusid)
 		if err != nil {
-			w.WriteHeader(500)
-			dev.ReportError(err, w, err.Error())
+
+			utils.ReportErrorToUser(err, w)
 			return
 		}
 
@@ -237,8 +237,8 @@ func PatchStatus(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if err := db.PatchStatus(status); err != nil {
-			w.WriteHeader(500)
-			dev.ReportError(err, w, err.Error())
+
+			utils.ReportErrorToUser(err, w)
 			return
 		}
 
@@ -258,15 +258,15 @@ func DeleteStatus(w http.ResponseWriter, r *http.Request) {
 
 	user, err := utils.GetUser(r, w)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
 	project, found, err := db.GetProject(projectid)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
@@ -278,16 +278,16 @@ func DeleteStatus(w http.ResponseWriter, r *http.Request) {
 
 	allperms, perms, err := perms.GetPermissionsToProject(user, project)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
 	if perms.CanRemoveStatuses || allperms.Admin {
 		_, found, err := db.GetStatus(projectid, statusid)
 		if err != nil {
-			w.WriteHeader(500)
-			dev.ReportError(err, w, err.Error())
+
+			utils.ReportErrorToUser(err, w)
 			return
 		}
 
@@ -299,8 +299,8 @@ func DeleteStatus(w http.ResponseWriter, r *http.Request) {
 
 		err = db.RemoveStatus(projectid, statusid)
 		if err != nil {
-			w.WriteHeader(500)
-			dev.ReportError(err, w, err.Error())
+
+			utils.ReportErrorToUser(err, w)
 			return
 		}
 

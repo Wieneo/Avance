@@ -21,8 +21,7 @@ func GetProjectQueues(w http.ResponseWriter, r *http.Request) {
 		projectid, _ := strconv.ParseInt(strings.Split(r.RequestURI, "/")[4], 10, 64)
 		queues, err := perms.GetVisibleQueuesFromProject(user, projectid)
 		if err != nil {
-			w.WriteHeader(500)
-			dev.ReportError(err, w, err.Error())
+			utils.ReportErrorToUser(err, w)
 			return
 		}
 
@@ -42,8 +41,7 @@ func CreateQueue(w http.ResponseWriter, r *http.Request) {
 
 	rawBytes, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
@@ -62,15 +60,15 @@ func CreateQueue(w http.ResponseWriter, r *http.Request) {
 
 	user, err := utils.GetUser(r, w)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
 	project, found, err := db.GetProject(projectid)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
@@ -82,16 +80,16 @@ func CreateQueue(w http.ResponseWriter, r *http.Request) {
 
 	allperms, perms, err := perms.GetPermissionsToProject(user, project)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
 	if perms.CanCreateQueues || allperms.Admin {
 		queues, err := db.QueuesInProject(project)
 		if err != nil {
-			w.WriteHeader(500)
-			dev.ReportError(err, w, err.Error())
+
+			utils.ReportErrorToUser(err, w)
 			return
 		}
 
@@ -111,16 +109,16 @@ func CreateQueue(w http.ResponseWriter, r *http.Request) {
 
 		id, err := db.CreateQueue(req.Name, projectid)
 		if err != nil {
-			w.WriteHeader(500)
-			dev.ReportError(err, w, err.Error())
+
+			utils.ReportErrorToUser(err, w)
 			return
 		}
 
 		queue, found, err := db.GetQueue(projectid, id)
 		//If queue isnt found here something went horribly wrong -> ReportError
 		if err != nil || !found {
-			w.WriteHeader(500)
-			dev.ReportError(err, w, err.Error())
+
+			utils.ReportErrorToUser(err, w)
 			return
 		}
 
@@ -141,15 +139,15 @@ func PatchQueue(w http.ResponseWriter, r *http.Request) {
 
 	user, err := utils.GetUser(r, w)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
 	project, found, err := db.GetProject(projectid)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
@@ -161,16 +159,16 @@ func PatchQueue(w http.ResponseWriter, r *http.Request) {
 
 	allperms, perms, err := perms.GetPermissionsToProject(user, project)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
 	if perms.CanModifyQueues || allperms.Admin {
 		rawBytes, err := ioutil.ReadAll(r.Body)
 		if err != nil {
-			w.WriteHeader(500)
-			dev.ReportError(err, w, err.Error())
+
+			utils.ReportErrorToUser(err, w)
 			return
 		}
 
@@ -183,8 +181,8 @@ func PatchQueue(w http.ResponseWriter, r *http.Request) {
 
 		queue, found, err := db.GetQueue(projectid, queueid)
 		if err != nil {
-			w.WriteHeader(500)
-			dev.ReportError(err, w, err.Error())
+
+			utils.ReportErrorToUser(err, w)
 			return
 		}
 
@@ -209,8 +207,8 @@ func PatchQueue(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if err := db.PatchQueue(queue); err != nil {
-			w.WriteHeader(500)
-			dev.ReportError(err, w, err.Error())
+
+			utils.ReportErrorToUser(err, w)
 			return
 		}
 
@@ -230,15 +228,15 @@ func DeleteQueue(w http.ResponseWriter, r *http.Request) {
 
 	user, err := utils.GetUser(r, w)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
 	project, found, err := db.GetProject(projectid)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
@@ -250,16 +248,16 @@ func DeleteQueue(w http.ResponseWriter, r *http.Request) {
 
 	allperms, perms, err := perms.GetPermissionsToProject(user, project)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
 	if perms.CanRemoveQueues || allperms.Admin {
 		_, found, err := db.GetQueue(projectid, queueid)
 		if err != nil {
-			w.WriteHeader(500)
-			dev.ReportError(err, w, err.Error())
+
+			utils.ReportErrorToUser(err, w)
 			return
 		}
 
@@ -271,8 +269,8 @@ func DeleteQueue(w http.ResponseWriter, r *http.Request) {
 
 		err = db.RemoveQueue(projectid, queueid)
 		if err != nil {
-			w.WriteHeader(500)
-			dev.ReportError(err, w, err.Error())
+
+			utils.ReportErrorToUser(err, w)
 			return
 		}
 

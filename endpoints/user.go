@@ -25,14 +25,14 @@ import (
 func GetProfile(w http.ResponseWriter, r *http.Request) {
 	user, err := utils.GetUser(r, w)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
 	if err := db.GetSettings(&user); err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
@@ -45,15 +45,15 @@ func GetPermissionsOfUser(w http.ResponseWriter, r *http.Request) {
 
 	user, err := utils.GetUser(r, w)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
 	req, found, err := db.GetUser(userID)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
@@ -65,8 +65,8 @@ func GetPermissionsOfUser(w http.ResponseWriter, r *http.Request) {
 
 	userperms, err := perms.CombinePermissions(user)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
@@ -78,8 +78,8 @@ func GetPermissionsOfUser(w http.ResponseWriter, r *http.Request) {
 
 	reqperms, err := perms.CombinePermissions(req)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
@@ -90,8 +90,8 @@ func GetPermissionsOfUser(w http.ResponseWriter, r *http.Request) {
 func PatchSettings(w http.ResponseWriter, r *http.Request) {
 	user, err := utils.GetUser(r, w)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
@@ -112,8 +112,8 @@ func PatchSettings(w http.ResponseWriter, r *http.Request) {
 
 	user.Settings = newSettings
 	if err := db.PatchSettings(user); err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 	} else {
 		json.NewEncoder(w).Encode(user)
 	}
@@ -127,8 +127,8 @@ func GetProfilePicture(w http.ResponseWriter, r *http.Request) {
 	} else {
 		user, err := utils.GetUser(r, w)
 		if err != nil {
-			w.WriteHeader(500)
-			dev.ReportError(err, w, err.Error())
+
+			utils.ReportErrorToUser(err, w)
 			return
 		}
 		userID = user.ID
@@ -156,8 +156,8 @@ func GetProfilePicture(w http.ResponseWriter, r *http.Request) {
 func UpdateProfilePicture(w http.ResponseWriter, r *http.Request) {
 	user, err := utils.GetUser(r, w)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
@@ -197,13 +197,13 @@ func UpdateProfilePicture(w http.ResponseWriter, r *http.Request) {
 
 	file, err := os.Create(filepath + strconv.FormatInt(user.ID, 10) + "." + fileType)
 	if err != nil {
-		w.WriteHeader(500)
+
 		dev.ReportError(err, w, "could not open avatar File "+err.Error())
 		return
 	}
 	_, err = io.Copy(file, tempFile)
 	if err != nil {
-		w.WriteHeader(500)
+
 		dev.ReportError(err, w, "could not write avatar File "+err.Error())
 	}
 
@@ -214,8 +214,8 @@ func UpdateProfilePicture(w http.ResponseWriter, r *http.Request) {
 func RemoveProfilePicture(w http.ResponseWriter, r *http.Request) {
 	user, err := utils.GetUser(r, w)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
@@ -241,8 +241,8 @@ type profileWebRequest struct {
 func PatchProfile(w http.ResponseWriter, r *http.Request) {
 	user, err := utils.GetUser(r, w)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
@@ -292,15 +292,15 @@ func PatchProfile(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if db.PatchUser(user) != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
 	if len(hashedPassword) > 0 {
 		if db.UpdatePassword(user.ID, hashedPassword) != nil {
-			w.WriteHeader(500)
-			dev.ReportError(err, w, err.Error())
+
+			utils.ReportErrorToUser(err, w)
 			return
 		}
 	}
@@ -316,15 +316,15 @@ type userWebRequest struct {
 func CreateUser(w http.ResponseWriter, r *http.Request) {
 	user, err := utils.GetUser(r, w)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
 	perms, err := perms.CombinePermissions(user)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
@@ -338,8 +338,8 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 
 	rawBytes, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
@@ -382,8 +382,8 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 
 	users, err := db.GetALLUsers()
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
@@ -418,8 +418,8 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 
 	newUser.ID, err = db.CreateUser(newUser, req.Password)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
@@ -430,15 +430,15 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 func GetUsers(w http.ResponseWriter, r *http.Request) {
 	user, err := utils.GetUser(r, w)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
 	perms, err := perms.CombinePermissions(user)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
@@ -451,8 +451,8 @@ func GetUsers(w http.ResponseWriter, r *http.Request) {
 
 	users, err := db.GetALLUsers()
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
@@ -463,8 +463,8 @@ func GetUsers(w http.ResponseWriter, r *http.Request) {
 func GetSpecificUser(w http.ResponseWriter, r *http.Request) {
 	user, err := utils.GetUser(r, w)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
@@ -472,8 +472,8 @@ func GetSpecificUser(w http.ResponseWriter, r *http.Request) {
 
 	user, found, err := db.GetUser(userid)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
@@ -499,15 +499,15 @@ func DeactivateUser(w http.ResponseWriter, r *http.Request) {
 
 	user, err := utils.GetUser(r, w)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
 	userperms, err := perms.CombinePermissions(user)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
@@ -521,8 +521,8 @@ func DeactivateUser(w http.ResponseWriter, r *http.Request) {
 	if userperms.Admin {
 		users, err := db.GetALLUsers()
 		if err != nil {
-			w.WriteHeader(500)
-			dev.ReportError(err, w, err.Error())
+
+			utils.ReportErrorToUser(err, w)
 			return
 		}
 
@@ -531,8 +531,8 @@ func DeactivateUser(w http.ResponseWriter, r *http.Request) {
 			if k.ID != req.ID {
 				tempperms, err := perms.CombinePermissions(k)
 				if err != nil {
-					w.WriteHeader(500)
-					dev.ReportError(err, w, err.Error())
+
+					utils.ReportErrorToUser(err, w)
 					return
 				}
 
@@ -550,8 +550,8 @@ func DeactivateUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := db.DeactivateUser(req.ID); err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
@@ -560,8 +560,8 @@ func DeactivateUser(w http.ResponseWriter, r *http.Request) {
 	data, _ := json.Marshal(req)
 	taskid, err := db.CreateTask(models.DeleteUser, string(data), sql.NullInt32{Valid: false}, sql.NullString{Valid: false}, sql.NullInt64{Valid: false}, sql.NullInt32{Valid: false})
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 

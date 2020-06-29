@@ -16,8 +16,8 @@ import (
 func GetWorkers(w http.ResponseWriter, r *http.Request) {
 	user, err := utils.GetUser(r, w)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
@@ -30,8 +30,8 @@ func GetWorkers(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if workers, err := db.GetAllWorkers(); err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 	} else {
 		json.NewEncoder(w).Encode(workers)
 	}
@@ -43,8 +43,8 @@ func ToggleWorker(w http.ResponseWriter, r *http.Request) {
 
 	user, err := utils.GetUser(r, w)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
@@ -58,8 +58,8 @@ func ToggleWorker(w http.ResponseWriter, r *http.Request) {
 
 	worker, found, err := db.GetWorker(workerID)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 		return
 	}
 
@@ -71,8 +71,8 @@ func ToggleWorker(w http.ResponseWriter, r *http.Request) {
 
 	worker.Active = !worker.Active
 	if err := db.PatchWorker(worker); err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportErrorToUser(err, w)
 	} else {
 		json.NewEncoder(w).Encode(worker)
 	}
