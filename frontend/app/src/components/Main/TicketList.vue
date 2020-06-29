@@ -1,37 +1,37 @@
 <template>
     <div>
       <v-skeleton-loader
-          :loading="LoadingTickets"
+          v-if="LoadingTickets"
           type="list-item-avatar-two-line@5"
-        >
-        <v-card>
+        ></v-skeleton-loader>
+        <v-card v-else>
             <div v-for="queue in Queues" :key="queue.ID">
                 <v-list subheader dense>
                     <v-subheader>{{queue.Name}}</v-subheader>
-                    <v-list-item
-                        v-for="ticket in queue.Tickets"
-                        :key="ticket.ID"
-                        @click="DisplayTicket(ticket.ID)">
-                        <v-list-item-avatar>
-                            <v-img v-if="ticket.OwnerID.Valid" :src="getUserAvatarLink(ticket.Owner.ID)"></v-img>
-                            <v-img v-else src="" style="background-color: #d0d0d0;"></v-img>
-                        </v-list-item-avatar>
+                    <v-list-item-group v-model="queue.SelectedTicket">
+                      <v-list-item
+                          v-for="ticket in queue.Tickets"
+                          :key="ticket.ID"
+                          @click="DisplayTicket(ticket.ID)">
+                          <v-list-item-avatar>
+                              <v-img v-if="ticket.OwnerID.Valid" :src="getUserAvatarLink(ticket.Owner.ID)"></v-img>
+                              <v-img v-else src="" style="background-color: #d0d0d0;"></v-img>
+                          </v-list-item-avatar>
 
-                        <v-list-item-content>
-                            <v-list-item-title>{{ticket.Title}}</v-list-item-title>
-                            <v-list-item-subtitle :style="{ color: ticket.Status.DisplayColor }">{{ticket.Status.Name}}</v-list-item-subtitle>
-                        </v-list-item-content>
+                          <v-list-item-content>
+                              <v-list-item-title>{{ticket.Title}}</v-list-item-title>
+                              <v-list-item-subtitle :style="{ color: ticket.Status.DisplayColor }">{{ticket.Status.Name}}</v-list-item-subtitle>
+                          </v-list-item-content>
 
-                        <v-list-item-icon>
-                            <v-icon :style="{ color: ticket.Severity.DisplayColor }" :title="ticket.Severity.Name">mdi-fire</v-icon>
-                            <v-icon @click="console.log('test2')">mdi-forward</v-icon>
-                        </v-list-item-icon>
-                    </v-list-item>
+                          <v-list-item-icon>
+                              <v-icon :style="{ color: ticket.Severity.DisplayColor }" :title="ticket.Severity.Name">mdi-fire</v-icon>
+                          </v-list-item-icon>
+                      </v-list-item>
+                    </v-list-item-group>
                 </v-list>
                 <v-divider/>
             </div>
         </v-card>
-      </v-skeleton-loader>
     </div>
 </template>
 <script lang="ts">
@@ -41,6 +41,7 @@
     ID: number;
     Name: string;
     Tickets: any[];
+    SelectedTicket: number;
   }
 
   const Queues: Queue[] = []
@@ -81,21 +82,49 @@
     methods:{
       LoadQueues: async function(){
         this.LoadingTickets = true
-        this.Queues = (await Vue.prototype.$Request("GET", "/api/v1/project/" + this.CurrentProject + "/queues"))
-        await this.LoadTickets()
+        const rawQueues = (await Vue.prototype.$Request("GET", "/api/v1/project/" + this.CurrentProject + "/queues"))
+
+        await this.asyncForEach(rawQueues, async (element: any, index: number) => {
+          rawQueues[index].Tickets = (await Vue.prototype.$Request("GET", "/api/v1/project/" + this.CurrentProject + "/queue/" + element.ID + "/tickets"))
+        });
+
+        //Fix for v-list selection
+         if(this.$route.query.ticket != undefined){
+          const ticketID = parseInt(this.$route.query.ticket as string)
+          if (!isNaN(ticketID)){
+            rawQueues.forEach((queue: any, index: number) => {
+              queue.Tickets.forEach((element: any, tindex: number) => {
+                if (element.ID == ticketID){
+                  rawQueues[index].SelectedTicket = tindex
+                }
+              });
+            });
+          }
+        }
+
+        this.Queues = rawQueues
+
         this.LoadingTickets = false
       },
-      LoadTickets: async function(){
-        await this.asyncForEach(this.Queues, async (element: any) => {
-          element.Tickets = (await Vue.prototype.$Request("GET", "/api/v1/project/" + this.CurrentProject + "/queue/" + element.ID + "/tickets"))
-        });
-      },
       DisplayTicket: async function(TicketID: number){
+        //Fix for v-list selection
+        this.Queues.forEach((queue: any, index: number) => {
+          queue.Tickets.forEach((element: any, tindex: number) => {
+            if (element.ID == TicketID){
+              this.Queues[index].SelectedTicket = tindex
+            }else{
+              this.Queues[index].SelectedTicket = -1
+            }
+          });
+        });
+
         try{
           this.$router.push({ query: Object.assign({}, this.$route.query, { ticket: TicketID }) });
         }finally{
           //Do Nothing
         }
+
+        this.$forceUpdate();
       },
       asyncForEach: async function (array: any, callback: any) {
         for (let index = 0; index < array.length; index++) {
