@@ -25,6 +25,8 @@ type Migration struct {
 	After   string
 }
 
+const migrationsPath = "/db/migrations/"
+
 //Init is called after config is read to connect to postgres
 func Init(ApplyMigrations bool) {
 	dev.LogInfo("Postgres is being initialized")
@@ -145,7 +147,7 @@ func migrate(ApplyMigrations bool) {
 	rows.Close()
 
 	cwd, _ := os.Getwd()
-	files, err := ioutil.ReadDir(fmt.Sprint(cwd, "/db/migrations/"))
+	files, err := ioutil.ReadDir(fmt.Sprint(cwd, migrationsPath))
 	if err != nil {
 		dev.LogFatal(err, "Couldn't find/read migrations: ", err.Error())
 	}
@@ -154,7 +156,7 @@ func migrate(ApplyMigrations bool) {
 	for _, k := range files {
 		if strings.HasSuffix(k.Name(), ".migrate.json") {
 			var migration Migration
-			rawBytes, err := ioutil.ReadFile(fmt.Sprint(cwd, "/db/migrations/", k.Name()))
+			rawBytes, err := ioutil.ReadFile(fmt.Sprint(cwd, migrationsPath, k.Name()))
 			if err != nil {
 				dev.LogFatal(err, "Couldn't read migration file: "+err.Error())
 			}
@@ -241,7 +243,7 @@ func migrate(ApplyMigrations bool) {
 				//Targets contains all SQL Files wich are included in this migration
 				//Concat these here
 				for _, k := range k.Targets {
-					rawBytes, err := ioutil.ReadFile(cwd + "/db/migrations/" + k)
+					rawBytes, err := ioutil.ReadFile(cwd + migrationsPath + k)
 
 					if err != nil {
 						dev.LogFatal(err, "Couldn't read target:", err.Error())
@@ -312,9 +314,9 @@ func deploy() {
 	rows.Close()
 
 	cwd, _ := os.Getwd()
-	rawBytes, err := ioutil.ReadFile(cwd + "/db/migrations/base.sql")
+	rawBytes, err := ioutil.ReadFile(cwd + migrationsPath + "base.sql")
 	if err != nil {
-		dev.LogFatal(err, "Couldn't read "+cwd+"/db/migrations/base.sql! Please check permissions and roles!")
+		dev.LogFatal(err, "Couldn't read "+cwd+migrationsPath+"base.sql! Please check permissions and roles!")
 	}
 
 	_, err = Connection.Query(string(rawBytes))

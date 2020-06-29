@@ -58,7 +58,7 @@ func GetTask(TaskID int64) (models.WorkerTask, bool, error) {
 	var workerTask models.WorkerTask
 	err := Connection.QueryRow(`SELECT "ID", "Task", "QueuedAt", "Status", "Type", "Interval", "LastRun", "Recipient", "Ticket", "Results" FROM "Tasks" WHERE "ID" = $1`, TaskID).Scan(&workerTask.ID, &workerTask.Data, &workerTask.QueuedAt, &workerTask.Status, &workerTask.Type, &workerTask.Interval, &workerTask.LastRun, &workerTask.Recipient, &workerTask.Ticket, &rawResults)
 	if err != nil {
-		if err.Error() == "sql: no rows in result set" {
+		if err == sql.ErrNoRows {
 			dev.LogDebug(fmt.Sprintf("[DB] Requested task %d wasnt found -> Returning empty queue struct", TaskID))
 			return models.WorkerTask{}, false, nil
 		}

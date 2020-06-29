@@ -16,7 +16,7 @@ func GetTicketUnsafe(TicketID int64, Wanted models.WantedProperties) (models.Tic
 	var queueID int64
 	err := Connection.QueryRow(`SELECT "Queue" FROM "Tickets" WHERE "ID" = $1`, TicketID).Scan(&queueID)
 	if err != nil {
-		if err.Error() == "sql: no rows in result set" {
+		if err == sql.ErrNoRows {
 			dev.LogDebug(fmt.Sprintf("[DB] Ticket %d wasn't found", TicketID))
 			return models.Ticket{}, false, nil
 		}
@@ -37,7 +37,7 @@ func GetTicket(TicketID int64, QueueID int64, Wanted models.WantedProperties) (m
 	var ticket models.Ticket
 	err := Connection.QueryRow(`SELECT "t"."ID", "t"."Title", "t"."Description", "t"."Queue" AS "QueueID", "t"."Owner" AS "OwnerID", "t"."Severity" AS "SeverityID", "t"."Status" AS "StatusID","t"."CreatedAt","t"."LastModified","t"."StalledUntil","t"."Meta" FROM "Tickets" AS "t" WHERE "ID" = $1 AND "Queue" = $2`, TicketID, QueueID).Scan(&ticket.ID, &ticket.Title, &ticket.Description, &ticket.QueueID, &ticket.OwnerID, &ticket.SeverityID, &ticket.StatusID, &ticket.CreatedAt, &ticket.LastModified, &ticket.StalledUntil, &ticket.Meta)
 	if err != nil {
-		if err.Error() == "sql: no rows in result set" {
+		if err == sql.ErrNoRows {
 			dev.LogDebug(fmt.Sprintf("[DB] Ticket %d wasn't found in queue %d", TicketID, QueueID))
 			return models.Ticket{}, false, nil
 		}
