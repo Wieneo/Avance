@@ -27,13 +27,13 @@ func GetProfile(w http.ResponseWriter, r *http.Request) {
 	user, err := utils.GetUser(r, w)
 	if err != nil {
 
-		utils.ReportErrorToUser(err, w)
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
 	if err := db.GetSettings(&user); err != nil {
 
-		utils.ReportErrorToUser(err, w)
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
@@ -47,14 +47,14 @@ func GetPermissionsOfUser(w http.ResponseWriter, r *http.Request) {
 	user, err := utils.GetUser(r, w)
 	if err != nil {
 
-		utils.ReportErrorToUser(err, w)
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
 	req, found, err := db.GetUser(userID)
 	if err != nil {
 
-		utils.ReportErrorToUser(err, w)
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
@@ -67,7 +67,7 @@ func GetPermissionsOfUser(w http.ResponseWriter, r *http.Request) {
 	userperms, err := perms.CombinePermissions(user)
 	if err != nil {
 
-		utils.ReportErrorToUser(err, w)
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
@@ -80,7 +80,7 @@ func GetPermissionsOfUser(w http.ResponseWriter, r *http.Request) {
 	reqperms, err := perms.CombinePermissions(req)
 	if err != nil {
 
-		utils.ReportErrorToUser(err, w)
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
@@ -92,7 +92,7 @@ func PatchSettings(w http.ResponseWriter, r *http.Request) {
 	user, err := utils.GetUser(r, w)
 	if err != nil {
 
-		utils.ReportErrorToUser(err, w)
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
@@ -114,7 +114,7 @@ func PatchSettings(w http.ResponseWriter, r *http.Request) {
 	user.Settings = newSettings
 	if err := db.PatchSettings(user); err != nil {
 
-		utils.ReportErrorToUser(err, w)
+		utils.ReportInternalErrorToUser(err, w)
 	} else {
 		json.NewEncoder(w).Encode(user)
 	}
@@ -129,7 +129,7 @@ func GetProfilePicture(w http.ResponseWriter, r *http.Request) {
 		user, err := utils.GetUser(r, w)
 		if err != nil {
 
-			utils.ReportErrorToUser(err, w)
+			utils.ReportInternalErrorToUser(err, w)
 			return
 		}
 		userID = user.ID
@@ -158,7 +158,7 @@ func UpdateProfilePicture(w http.ResponseWriter, r *http.Request) {
 	user, err := utils.GetUser(r, w)
 	if err != nil {
 
-		utils.ReportErrorToUser(err, w)
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
@@ -216,7 +216,7 @@ func RemoveProfilePicture(w http.ResponseWriter, r *http.Request) {
 	user, err := utils.GetUser(r, w)
 	if err != nil {
 
-		utils.ReportErrorToUser(err, w)
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
@@ -243,7 +243,7 @@ func PatchProfile(w http.ResponseWriter, r *http.Request) {
 	user, err := utils.GetUser(r, w)
 	if err != nil {
 
-		utils.ReportErrorToUser(err, w)
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
@@ -294,14 +294,14 @@ func PatchProfile(w http.ResponseWriter, r *http.Request) {
 
 	if db.PatchUser(user) != nil {
 
-		utils.ReportErrorToUser(err, w)
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
 	if len(hashedPassword) > 0 {
 		if db.UpdatePassword(user.ID, hashedPassword) != nil {
 
-			utils.ReportErrorToUser(err, w)
+			utils.ReportInternalErrorToUser(err, w)
 			return
 		}
 	}
@@ -318,14 +318,14 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 	user, err := utils.GetUser(r, w)
 	if err != nil {
 
-		utils.ReportErrorToUser(err, w)
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
 	perms, err := perms.CombinePermissions(user)
 	if err != nil {
 
-		utils.ReportErrorToUser(err, w)
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
@@ -340,7 +340,7 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 	rawBytes, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 
-		utils.ReportErrorToUser(err, w)
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
@@ -384,7 +384,7 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 	users, err := db.GetALLUsers()
 	if err != nil {
 
-		utils.ReportErrorToUser(err, w)
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
@@ -420,7 +420,7 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 	newUser.ID, err = db.CreateUser(newUser, req.Password)
 	if err != nil {
 
-		utils.ReportErrorToUser(err, w)
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
@@ -432,14 +432,14 @@ func GetUsers(w http.ResponseWriter, r *http.Request) {
 	user, err := utils.GetUser(r, w)
 	if err != nil {
 
-		utils.ReportErrorToUser(err, w)
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
 	perms, err := perms.CombinePermissions(user)
 	if err != nil {
 
-		utils.ReportErrorToUser(err, w)
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
@@ -453,7 +453,7 @@ func GetUsers(w http.ResponseWriter, r *http.Request) {
 	users, err := db.GetALLUsers()
 	if err != nil {
 
-		utils.ReportErrorToUser(err, w)
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
@@ -465,7 +465,7 @@ func GetSpecificUser(w http.ResponseWriter, r *http.Request) {
 	user, err := utils.GetUser(r, w)
 	if err != nil {
 
-		utils.ReportErrorToUser(err, w)
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
@@ -474,7 +474,7 @@ func GetSpecificUser(w http.ResponseWriter, r *http.Request) {
 	user, found, err := db.GetUser(userid)
 	if err != nil {
 
-		utils.ReportErrorToUser(err, w)
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
@@ -501,14 +501,14 @@ func DeactivateUser(w http.ResponseWriter, r *http.Request) {
 	user, err := utils.GetUser(r, w)
 	if err != nil {
 
-		utils.ReportErrorToUser(err, w)
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
 	userperms, err := perms.CombinePermissions(user)
 	if err != nil {
 
-		utils.ReportErrorToUser(err, w)
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
@@ -523,7 +523,7 @@ func DeactivateUser(w http.ResponseWriter, r *http.Request) {
 		users, err := db.GetALLUsers()
 		if err != nil {
 
-			utils.ReportErrorToUser(err, w)
+			utils.ReportInternalErrorToUser(err, w)
 			return
 		}
 
@@ -533,7 +533,7 @@ func DeactivateUser(w http.ResponseWriter, r *http.Request) {
 				tempperms, err := perms.CombinePermissions(k)
 				if err != nil {
 
-					utils.ReportErrorToUser(err, w)
+					utils.ReportInternalErrorToUser(err, w)
 					return
 				}
 
@@ -552,7 +552,7 @@ func DeactivateUser(w http.ResponseWriter, r *http.Request) {
 
 	if err := db.DeactivateUser(req.ID); err != nil {
 
-		utils.ReportErrorToUser(err, w)
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
@@ -562,7 +562,7 @@ func DeactivateUser(w http.ResponseWriter, r *http.Request) {
 	taskid, err := db.CreateTask(models.DeleteUser, string(data), sql.NullInt32{Valid: false}, sql.NullString{Valid: false}, sql.NullInt64{Valid: false}, sql.NullInt32{Valid: false})
 	if err != nil {
 
-		utils.ReportErrorToUser(err, w)
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 

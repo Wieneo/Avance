@@ -22,7 +22,7 @@ func GetProjectQueues(w http.ResponseWriter, r *http.Request) {
 		projectid, _ := strconv.ParseInt(strings.Split(r.RequestURI, "/")[4], 10, 64)
 		queues, err := perms.GetVisibleQueuesFromProject(user, projectid)
 		if err != nil {
-			utils.ReportErrorToUser(err, w)
+			utils.ReportInternalErrorToUser(err, w)
 			return
 		}
 
@@ -42,7 +42,7 @@ func CreateQueue(w http.ResponseWriter, r *http.Request) {
 
 	rawBytes, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		utils.ReportErrorToUser(err, w)
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
@@ -62,14 +62,14 @@ func CreateQueue(w http.ResponseWriter, r *http.Request) {
 	user, err := utils.GetUser(r, w)
 	if err != nil {
 
-		utils.ReportErrorToUser(err, w)
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
 	project, found, err := db.GetProject(projectid)
 	if err != nil {
 
-		utils.ReportErrorToUser(err, w)
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
@@ -82,7 +82,7 @@ func CreateQueue(w http.ResponseWriter, r *http.Request) {
 	allperms, perms, err := perms.GetPermissionsToProject(user, project)
 	if err != nil {
 
-		utils.ReportErrorToUser(err, w)
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
@@ -90,7 +90,7 @@ func CreateQueue(w http.ResponseWriter, r *http.Request) {
 		queues, err := db.QueuesInProject(project)
 		if err != nil {
 
-			utils.ReportErrorToUser(err, w)
+			utils.ReportInternalErrorToUser(err, w)
 			return
 		}
 
@@ -111,7 +111,7 @@ func CreateQueue(w http.ResponseWriter, r *http.Request) {
 		id, err := db.CreateQueue(req.Name, projectid)
 		if err != nil {
 
-			utils.ReportErrorToUser(err, w)
+			utils.ReportInternalErrorToUser(err, w)
 			return
 		}
 
@@ -119,7 +119,7 @@ func CreateQueue(w http.ResponseWriter, r *http.Request) {
 		//If queue isnt found here something went horribly wrong -> ReportError
 		if err != nil || !found {
 
-			utils.ReportErrorToUser(err, w)
+			utils.ReportInternalErrorToUser(err, w)
 			return
 		}
 
@@ -141,14 +141,14 @@ func PatchQueue(w http.ResponseWriter, r *http.Request) {
 	user, err := utils.GetUser(r, w)
 	if err != nil {
 
-		utils.ReportErrorToUser(err, w)
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
 	project, found, err := db.GetProject(projectid)
 	if err != nil {
 
-		utils.ReportErrorToUser(err, w)
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
@@ -161,7 +161,7 @@ func PatchQueue(w http.ResponseWriter, r *http.Request) {
 	allperms, perms, err := perms.GetPermissionsToProject(user, project)
 	if err != nil {
 
-		utils.ReportErrorToUser(err, w)
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
@@ -169,7 +169,7 @@ func PatchQueue(w http.ResponseWriter, r *http.Request) {
 		rawBytes, err := ioutil.ReadAll(r.Body)
 		if err != nil {
 
-			utils.ReportErrorToUser(err, w)
+			utils.ReportInternalErrorToUser(err, w)
 			return
 		}
 
@@ -183,7 +183,7 @@ func PatchQueue(w http.ResponseWriter, r *http.Request) {
 		queue, found, err := db.GetQueue(projectid, queueid)
 		if err != nil {
 
-			utils.ReportErrorToUser(err, w)
+			utils.ReportInternalErrorToUser(err, w)
 			return
 		}
 
@@ -209,7 +209,7 @@ func PatchQueue(w http.ResponseWriter, r *http.Request) {
 
 		if err := db.PatchQueue(queue); err != nil {
 
-			utils.ReportErrorToUser(err, w)
+			utils.ReportInternalErrorToUser(err, w)
 			return
 		}
 
@@ -230,14 +230,14 @@ func DeleteQueue(w http.ResponseWriter, r *http.Request) {
 	user, err := utils.GetUser(r, w)
 	if err != nil {
 
-		utils.ReportErrorToUser(err, w)
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
 	project, found, err := db.GetProject(projectid)
 	if err != nil {
 
-		utils.ReportErrorToUser(err, w)
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
@@ -250,7 +250,7 @@ func DeleteQueue(w http.ResponseWriter, r *http.Request) {
 	allperms, perms, err := perms.GetPermissionsToProject(user, project)
 	if err != nil {
 
-		utils.ReportErrorToUser(err, w)
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
@@ -258,7 +258,7 @@ func DeleteQueue(w http.ResponseWriter, r *http.Request) {
 		_, found, err := db.GetQueue(projectid, queueid)
 		if err != nil {
 
-			utils.ReportErrorToUser(err, w)
+			utils.ReportInternalErrorToUser(err, w)
 			return
 		}
 
@@ -271,7 +271,7 @@ func DeleteQueue(w http.ResponseWriter, r *http.Request) {
 		err = db.RemoveQueue(projectid, queueid)
 		if err != nil {
 
-			utils.ReportErrorToUser(err, w)
+			utils.ReportInternalErrorToUser(err, w)
 			return
 		}
 

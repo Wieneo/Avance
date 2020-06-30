@@ -33,13 +33,13 @@ func GetUserID(r *http.Request) (int64, error) {
 func GetUser(r *http.Request, w http.ResponseWriter) (models.User, error) {
 	userid, err := GetUserID(r)
 	if err != nil {
-		ReportErrorToUser(err, w)
+		ReportInternalErrorToUser(err, w)
 		return models.User{}, err
 	}
 
 	user, _, err := db.GetUser(userid)
 	if err != nil {
-		ReportErrorToUser(err, w)
+		ReportInternalErrorToUser(err, w)
 		return models.User{}, err
 	}
 

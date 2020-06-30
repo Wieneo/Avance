@@ -35,7 +35,7 @@ func GetSeverities(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 
-		utils.ReportErrorToUser(err, w)
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
@@ -48,7 +48,7 @@ func GetSeverities(w http.ResponseWriter, r *http.Request) {
 	severities, err := db.GetSeverities(project.ID, showDisabled)
 	if err != nil {
 
-		utils.ReportErrorToUser(err, w)
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
@@ -71,7 +71,7 @@ func CreateSeverity(w http.ResponseWriter, r *http.Request) {
 	rawBytes, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 
-		utils.ReportErrorToUser(err, w)
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
@@ -91,14 +91,14 @@ func CreateSeverity(w http.ResponseWriter, r *http.Request) {
 	user, err := utils.GetUser(r, w)
 	if err != nil {
 
-		utils.ReportErrorToUser(err, w)
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
 	project, found, err := db.GetProject(projectid)
 	if err != nil {
 
-		utils.ReportErrorToUser(err, w)
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
@@ -111,7 +111,7 @@ func CreateSeverity(w http.ResponseWriter, r *http.Request) {
 	allperms, perms, err := perms.GetPermissionsToProject(user, project)
 	if err != nil {
 
-		utils.ReportErrorToUser(err, w)
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
@@ -119,7 +119,7 @@ func CreateSeverity(w http.ResponseWriter, r *http.Request) {
 		severities, err := db.GetSeverities(project.ID, true)
 		if err != nil {
 
-			utils.ReportErrorToUser(err, w)
+			utils.ReportInternalErrorToUser(err, w)
 			return
 		}
 
@@ -140,7 +140,7 @@ func CreateSeverity(w http.ResponseWriter, r *http.Request) {
 		id, err := db.CreateSeverity(req.Enabled, req.Name, req.DisplayColor, req.Priority, projectid)
 		if err != nil {
 
-			utils.ReportErrorToUser(err, w)
+			utils.ReportInternalErrorToUser(err, w)
 			return
 		}
 
@@ -148,7 +148,7 @@ func CreateSeverity(w http.ResponseWriter, r *http.Request) {
 		//If severity isnt found here something went horribly wrong -> ReportError
 		if err != nil || !found {
 
-			utils.ReportErrorToUser(err, w)
+			utils.ReportInternalErrorToUser(err, w)
 			return
 		}
 
@@ -170,14 +170,14 @@ func PatchSeverity(w http.ResponseWriter, r *http.Request) {
 	user, err := utils.GetUser(r, w)
 	if err != nil {
 
-		utils.ReportErrorToUser(err, w)
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
 	project, found, err := db.GetProject(projectid)
 	if err != nil {
 
-		utils.ReportErrorToUser(err, w)
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
@@ -190,7 +190,7 @@ func PatchSeverity(w http.ResponseWriter, r *http.Request) {
 	allperms, perms, err := perms.GetPermissionsToProject(user, project)
 	if err != nil {
 
-		utils.ReportErrorToUser(err, w)
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
@@ -198,7 +198,7 @@ func PatchSeverity(w http.ResponseWriter, r *http.Request) {
 		rawBytes, err := ioutil.ReadAll(r.Body)
 		if err != nil {
 
-			utils.ReportErrorToUser(err, w)
+			utils.ReportInternalErrorToUser(err, w)
 			return
 		}
 
@@ -212,7 +212,7 @@ func PatchSeverity(w http.ResponseWriter, r *http.Request) {
 		severity, found, err := db.GetSeverity(projectid, severityid)
 		if err != nil {
 
-			utils.ReportErrorToUser(err, w)
+			utils.ReportInternalErrorToUser(err, w)
 			return
 		}
 
@@ -254,7 +254,7 @@ func PatchSeverity(w http.ResponseWriter, r *http.Request) {
 
 		if err := db.PatchSeverity(severity); err != nil {
 
-			utils.ReportErrorToUser(err, w)
+			utils.ReportInternalErrorToUser(err, w)
 			return
 		}
 
@@ -275,14 +275,14 @@ func DeleteSeverity(w http.ResponseWriter, r *http.Request) {
 	user, err := utils.GetUser(r, w)
 	if err != nil {
 
-		utils.ReportErrorToUser(err, w)
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
 	project, found, err := db.GetProject(projectid)
 	if err != nil {
 
-		utils.ReportErrorToUser(err, w)
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
@@ -295,7 +295,7 @@ func DeleteSeverity(w http.ResponseWriter, r *http.Request) {
 	allperms, perms, err := perms.GetPermissionsToProject(user, project)
 	if err != nil {
 
-		utils.ReportErrorToUser(err, w)
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
@@ -303,7 +303,7 @@ func DeleteSeverity(w http.ResponseWriter, r *http.Request) {
 		_, found, err := db.GetSeverity(projectid, severityid)
 		if err != nil {
 
-			utils.ReportErrorToUser(err, w)
+			utils.ReportInternalErrorToUser(err, w)
 			return
 		}
 
@@ -316,7 +316,7 @@ func DeleteSeverity(w http.ResponseWriter, r *http.Request) {
 		err = db.RemoveSeverity(projectid, severityid)
 		if err != nil {
 
-			utils.ReportErrorToUser(err, w)
+			utils.ReportInternalErrorToUser(err, w)
 			return
 		}
 

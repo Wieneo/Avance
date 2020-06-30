@@ -18,7 +18,7 @@ func GetTaskInfo(w http.ResponseWriter, r *http.Request) {
 	user, err := utils.GetUser(r, w)
 	if err != nil {
 
-		utils.ReportErrorToUser(err, w)
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
@@ -28,7 +28,7 @@ func GetTaskInfo(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 
-		utils.ReportErrorToUser(err, w)
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
@@ -42,14 +42,14 @@ func GetTaskInfo(w http.ResponseWriter, r *http.Request) {
 		ticket, _, err := db.GetTicketUnsafe(task.Ticket.Int64, models.WantedProperties{Queue: true})
 		if err != nil {
 
-			utils.ReportErrorToUser(err, w)
+			utils.ReportInternalErrorToUser(err, w)
 			return
 		}
 
 		allperms, perms, err := perms.GetPermissionsToQueue(user, ticket.Queue)
 		if err != nil {
 
-			utils.ReportErrorToUser(err, w)
+			utils.ReportInternalErrorToUser(err, w)
 			return
 		}
 
@@ -62,7 +62,7 @@ func GetTaskInfo(w http.ResponseWriter, r *http.Request) {
 		allperms, err := perms.CombinePermissions(user)
 		if err != nil {
 
-			utils.ReportErrorToUser(err, w)
+			utils.ReportInternalErrorToUser(err, w)
 			return
 		}
 
