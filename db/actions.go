@@ -28,19 +28,13 @@ func GetActions(TicketID int64) ([]models.Action, error) {
 		rows.Scan(&singleAction.ID, &singleAction.Type, &singleAction.Title, &singleAction.Content, &singleAction.IssuedAt, &rawUserID, &rawTasks)
 
 		if rawUserID.Valid {
-
-			//If user is not cached
-			if _, found := cachedUsers[rawUserID.Int64]; !found {
-				user, _, err := GetUser(rawUserID.Int64)
-				if err != nil {
-					return make([]models.Action, 0), err
-				}
-
-				cachedUsers[rawUserID.Int64] = user
+			user, err := getUserUsingCache(&cachedUsers, rawUserID.Int64)
+			if err != nil {
+				return make([]models.Action, 0), err
 			}
 
 			singleAction.IssuedBy.Valid = true
-			singleAction.IssuedBy.Issuer = cachedUsers[rawUserID.Int64]
+			singleAction.IssuedBy.Issuer = user
 		}
 
 		if rawTasks.Valid {
@@ -57,6 +51,21 @@ func GetActions(TicketID int64) ([]models.Action, error) {
 	dev.LogDebug(fmt.Sprintf("[DB] Got %d actions for ticket %d", len(actions), TicketID))
 
 	return actions, nil
+}
+
+//getUserUsingCache gets a user from the database and populates the references cache with the user
+func getUserUsingCache(Cache *map[int64]models.User, UserID int64) (models.User, error) {
+	//If user is not cached
+	if _, found := (*Cache)[UserID]; !found {
+		user, _, err := GetUser(UserID)
+		if err != nil {
+			return models.User{}, err
+		}
+
+		(*Cache)[UserID] = user
+	}
+
+	return (*Cache)[UserID], nil
 }
 
 //AddAction adds an action to a ticket
