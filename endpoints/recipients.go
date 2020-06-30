@@ -12,6 +12,7 @@ import (
 	"gitlab.gnaucke.dev/avance/avance-app/v2/dev"
 	"gitlab.gnaucke.dev/avance/avance-app/v2/models"
 	"gitlab.gnaucke.dev/avance/avance-app/v2/perms"
+	"gitlab.gnaucke.dev/avance/avance-app/v2/templates"
 	"gitlab.gnaucke.dev/avance/avance-app/v2/utils"
 )
 
@@ -33,28 +34,28 @@ func AddRecipient(w http.ResponseWriter, r *http.Request) {
 
 	queue, found, err := db.GetQueue(projectid, queueid)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
 	if !found {
 		w.WriteHeader(404)
-		dev.ReportUserError(w, "Project/Queue not found")
+		dev.ReportUserError(w, templates.QueueNoPerms)
 		return
 	}
 
 	user, err := utils.GetUser(r, w)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
 	allperms, perms, err := perms.GetPermissionsToQueue(user, queue)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
@@ -66,14 +67,14 @@ func AddRecipient(w http.ResponseWriter, r *http.Request) {
 
 	ticket, found, err := db.GetTicket(ticketid, queueid, models.WantedProperties{Recipients: true})
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
 	if !found {
 		w.WriteHeader(404)
-		dev.ReportUserError(w, "Ticket not found")
+		dev.ReportUserError(w, templates.TicketNotFound)
 		return
 	}
 
@@ -101,8 +102,8 @@ func AddRecipient(w http.ResponseWriter, r *http.Request) {
 		if !utils.IsEmpty(k.User) {
 			userid, found, err := db.SearchUser(k.User)
 			if err != nil {
-				w.WriteHeader(500)
-				dev.ReportError(err, w, err.Error())
+
+				utils.ReportInternalErrorToUser(err, w)
 				return
 			}
 
@@ -266,15 +267,15 @@ func AddRecipient(w http.ResponseWriter, r *http.Request) {
 		if !utils.IsEmpty(k.User) {
 			userid, _, err := db.SearchUser(k.User)
 			if err != nil {
-				w.WriteHeader(500)
-				dev.ReportError(err, w, err.Error())
+
+				utils.ReportInternalErrorToUser(err, w)
 				return
 			}
 
 			newid, err := db.AddUserRecipient(ticket.ID, userid, k.Type)
 			if err != nil {
-				w.WriteHeader(500)
-				dev.ReportError(err, w, err.Error())
+
+				utils.ReportInternalErrorToUser(err, w)
 				return
 			}
 
@@ -282,8 +283,8 @@ func AddRecipient(w http.ResponseWriter, r *http.Request) {
 		} else {
 			newid, err := db.AddMailRecipient(ticket.ID, k.Mail, k.Type)
 			if err != nil {
-				w.WriteHeader(500)
-				dev.ReportError(err, w, err.Error())
+
+				utils.ReportInternalErrorToUser(err, w)
 				return
 			}
 
@@ -327,28 +328,28 @@ func DeleteRecipient(w http.ResponseWriter, r *http.Request) {
 
 	queue, found, err := db.GetQueue(projectid, queueid)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
 	if !found {
 		w.WriteHeader(404)
-		dev.ReportUserError(w, "Project/Queue not found")
+		dev.ReportUserError(w, templates.QueueNotFound)
 		return
 	}
 
 	user, err := utils.GetUser(r, w)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
 	allperms, perms, err := perms.GetPermissionsToQueue(user, queue)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
@@ -360,14 +361,14 @@ func DeleteRecipient(w http.ResponseWriter, r *http.Request) {
 
 	ticket, found, err := db.GetTicket(ticketid, queueid, models.WantedProperties{Recipients: true})
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
 	if !found {
 		w.WriteHeader(404)
-		dev.ReportUserError(w, "Ticket not found")
+		dev.ReportUserError(w, templates.TicketNotFound)
 		return
 	}
 
@@ -381,13 +382,13 @@ func DeleteRecipient(w http.ResponseWriter, r *http.Request) {
 
 	if !found {
 		w.WriteHeader(404)
-		dev.ReportUserError(w, "Recipient not found")
+		dev.ReportUserError(w, templates.RecipientNotFound)
 		return
 	}
 
 	if err := db.RemoveRecipient(recipientid); err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportInternalErrorToUser(err, w)
 	} else {
 		json.NewEncoder(w).Encode(struct {
 			Recipient string

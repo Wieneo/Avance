@@ -13,6 +13,7 @@ import (
 	"gitlab.gnaucke.dev/avance/avance-app/v2/dev"
 	"gitlab.gnaucke.dev/avance/avance-app/v2/models"
 	"gitlab.gnaucke.dev/avance/avance-app/v2/perms"
+	"gitlab.gnaucke.dev/avance/avance-app/v2/templates"
 	"gitlab.gnaucke.dev/avance/avance-app/v2/utils"
 )
 
@@ -22,35 +23,35 @@ func GetTicket(w http.ResponseWriter, r *http.Request) {
 
 	ticket, found, err := db.GetTicketUnsafe(ticketid, models.WantedProperties{All: true})
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
 	if !found {
 		w.WriteHeader(404)
-		dev.ReportUserError(w, "Ticket not found")
+		dev.ReportUserError(w, templates.TicketNotFound)
 		return
 	}
 
 	user, err := utils.GetUser(r, w)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
 	project, err := db.GetProjectFromQueue(ticket.Queue.ID)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
 	allperms, pperms, err := perms.GetPermissionsToProject(user, project)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
@@ -63,14 +64,14 @@ func GetTicket(w http.ResponseWriter, r *http.Request) {
 
 		_, qperms, err := perms.GetPermissionsToQueue(user, ticket.Queue)
 		if err != nil {
-			w.WriteHeader(500)
-			dev.ReportError(err, w, err.Error())
+
+			utils.ReportInternalErrorToUser(err, w)
 			return
 		}
 
 		if !qperms.CanSee {
 			w.WriteHeader(403)
-			dev.ReportUserError(w, "You don't have access to that queue!")
+			dev.ReportUserError(w, templates.QueueNoPerms)
 			return
 		}
 	}
@@ -86,49 +87,49 @@ func GetTicketFullPath(w http.ResponseWriter, r *http.Request) {
 
 	queue, found, err := db.GetQueue(projectid, queueid)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
 	if !found {
 		w.WriteHeader(404)
-		dev.ReportUserError(w, "Project/Queue not found")
+		dev.ReportUserError(w, templates.QueueNotFound)
 		return
 	}
 
 	user, err := utils.GetUser(r, w)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
 	allperms, perms, err := perms.GetPermissionsToQueue(user, queue)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
 	if allperms.Admin || perms.CanSee {
 		ticket, found, err := db.GetTicket(ticketid, queueid, models.WantedProperties{All: true})
 		if err != nil {
-			w.WriteHeader(500)
-			dev.ReportError(err, w, err.Error())
+
+			utils.ReportInternalErrorToUser(err, w)
 			return
 		}
 
 		if !found {
 			w.WriteHeader(404)
-			dev.ReportUserError(w, "Ticket not found")
+			dev.ReportUserError(w, templates.TicketNotFound)
 			return
 		}
 
 		json.NewEncoder(w).Encode(ticket)
 	} else {
 		w.WriteHeader(403)
-		dev.ReportUserError(w, "You don't have access to that queue!")
+		dev.ReportUserError(w, templates.QueueNoPerms)
 	}
 }
 
@@ -139,28 +140,28 @@ func GetTicketsFromQueue(w http.ResponseWriter, r *http.Request) {
 
 	queue, found, err := db.GetQueue(projectid, queueid)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
 	if !found {
 		w.WriteHeader(404)
-		dev.ReportUserError(w, "Project/Queue not found")
+		dev.ReportUserError(w, templates.QueueNotFound)
 		return
 	}
 
 	user, err := utils.GetUser(r, w)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
 	allperms, perms, err := perms.GetPermissionsToQueue(user, queue)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
@@ -178,15 +179,15 @@ func GetTicketsFromQueue(w http.ResponseWriter, r *http.Request) {
 
 		tickets, err := db.GetTicketsInQueue(queueid, showInvisible)
 		if err != nil {
-			w.WriteHeader(500)
-			dev.ReportError(err, w, err.Error())
+
+			utils.ReportInternalErrorToUser(err, w)
 			return
 		}
 
 		json.NewEncoder(w).Encode(tickets)
 	} else {
 		w.WriteHeader(403)
-		dev.ReportUserError(w, "You don't have access to that queue!")
+		dev.ReportUserError(w, templates.QueueNoPerms)
 	}
 }
 
@@ -206,28 +207,28 @@ func CreateTicketsInQueue(w http.ResponseWriter, r *http.Request) {
 
 	queue, found, err := db.GetQueue(projectid, queueid)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
 	if !found {
 		w.WriteHeader(404)
-		dev.ReportUserError(w, "Project/Queue not found")
+		dev.ReportUserError(w, templates.QueueNotFound)
 		return
 	}
 
 	user, err := utils.GetUser(r, w)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
 	allperms, perms, err := perms.GetPermissionsToQueue(user, queue)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
@@ -274,8 +275,8 @@ func CreateTicketsInQueue(w http.ResponseWriter, r *http.Request) {
 	if !utils.IsEmpty(req.Owner) {
 		ownerID, found, err = db.SearchUser(req.Owner)
 		if err != nil {
-			w.WriteHeader(500)
-			dev.ReportError(err, w, err.Error())
+
+			utils.ReportInternalErrorToUser(err, w)
 			return
 		}
 
@@ -290,8 +291,8 @@ func CreateTicketsInQueue(w http.ResponseWriter, r *http.Request) {
 
 	statusid, found, err := db.SearchStatus(projectid, req.Status)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
@@ -303,22 +304,22 @@ func CreateTicketsInQueue(w http.ResponseWriter, r *http.Request) {
 
 	severityid, found, err := db.SearchSeverity(projectid, req.Severity)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
 	severity, _, err := db.GetSeverity(projectid, severityid)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
 	status, _, err := db.GetStatus(projectid, statusid)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
@@ -331,7 +332,7 @@ func CreateTicketsInQueue(w http.ResponseWriter, r *http.Request) {
 	isStalled := false
 
 	if !utils.IsEmpty(req.StalledUntil) {
-		_, err := time.Parse("2006-01-02T15:04:05.000Z", req.StalledUntil)
+		_, err := time.Parse(models.DateFormat, req.StalledUntil)
 		if err != nil {
 			w.WriteHeader(406)
 			dev.ReportUserError(w, "StalledUntil isn't a valid date/time")
@@ -341,18 +342,30 @@ func CreateTicketsInQueue(w http.ResponseWriter, r *http.Request) {
 		isStalled = true
 	}
 
+	newTicket := models.CreateTicket{
+		Title:         req.Title,
+		Description:   req.Description,
+		Queue:         queueid,
+		OwnedByNobody: ownedByNobody,
+		Owner:         ownerID,
+		Severity:      severity,
+		Status:        status,
+		IsStalled:     isStalled,
+		StalledUntil:  req.StalledUntil,
+	}
+
 	//Now everything should be ok
-	id, err := db.CreateTicket(req.Title, req.Description, queueid, ownedByNobody, ownerID, severity, status, isStalled, req.StalledUntil)
+	id, err := db.CreateTicket(newTicket)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
 	ticket, found, err := db.GetTicket(id, queueid, models.WantedProperties{All: true})
 	if err != nil || !found {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
@@ -367,28 +380,28 @@ func PatchTicketsInQueue(w http.ResponseWriter, r *http.Request) {
 
 	queue, found, err := db.GetQueue(projectid, queueid)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
 	if !found {
 		w.WriteHeader(404)
-		dev.ReportUserError(w, "Project/Queue not found")
+		dev.ReportUserError(w, templates.QueueNotFound)
 		return
 	}
 
 	user, err := utils.GetUser(r, w)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
 	allperms, perms, err := perms.GetPermissionsToQueue(user, queue)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
@@ -410,14 +423,14 @@ func PatchTicketsInQueue(w http.ResponseWriter, r *http.Request) {
 
 	ticket, found, err := db.GetTicket(ticketid, queueid, models.WantedProperties{All: true})
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
 	if !found {
 		w.WriteHeader(404)
-		dev.ReportUserError(w, "Ticket not found")
+		dev.ReportUserError(w, templates.TicketNotFound)
 		return
 	}
 
@@ -436,8 +449,8 @@ func PatchTicketsInQueue(w http.ResponseWriter, r *http.Request) {
 	if !utils.IsEmpty(req.Owner) && req.Owner != ticket.Owner.Username {
 		ownerID, found, err := db.SearchUser(req.Owner)
 		if err != nil {
-			w.WriteHeader(500)
-			dev.ReportError(err, w, err.Error())
+
+			utils.ReportInternalErrorToUser(err, w)
 			return
 		}
 
@@ -455,8 +468,8 @@ func PatchTicketsInQueue(w http.ResponseWriter, r *http.Request) {
 	if !utils.IsEmpty(req.Status) && req.Status != ticket.Status.Name {
 		statusid, found, err := db.SearchStatus(projectid, req.Status)
 		if err != nil {
-			w.WriteHeader(500)
-			dev.ReportError(err, w, err.Error())
+
+			utils.ReportInternalErrorToUser(err, w)
 			return
 		}
 
@@ -473,8 +486,8 @@ func PatchTicketsInQueue(w http.ResponseWriter, r *http.Request) {
 	if !utils.IsEmpty(req.Severity) && req.Severity != ticket.Severity.Name {
 		severityid, found, err := db.SearchSeverity(projectid, req.Severity)
 		if err != nil {
-			w.WriteHeader(500)
-			dev.ReportError(err, w, err.Error())
+
+			utils.ReportInternalErrorToUser(err, w)
 			return
 		}
 
@@ -488,8 +501,8 @@ func PatchTicketsInQueue(w http.ResponseWriter, r *http.Request) {
 		somethingChanged = true
 	}
 
-	if !utils.IsEmpty(req.StalledUntil) && req.StalledUntil != ticket.StalledUntil.Time.Format("2006-01-02T15:04:05.000Z") {
-		t, err := time.Parse("2006-01-02T15:04:05.000Z", req.StalledUntil)
+	if !utils.IsEmpty(req.StalledUntil) && req.StalledUntil != ticket.StalledUntil.Time.Format(models.DateFormat) {
+		t, err := time.Parse(models.DateFormat, req.StalledUntil)
 		if err != nil {
 			w.WriteHeader(406)
 			dev.ReportUserError(w, "StalledUntil isn't a valid date/time")
@@ -503,14 +516,14 @@ func PatchTicketsInQueue(w http.ResponseWriter, r *http.Request) {
 
 	if !somethingChanged {
 		w.WriteHeader(406)
-		dev.ReportUserError(w, "Nothing changed!")
+		dev.ReportUserError(w, templates.NothingChanged)
 		return
 	}
 
 	ticket, err = db.PatchTicket(ticket)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
@@ -525,28 +538,28 @@ func DeletePropertyFromTicket(w http.ResponseWriter, r *http.Request) {
 
 	queue, found, err := db.GetQueue(projectid, queueid)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
 	if !found {
 		w.WriteHeader(404)
-		dev.ReportUserError(w, "Project/Queue not found")
+		dev.ReportUserError(w, templates.QueueNotFound)
 		return
 	}
 
 	user, err := utils.GetUser(r, w)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
 	allperms, perms, err := perms.GetPermissionsToQueue(user, queue)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
@@ -558,21 +571,21 @@ func DeletePropertyFromTicket(w http.ResponseWriter, r *http.Request) {
 
 	ticket, found, err := db.GetTicket(ticketid, queueid, models.WantedProperties{All: true})
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
 	if !found {
 		w.WriteHeader(404)
-		dev.ReportUserError(w, "Ticket not found")
+		dev.ReportUserError(w, templates.TicketNotFound)
 		return
 	}
 
 	if strings.Split(r.RequestURI, "/")[9] == "owner" {
 		if !ticket.OwnerID.Valid {
 			w.WriteHeader(406)
-			dev.ReportUserError(w, "Nothing changed!")
+			dev.ReportUserError(w, templates.NothingChanged)
 			return
 		}
 
@@ -582,7 +595,7 @@ func DeletePropertyFromTicket(w http.ResponseWriter, r *http.Request) {
 	} else if strings.Split(r.RequestURI, "/")[9] == "stalleduntil" {
 		if !ticket.StalledUntil.Valid {
 			w.WriteHeader(406)
-			dev.ReportUserError(w, "Nothing changed!")
+			dev.ReportUserError(w, templates.NothingChanged)
 			return
 		}
 
@@ -592,8 +605,8 @@ func DeletePropertyFromTicket(w http.ResponseWriter, r *http.Request) {
 
 	ticket, err = db.PatchTicket(ticket)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 

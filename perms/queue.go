@@ -9,7 +9,7 @@ func GetPermissionsToQueue(User models.User, Queue models.Queue) (models.Permiss
 		return models.Permissions{}, &models.QueuePermission{}, err
 	}
 
-	if found, pp := containsQueue(Queue, perms.AccessTo.Queues); found {
+	if found, pp := permsContainQueue(Queue, perms.AccessTo.Queues); found {
 		return perms, pp, nil
 	}
 

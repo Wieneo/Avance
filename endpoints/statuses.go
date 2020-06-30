@@ -11,6 +11,7 @@ import (
 	"gitlab.gnaucke.dev/avance/avance-app/v2/db"
 	"gitlab.gnaucke.dev/avance/avance-app/v2/dev"
 	"gitlab.gnaucke.dev/avance/avance-app/v2/perms"
+	"gitlab.gnaucke.dev/avance/avance-app/v2/templates"
 	"gitlab.gnaucke.dev/avance/avance-app/v2/utils"
 )
 
@@ -32,8 +33,8 @@ func GetStatuses(w http.ResponseWriter, r *http.Request) {
 
 	statuses, err := db.GetStatuses(projectid, showDisabled)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
@@ -55,8 +56,8 @@ func CreateStatus(w http.ResponseWriter, r *http.Request) {
 
 	rawBytes, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
@@ -75,36 +76,36 @@ func CreateStatus(w http.ResponseWriter, r *http.Request) {
 
 	user, err := utils.GetUser(r, w)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
 	project, found, err := db.GetProject(projectid)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
 	if !found {
 		w.WriteHeader(404)
-		dev.ReportUserError(w, "Project not found")
+		dev.ReportUserError(w, templates.ProjectNotFound)
 		return
 	}
 
 	allperms, perms, err := perms.GetPermissionsToProject(user, project)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
 	if perms.CanCreateStatuses || allperms.Admin {
 		statuses, err := db.GetStatuses(project.ID, true)
 		if err != nil {
-			w.WriteHeader(500)
-			dev.ReportError(err, w, err.Error())
+
+			utils.ReportInternalErrorToUser(err, w)
 			return
 		}
 
@@ -124,15 +125,15 @@ func CreateStatus(w http.ResponseWriter, r *http.Request) {
 
 		id, err := db.CreateStatus(req.Enabled, req.Name, req.DisplayColor, req.TicketsVisible, projectid)
 		if err != nil {
-			w.WriteHeader(500)
-			dev.ReportError(err, w, err.Error())
+
+			utils.ReportInternalErrorToUser(err, w)
 			return
 		}
 
 		status, found, err := db.GetStatus(projectid, id)
 		if err != nil || !found {
-			w.WriteHeader(500)
-			dev.ReportError(err, w, err.Error())
+
+			utils.ReportInternalErrorToUser(err, w)
 			return
 		}
 
@@ -153,36 +154,36 @@ func PatchStatus(w http.ResponseWriter, r *http.Request) {
 
 	user, err := utils.GetUser(r, w)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
 	project, found, err := db.GetProject(projectid)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
 	if !found {
 		w.WriteHeader(404)
-		dev.ReportUserError(w, "Project not found")
+		dev.ReportUserError(w, templates.ProjectNotFound)
 		return
 	}
 
 	allperms, perms, err := perms.GetPermissionsToProject(user, project)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
 	if perms.CanModifyStatuses || allperms.Admin {
 		rawBytes, err := ioutil.ReadAll(r.Body)
 		if err != nil {
-			w.WriteHeader(500)
-			dev.ReportError(err, w, err.Error())
+
+			utils.ReportInternalErrorToUser(err, w)
 			return
 		}
 
@@ -195,14 +196,14 @@ func PatchStatus(w http.ResponseWriter, r *http.Request) {
 
 		status, found, err := db.GetStatus(projectid, statusid)
 		if err != nil {
-			w.WriteHeader(500)
-			dev.ReportError(err, w, err.Error())
+
+			utils.ReportInternalErrorToUser(err, w)
 			return
 		}
 
 		if !found {
 			w.WriteHeader(404)
-			dev.ReportUserError(w, "Status not found")
+			dev.ReportUserError(w, templates.StatusNotFound)
 			return
 		}
 
@@ -232,13 +233,13 @@ func PatchStatus(w http.ResponseWriter, r *http.Request) {
 
 		if !somethingChanged {
 			w.WriteHeader(400)
-			dev.ReportUserError(w, "Nothing changed")
+			dev.ReportUserError(w, templates.NothingChanged)
 			return
 		}
 
 		if err := db.PatchStatus(status); err != nil {
-			w.WriteHeader(500)
-			dev.ReportError(err, w, err.Error())
+
+			utils.ReportInternalErrorToUser(err, w)
 			return
 		}
 
@@ -258,49 +259,49 @@ func DeleteStatus(w http.ResponseWriter, r *http.Request) {
 
 	user, err := utils.GetUser(r, w)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
 	project, found, err := db.GetProject(projectid)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
 	if !found {
 		w.WriteHeader(404)
-		dev.ReportUserError(w, "Project not found")
+		dev.ReportUserError(w, templates.ProjectNotFound)
 		return
 	}
 
 	allperms, perms, err := perms.GetPermissionsToProject(user, project)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
 	if perms.CanRemoveStatuses || allperms.Admin {
 		_, found, err := db.GetStatus(projectid, statusid)
 		if err != nil {
-			w.WriteHeader(500)
-			dev.ReportError(err, w, err.Error())
+
+			utils.ReportInternalErrorToUser(err, w)
 			return
 		}
 
 		if !found {
 			w.WriteHeader(404)
-			dev.ReportUserError(w, "Status not found")
+			dev.ReportUserError(w, templates.StatusNotFound)
 			return
 		}
 
 		err = db.RemoveStatus(projectid, statusid)
 		if err != nil {
-			w.WriteHeader(500)
-			dev.ReportError(err, w, err.Error())
+
+			utils.ReportInternalErrorToUser(err, w)
 			return
 		}
 

@@ -45,7 +45,7 @@
 
             </v-card>
         </v-dialog>
-        <iframe name="submitDeflector" style="display: none;" id="submitDeflector" @load="HandleUploadFinish"> </iframe>
+        <iframe title="DummyContainer" name="submitDeflector" style="display: none;" id="submitDeflector" @load="HandleUploadFinish"> </iframe>
     </v-container>
 </template>
 <script lang="ts">

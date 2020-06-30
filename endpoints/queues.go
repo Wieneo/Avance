@@ -11,6 +11,7 @@ import (
 	"gitlab.gnaucke.dev/avance/avance-app/v2/db"
 	"gitlab.gnaucke.dev/avance/avance-app/v2/dev"
 	"gitlab.gnaucke.dev/avance/avance-app/v2/perms"
+	"gitlab.gnaucke.dev/avance/avance-app/v2/templates"
 	"gitlab.gnaucke.dev/avance/avance-app/v2/utils"
 )
 
@@ -21,8 +22,7 @@ func GetProjectQueues(w http.ResponseWriter, r *http.Request) {
 		projectid, _ := strconv.ParseInt(strings.Split(r.RequestURI, "/")[4], 10, 64)
 		queues, err := perms.GetVisibleQueuesFromProject(user, projectid)
 		if err != nil {
-			w.WriteHeader(500)
-			dev.ReportError(err, w, err.Error())
+			utils.ReportInternalErrorToUser(err, w)
 			return
 		}
 
@@ -42,8 +42,7 @@ func CreateQueue(w http.ResponseWriter, r *http.Request) {
 
 	rawBytes, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
@@ -62,36 +61,36 @@ func CreateQueue(w http.ResponseWriter, r *http.Request) {
 
 	user, err := utils.GetUser(r, w)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
 	project, found, err := db.GetProject(projectid)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
 	if !found {
 		w.WriteHeader(404)
-		dev.ReportUserError(w, "Project not found")
+		dev.ReportUserError(w, templates.ProjectNotFound)
 		return
 	}
 
 	allperms, perms, err := perms.GetPermissionsToProject(user, project)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
 	if perms.CanCreateQueues || allperms.Admin {
 		queues, err := db.QueuesInProject(project)
 		if err != nil {
-			w.WriteHeader(500)
-			dev.ReportError(err, w, err.Error())
+
+			utils.ReportInternalErrorToUser(err, w)
 			return
 		}
 
@@ -111,16 +110,16 @@ func CreateQueue(w http.ResponseWriter, r *http.Request) {
 
 		id, err := db.CreateQueue(req.Name, projectid)
 		if err != nil {
-			w.WriteHeader(500)
-			dev.ReportError(err, w, err.Error())
+
+			utils.ReportInternalErrorToUser(err, w)
 			return
 		}
 
 		queue, found, err := db.GetQueue(projectid, id)
 		//If queue isnt found here something went horribly wrong -> ReportError
 		if err != nil || !found {
-			w.WriteHeader(500)
-			dev.ReportError(err, w, err.Error())
+
+			utils.ReportInternalErrorToUser(err, w)
 			return
 		}
 
@@ -141,36 +140,36 @@ func PatchQueue(w http.ResponseWriter, r *http.Request) {
 
 	user, err := utils.GetUser(r, w)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
 	project, found, err := db.GetProject(projectid)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
 	if !found {
 		w.WriteHeader(404)
-		dev.ReportUserError(w, "Project not found")
+		dev.ReportUserError(w, templates.ProjectNotFound)
 		return
 	}
 
 	allperms, perms, err := perms.GetPermissionsToProject(user, project)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
 	if perms.CanModifyQueues || allperms.Admin {
 		rawBytes, err := ioutil.ReadAll(r.Body)
 		if err != nil {
-			w.WriteHeader(500)
-			dev.ReportError(err, w, err.Error())
+
+			utils.ReportInternalErrorToUser(err, w)
 			return
 		}
 
@@ -183,14 +182,14 @@ func PatchQueue(w http.ResponseWriter, r *http.Request) {
 
 		queue, found, err := db.GetQueue(projectid, queueid)
 		if err != nil {
-			w.WriteHeader(500)
-			dev.ReportError(err, w, err.Error())
+
+			utils.ReportInternalErrorToUser(err, w)
 			return
 		}
 
 		if !found {
 			w.WriteHeader(404)
-			dev.ReportUserError(w, "Queue not found")
+			dev.ReportUserError(w, templates.QueueNotFound)
 			return
 		}
 
@@ -204,13 +203,13 @@ func PatchQueue(w http.ResponseWriter, r *http.Request) {
 
 		if !somethingChanged {
 			w.WriteHeader(406)
-			dev.ReportUserError(w, "Nothing changed")
+			dev.ReportUserError(w, templates.NothingChanged)
 			return
 		}
 
 		if err := db.PatchQueue(queue); err != nil {
-			w.WriteHeader(500)
-			dev.ReportError(err, w, err.Error())
+
+			utils.ReportInternalErrorToUser(err, w)
 			return
 		}
 
@@ -230,49 +229,49 @@ func DeleteQueue(w http.ResponseWriter, r *http.Request) {
 
 	user, err := utils.GetUser(r, w)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
 	project, found, err := db.GetProject(projectid)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
 	if !found {
 		w.WriteHeader(404)
-		dev.ReportUserError(w, "Project not found")
+		dev.ReportUserError(w, templates.ProjectNotFound)
 		return
 	}
 
 	allperms, perms, err := perms.GetPermissionsToProject(user, project)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
 	if perms.CanRemoveQueues || allperms.Admin {
 		_, found, err := db.GetQueue(projectid, queueid)
 		if err != nil {
-			w.WriteHeader(500)
-			dev.ReportError(err, w, err.Error())
+
+			utils.ReportInternalErrorToUser(err, w)
 			return
 		}
 
 		if !found {
 			w.WriteHeader(404)
-			dev.ReportUserError(w, "Queue not found")
+			dev.ReportUserError(w, templates.QueueNotFound)
 			return
 		}
 
 		err = db.RemoveQueue(projectid, queueid)
 		if err != nil {
-			w.WriteHeader(500)
-			dev.ReportError(err, w, err.Error())
+
+			utils.ReportInternalErrorToUser(err, w)
 			return
 		}
 

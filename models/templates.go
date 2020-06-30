@@ -6,7 +6,10 @@ import (
 	"time"
 )
 
-///Constants
+//Constants
+
+//DateFormat is used as the default format for parsing dates the user specifies
+const DateFormat = "2006-01-02T15:04:05.000Z"
 
 //GetAllowedImageFormates defines what Image formates a Prfile Picture is allowed to be
 func GetAllowedImageFormates() []string {
@@ -120,6 +123,19 @@ type Ticket struct {
 	Relations    []Relation
 	Actions      []Action
 	Recipients   RecipientCollection
+}
+
+//CreateTicket is used for passing all necessary information to the db subroutine for creating tickets
+type CreateTicket struct {
+	Title         string
+	Description   string
+	Queue         int64
+	OwnedByNobody bool
+	Owner         int64
+	Severity      Severity
+	Status        Status
+	IsStalled     bool
+	StalledUntil  string
 }
 
 //RecipientCollection stores all recipients assigned to a single ticket

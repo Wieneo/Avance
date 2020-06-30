@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"gitlab.gnaucke.dev/avance/avance-app/v2/perms"
+	"gitlab.gnaucke.dev/avance/avance-app/v2/templates"
 	"gitlab.gnaucke.dev/avance/avance-app/v2/utils"
 
 	"gitlab.gnaucke.dev/avance/avance-app/v2/db"
@@ -33,21 +34,21 @@ func GetSeverities(w http.ResponseWriter, r *http.Request) {
 	project, found, err := db.GetProject(projectid)
 
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
 	if !found {
 		w.WriteHeader(404)
-		dev.ReportUserError(w, "Project not found")
+		dev.ReportUserError(w, templates.ProjectNotFound)
 		return
 	}
 
 	severities, err := db.GetSeverities(project.ID, showDisabled)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
@@ -69,8 +70,8 @@ func CreateSeverity(w http.ResponseWriter, r *http.Request) {
 
 	rawBytes, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
@@ -89,36 +90,36 @@ func CreateSeverity(w http.ResponseWriter, r *http.Request) {
 
 	user, err := utils.GetUser(r, w)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
 	project, found, err := db.GetProject(projectid)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
 	if !found {
 		w.WriteHeader(404)
-		dev.ReportUserError(w, "Project not found")
+		dev.ReportUserError(w, templates.ProjectNotFound)
 		return
 	}
 
 	allperms, perms, err := perms.GetPermissionsToProject(user, project)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
 	if perms.CanCreateSeverities || allperms.Admin {
 		severities, err := db.GetSeverities(project.ID, true)
 		if err != nil {
-			w.WriteHeader(500)
-			dev.ReportError(err, w, err.Error())
+
+			utils.ReportInternalErrorToUser(err, w)
 			return
 		}
 
@@ -138,16 +139,16 @@ func CreateSeverity(w http.ResponseWriter, r *http.Request) {
 
 		id, err := db.CreateSeverity(req.Enabled, req.Name, req.DisplayColor, req.Priority, projectid)
 		if err != nil {
-			w.WriteHeader(500)
-			dev.ReportError(err, w, err.Error())
+
+			utils.ReportInternalErrorToUser(err, w)
 			return
 		}
 
 		sev, found, err := db.GetSeverity(projectid, id)
 		//If severity isnt found here something went horribly wrong -> ReportError
 		if err != nil || !found {
-			w.WriteHeader(500)
-			dev.ReportError(err, w, err.Error())
+
+			utils.ReportInternalErrorToUser(err, w)
 			return
 		}
 
@@ -168,36 +169,36 @@ func PatchSeverity(w http.ResponseWriter, r *http.Request) {
 
 	user, err := utils.GetUser(r, w)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
 	project, found, err := db.GetProject(projectid)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
 	if !found {
 		w.WriteHeader(404)
-		dev.ReportUserError(w, "Project not found")
+		dev.ReportUserError(w, templates.ProjectNotFound)
 		return
 	}
 
 	allperms, perms, err := perms.GetPermissionsToProject(user, project)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
 	if perms.CanModifySeverities || allperms.Admin {
 		rawBytes, err := ioutil.ReadAll(r.Body)
 		if err != nil {
-			w.WriteHeader(500)
-			dev.ReportError(err, w, err.Error())
+
+			utils.ReportInternalErrorToUser(err, w)
 			return
 		}
 
@@ -210,14 +211,14 @@ func PatchSeverity(w http.ResponseWriter, r *http.Request) {
 
 		severity, found, err := db.GetSeverity(projectid, severityid)
 		if err != nil {
-			w.WriteHeader(500)
-			dev.ReportError(err, w, err.Error())
+
+			utils.ReportInternalErrorToUser(err, w)
 			return
 		}
 
 		if !found {
 			w.WriteHeader(404)
-			dev.ReportUserError(w, "Severity not found")
+			dev.ReportUserError(w, templates.SeverityNotFound)
 			return
 		}
 
@@ -247,13 +248,13 @@ func PatchSeverity(w http.ResponseWriter, r *http.Request) {
 
 		if !somethingChanged {
 			w.WriteHeader(406)
-			dev.ReportUserError(w, "Nothing changed")
+			dev.ReportUserError(w, templates.NothingChanged)
 			return
 		}
 
 		if err := db.PatchSeverity(severity); err != nil {
-			w.WriteHeader(500)
-			dev.ReportError(err, w, err.Error())
+
+			utils.ReportInternalErrorToUser(err, w)
 			return
 		}
 
@@ -273,49 +274,49 @@ func DeleteSeverity(w http.ResponseWriter, r *http.Request) {
 
 	user, err := utils.GetUser(r, w)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
 	project, found, err := db.GetProject(projectid)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
 	if !found {
 		w.WriteHeader(404)
-		dev.ReportUserError(w, "Project not found")
+		dev.ReportUserError(w, templates.ProjectNotFound)
 		return
 	}
 
 	allperms, perms, err := perms.GetPermissionsToProject(user, project)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
 	if perms.CanRemoveSeverities || allperms.Admin {
 		_, found, err := db.GetSeverity(projectid, severityid)
 		if err != nil {
-			w.WriteHeader(500)
-			dev.ReportError(err, w, err.Error())
+
+			utils.ReportInternalErrorToUser(err, w)
 			return
 		}
 
 		if !found {
 			w.WriteHeader(404)
-			dev.ReportUserError(w, "Severity not found")
+			dev.ReportUserError(w, templates.SeverityNotFound)
 			return
 		}
 
 		err = db.RemoveSeverity(projectid, severityid)
 		if err != nil {
-			w.WriteHeader(500)
-			dev.ReportError(err, w, err.Error())
+
+			utils.ReportInternalErrorToUser(err, w)
 			return
 		}
 

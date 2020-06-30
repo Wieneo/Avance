@@ -1,5 +1,4 @@
 import _Vue from "vue"
-import Axios from "axios"
 import Noty from "noty"
 
 export function Utils<AxiosPlugOptions>(Vue: typeof _Vue): void {

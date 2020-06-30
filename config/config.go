@@ -69,132 +69,15 @@ func LoadConfig() {
 
 	if EnvEnabled {
 		dev.LogInfo("Using ENV-Variables for configuration")
-
-		CurrentConfig.Debug, Error = strconv.ParseBool(os.Getenv("TIX_Debug"))
-		if Error != nil {
-			dev.LogWarn("Debug is not a boolean! Using false as default")
-			CurrentConfig.Debug = false
-		}
-		dev.DeubgLogging = CurrentConfig.Debug
-
-		CurrentConfig.SetupDemo, Error = strconv.ParseBool(os.Getenv("TIX_SetupDemo"))
-		if Error != nil {
-			CurrentConfig.SetupDemo = false
-			dev.LogInfo("TIX_SetupDemo seems not to be a boolean! Assuming \"false\"")
-		}
-
-		//Parse listen port to int
-		CurrentConfig.Port, Error = strconv.Atoi(os.Getenv("TIX_Port"))
-		if Error != nil {
-			dev.LogWarn("Port is not a number! Using 8000 as default")
-			CurrentConfig.Port = 8000
-		}
-
-		if len(os.Getenv("DATABASE_URL")) == 0 {
-			CurrentConfig.Postgres.Host = os.Getenv("TIX_Postgres_Host")
-			CurrentConfig.Postgres.Username = os.Getenv("TIX_Postgres_Username")
-			CurrentConfig.Postgres.Password = os.Getenv("TIX_Postgres_Password")
-			CurrentConfig.Postgres.Database = os.Getenv("TIX_Postgres_Database")
-		} else {
-			CurrentConfig.Postgres.ConnectionString = os.Getenv("DATABASE_URL")
-		}
-
-		//Parse Postgres Port to int
-		CurrentConfig.Postgres.Port, Error = strconv.Atoi(os.Getenv("TIX_Postgres_Port"))
-		if Error != nil {
-			dev.LogWarn("Postgres port is not a number! Using 5432 as default")
-			CurrentConfig.Postgres.Port = 5432
-		}
-
-		CurrentConfig.Redis.Host = os.Getenv("TIX_Redis_Host")
-		//Parse Redis Database to int
-		CurrentConfig.Redis.Database, Error = strconv.Atoi(os.Getenv("TIX_Redis_Database"))
-		if Error != nil {
-			dev.LogWarn("Redis database is not a number! Using 0 as default")
-			CurrentConfig.Redis.Database = 0
-		}
-
-		//Parse Redis Port to int
-		CurrentConfig.Redis.Port, Error = strconv.Atoi(os.Getenv("TIX_Redis_Port"))
-		if Error != nil {
-			dev.LogWarn("Redis port is not a number! Using 6379 as default")
-			CurrentConfig.Redis.Port = 6379
-		}
-
-		CurrentConfig.Redis.Sentinel.Enabled, Error = strconv.ParseBool(os.Getenv("TIX_Redis_Sentinel_Enabled"))
-		if Error != nil {
-			dev.LogWarn("Redis Sentinel is not a boolean! Using false as default")
-			CurrentConfig.Redis.Sentinel.Enabled = false
-		}
-
-		if CurrentConfig.Redis.Sentinel.Enabled {
-			CurrentConfig.Redis.Sentinel.Master = os.Getenv("TIX_Redis_Sentinel_Master")
-
-			//Search for sentinels
-			for _, e := range os.Environ() {
-				if strings.HasPrefix(e, "TIX_Redis_Sentinel_Endpoint_") {
-					value := strings.Join(strings.Split(e, "=")[1:], "=")
-					CurrentConfig.Redis.Sentinel.Endpoints = append(CurrentConfig.Redis.Sentinel.Endpoints, value)
-				}
-			}
-
-		}
-
-		//Parse Redis Port to int
-		CurrentConfig.Redis.Port, Error = strconv.Atoi(os.Getenv("TIX_Redis_Port"))
-		if Error != nil {
-			dev.LogWarn("Redis port is not a number! Using 6379 as default")
-			CurrentConfig.Redis.Port = 6379
-		}
-
-		CurrentConfig.SMTP.Enabled, Error = strconv.ParseBool(os.Getenv("TIX_SMTP_Enabled"))
-		if Error != nil {
-			dev.LogWarn("SMTP Enabled is not a boolean! Using true as default")
-			CurrentConfig.SMTP.Enabled = true
-		}
-
-		if CurrentConfig.SMTP.Enabled {
-			CurrentConfig.SMTP.Host = os.Getenv("TIX_SMTP_Host")
-			CurrentConfig.SMTP.From = os.Getenv("TIX_SMTP_From")
-			CurrentConfig.SMTP.User = os.Getenv("TIX_SMTP_User")
-			CurrentConfig.SMTP.Password = os.Getenv("TIX_SMTP_Password")
-			//Parse Redis Database to int
-			CurrentConfig.SMTP.Port, Error = strconv.Atoi(os.Getenv("TIX_SMTP_Port"))
-			if Error != nil {
-				dev.LogWarn("SMTP port is not a number! Using 465 as default")
-				CurrentConfig.SMTP.Port = 0
-			}
-
-		}
-
-		CurrentConfig.Sentry.DSN = os.Getenv("TIX_Sentry_DSN")
-		CurrentConfig.Sentry.Environment = os.Getenv("TIX_Sentry_Environment")
-		if len(CurrentConfig.Sentry.Environment) == 0 {
-			CurrentConfig.Sentry.Environment = os.Getenv("GITLAB_ENVIRONMENT_NAME")
-			dev.LogInfo("Used GITLAB_ENVIRONMENT_NAME as Sentry Environment")
-		}
-
-		CurrentConfig.Worker.Listen, Error = strconv.ParseBool(os.Getenv("TIX_Worker_Listen"))
-		if Error != nil {
-			dev.LogWarn("Worker_Listen is not a boolean! Using true as default")
-			CurrentConfig.Worker.Listen = true
-		}
+		getGeneralENV()
+		getDatabaseENV()
+		getRedisENV()
+		getSMTPENV()
+		getSentryENV()
+		getWorkerENV()
 
 	} else {
-		dir, _ := os.Getwd()
-		dev.LogInfo("Using ", dir+"/config/config.json", " for configuration")
-		rawBytes, err := ioutil.ReadFile(dir + "/config/config.json")
-		if err != nil {
-			dev.LogFatal(err, "Couldn't read config:", err.Error())
-			return
-		}
-		err = json.Unmarshal(rawBytes, &CurrentConfig)
-		if err != nil {
-			dev.LogFatal(err, "Couldn't read config:", err.Error())
-			return
-		}
-		dev.DeubgLogging = CurrentConfig.Debug
-
+		loadFromFile()
 	}
 
 	if CurrentConfig.Redis.Sentinel.Enabled {
@@ -217,4 +100,148 @@ func LoadConfig() {
 	}
 
 	dev.LogInfo("Config was read completely!")
+}
+
+func loadFromFile() {
+	dir, _ := os.Getwd()
+	dev.LogInfo("Using ", dir+"/config/config.json", " for configuration")
+	rawBytes, err := ioutil.ReadFile(dir + "/config/config.json")
+	if err != nil {
+		dev.LogFatal(err, "Couldn't read config:", err.Error())
+		return
+	}
+	err = json.Unmarshal(rawBytes, &CurrentConfig)
+	if err != nil {
+		dev.LogFatal(err, "Couldn't read config:", err.Error())
+		return
+	}
+	dev.DeubgLogging = CurrentConfig.Debug
+}
+
+func getGeneralENV() {
+	var Error error
+	CurrentConfig.Debug, Error = strconv.ParseBool(os.Getenv("TIX_Debug"))
+	if Error != nil {
+		dev.LogWarn("Debug is not a boolean! Using false as default")
+		CurrentConfig.Debug = false
+	}
+	dev.DeubgLogging = CurrentConfig.Debug
+
+	CurrentConfig.SetupDemo, Error = strconv.ParseBool(os.Getenv("TIX_SetupDemo"))
+	if Error != nil {
+		CurrentConfig.SetupDemo = false
+		dev.LogInfo("TIX_SetupDemo seems not to be a boolean! Assuming \"false\"")
+	}
+
+	//Parse listen port to int
+	CurrentConfig.Port, Error = strconv.Atoi(os.Getenv("TIX_Port"))
+	if Error != nil {
+		dev.LogWarn("Port is not a number! Using 8000 as default")
+		CurrentConfig.Port = 8000
+	}
+
+}
+
+func getDatabaseENV() {
+	var Error error
+	if len(os.Getenv("DATABASE_URL")) == 0 {
+		CurrentConfig.Postgres.Host = os.Getenv("TIX_Postgres_Host")
+		CurrentConfig.Postgres.Username = os.Getenv("TIX_Postgres_Username")
+		CurrentConfig.Postgres.Password = os.Getenv("TIX_Postgres_Password")
+		CurrentConfig.Postgres.Database = os.Getenv("TIX_Postgres_Database")
+	} else {
+		CurrentConfig.Postgres.ConnectionString = os.Getenv("DATABASE_URL")
+	}
+
+	//Parse Postgres Port to int
+	CurrentConfig.Postgres.Port, Error = strconv.Atoi(os.Getenv("TIX_Postgres_Port"))
+	if Error != nil {
+		dev.LogWarn("Postgres port is not a number! Using 5432 as default")
+		CurrentConfig.Postgres.Port = 5432
+	}
+}
+
+func getRedisENV() {
+	var Error error
+	CurrentConfig.Redis.Host = os.Getenv("TIX_Redis_Host")
+	//Parse Redis Database to int
+	CurrentConfig.Redis.Database, Error = strconv.Atoi(os.Getenv("TIX_Redis_Database"))
+	if Error != nil {
+		dev.LogWarn("Redis database is not a number! Using 0 as default")
+		CurrentConfig.Redis.Database = 0
+	}
+
+	//Parse Redis Port to int
+	CurrentConfig.Redis.Port, Error = strconv.Atoi(os.Getenv("TIX_Redis_Port"))
+	if Error != nil {
+		dev.LogWarn("Redis port is not a number! Using 6379 as default")
+		CurrentConfig.Redis.Port = 6379
+	}
+
+	CurrentConfig.Redis.Sentinel.Enabled, Error = strconv.ParseBool(os.Getenv("TIX_Redis_Sentinel_Enabled"))
+	if Error != nil {
+		dev.LogWarn("Redis Sentinel is not a boolean! Using false as default")
+		CurrentConfig.Redis.Sentinel.Enabled = false
+	}
+
+	if CurrentConfig.Redis.Sentinel.Enabled {
+		CurrentConfig.Redis.Sentinel.Master = os.Getenv("TIX_Redis_Sentinel_Master")
+
+		//Search for sentinels
+		for _, e := range os.Environ() {
+			if strings.HasPrefix(e, "TIX_Redis_Sentinel_Endpoint_") {
+				value := strings.Join(strings.Split(e, "=")[1:], "=")
+				CurrentConfig.Redis.Sentinel.Endpoints = append(CurrentConfig.Redis.Sentinel.Endpoints, value)
+			}
+		}
+
+	}
+
+	//Parse Redis Port to int
+	CurrentConfig.Redis.Port, Error = strconv.Atoi(os.Getenv("TIX_Redis_Port"))
+	if Error != nil {
+		dev.LogWarn("Redis port is not a number! Using 6379 as default")
+		CurrentConfig.Redis.Port = 6379
+	}
+}
+
+func getSMTPENV() {
+	var Error error
+	CurrentConfig.SMTP.Enabled, Error = strconv.ParseBool(os.Getenv("TIX_SMTP_Enabled"))
+	if Error != nil {
+		dev.LogWarn("SMTP Enabled is not a boolean! Using true as default")
+		CurrentConfig.SMTP.Enabled = true
+	}
+
+	if CurrentConfig.SMTP.Enabled {
+		CurrentConfig.SMTP.Host = os.Getenv("TIX_SMTP_Host")
+		CurrentConfig.SMTP.From = os.Getenv("TIX_SMTP_From")
+		CurrentConfig.SMTP.User = os.Getenv("TIX_SMTP_User")
+		CurrentConfig.SMTP.Password = os.Getenv("TIX_SMTP_Password")
+		//Parse Redis Database to int
+		CurrentConfig.SMTP.Port, Error = strconv.Atoi(os.Getenv("TIX_SMTP_Port"))
+		if Error != nil {
+			dev.LogWarn("SMTP port is not a number! Using 465 as default")
+			CurrentConfig.SMTP.Port = 0
+		}
+
+	}
+}
+
+func getSentryENV() {
+	CurrentConfig.Sentry.DSN = os.Getenv("TIX_Sentry_DSN")
+	CurrentConfig.Sentry.Environment = os.Getenv("TIX_Sentry_Environment")
+	if len(CurrentConfig.Sentry.Environment) == 0 {
+		CurrentConfig.Sentry.Environment = os.Getenv("GITLAB_ENVIRONMENT_NAME")
+		dev.LogInfo("Used GITLAB_ENVIRONMENT_NAME as Sentry Environment")
+	}
+}
+
+func getWorkerENV() {
+	var Error error
+	CurrentConfig.Worker.Listen, Error = strconv.ParseBool(os.Getenv("TIX_Worker_Listen"))
+	if Error != nil {
+		dev.LogWarn("Worker_Listen is not a boolean! Using true as default")
+		CurrentConfig.Worker.Listen = true
+	}
 }

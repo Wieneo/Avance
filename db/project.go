@@ -1,7 +1,7 @@
 package db
 
 import (
-	"errors"
+	"database/sql"
 	"fmt"
 
 	"gitlab.gnaucke.dev/avance/avance-app/v2/dev"
@@ -11,19 +11,17 @@ import (
 //GetProject returns the project struct to a given projectid
 func GetProject(ProjectID int64) (models.Project, bool, error) {
 	dev.LogDebug(fmt.Sprintf("[DB] Getting project %d", ProjectID))
-	var Requested models.Project
-	rows, err := Connection.Query(`SELECT "ID", "Name", "Description" FROM "Projects" WHERE "ID" = $1`, ProjectID)
+	Requested := models.Project{
+		ID: ProjectID,
+	}
+
+	err := Connection.QueryRow(`SELECT "Name", "Description" FROM "Projects" WHERE "ID" = $1`, ProjectID).Scan(&Requested.Name, &Requested.Description)
 	if err != nil {
-		return Requested, false, err
+		if err == sql.ErrNoRows {
+			return models.Project{}, false, nil
+		}
+		return models.Project{}, true, err
 	}
-
-	if !rows.Next() {
-		dev.LogDebug(fmt.Sprintf("[DB] Projcet %d was not found", ProjectID))
-		return Requested, false, errors.New("Project not found")
-	}
-
-	rows.Scan(&Requested.ID, &Requested.Name, &Requested.Description)
-	rows.Close()
 
 	dev.LogDebug(fmt.Sprintf("[DB] Got Project %d: Name: %s, Description: %s", ProjectID, Requested.Name, Requested.Description))
 	return Requested, true, nil

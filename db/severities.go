@@ -1,6 +1,7 @@
 package db
 
 import (
+	"database/sql"
 	"fmt"
 
 	"gitlab.gnaucke.dev/avance/avance-app/v2/dev"
@@ -15,7 +16,7 @@ func SearchSeverity(Project int64, Name string) (int64, bool, error) {
 	//Ignoring casing
 	err := Connection.QueryRow(`SELECT "ID" FROM "Severities" WHERE UPPER("Name") = UPPER($1) AND "Project" = $2`, Name, Project).Scan(&ID)
 	if err != nil {
-		if err.Error() == "sql: no rows in result set" {
+		if err == sql.ErrNoRows {
 			dev.LogDebug(fmt.Sprintf("[DB] Severity '%s' wasn't found in project %d", Name, Project))
 			return ID, false, nil
 		}
@@ -71,7 +72,7 @@ func GetSeverity(Project int64, Severity int64) (models.Severity, bool, error) {
 		return severity, true, err
 	}
 
-	if err.Error() == "sql: no rows in result set" {
+	if err == sql.ErrNoRows {
 		dev.LogDebug(fmt.Sprintf("[DB] Severity %d wasn't found in project %d", Severity, Project))
 		return severity, false, nil
 	}
@@ -93,7 +94,7 @@ func GetSeverityUNSAFE(Severity int64) (models.Severity, bool, error) {
 		return severity, true, err
 	}
 
-	if err.Error() == "sql: no rows in result set" {
+	if err == sql.ErrNoRows {
 		dev.LogDebug(fmt.Sprintf("[DB] Severity %d wasn't found", Severity))
 		return severity, false, nil
 	}

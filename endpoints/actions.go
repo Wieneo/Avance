@@ -11,6 +11,7 @@ import (
 	"gitlab.gnaucke.dev/avance/avance-app/v2/dev"
 	"gitlab.gnaucke.dev/avance/avance-app/v2/models"
 	"gitlab.gnaucke.dev/avance/avance-app/v2/perms"
+	"gitlab.gnaucke.dev/avance/avance-app/v2/templates"
 	"gitlab.gnaucke.dev/avance/avance-app/v2/utils"
 )
 
@@ -27,28 +28,25 @@ func CreateAction(w http.ResponseWriter, r *http.Request) {
 
 	queue, found, err := db.GetQueue(projectid, queueid)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
 	if !found {
 		w.WriteHeader(404)
-		dev.ReportUserError(w, "Project/Queue not found")
+		dev.ReportUserError(w, templates.QueueNotFound)
 		return
 	}
 
 	user, err := utils.GetUser(r, w)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
 	allperms, perms, err := perms.GetPermissionsToQueue(user, queue)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
@@ -60,14 +58,13 @@ func CreateAction(w http.ResponseWriter, r *http.Request) {
 
 	_, found, err = db.GetTicket(ticketid, queueid, models.WantedProperties{})
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
 	if !found {
 		w.WriteHeader(404)
-		dev.ReportUserError(w, "Ticket not found")
+		dev.ReportUserError(w, templates.TicketNotFound)
 		return
 	}
 
@@ -101,8 +98,7 @@ func CreateAction(w http.ResponseWriter, r *http.Request) {
 
 	id, err := db.AddAction(ticketid, action.Type, title, action.Content, models.Issuer{Valid: true, Issuer: user})
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 

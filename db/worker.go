@@ -1,6 +1,7 @@
 package db
 
 import (
+	"database/sql"
 	"fmt"
 	"os"
 	"time"
@@ -35,7 +36,7 @@ func GetWorker(WorkerID int) (models.Worker, bool, error) {
 	var singleWorker models.Worker
 	err := Connection.QueryRow(`SELECT "ID", "Name", "LastSeen", "Active" FROM "Workers" WHERE "ID" = $1`, WorkerID).Scan(&singleWorker.ID, &singleWorker.Name, &singleWorker.LastSeen, &singleWorker.Active)
 	if err != nil {
-		if err.Error() == "sql: no rows in result set" {
+		if err == sql.ErrNoRows {
 			dev.LogDebug(fmt.Sprintf("[DB] Worker %d wasn't found", WorkerID))
 			return singleWorker, false, nil
 		}

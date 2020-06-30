@@ -16,7 +16,7 @@ func GetTicketUnsafe(TicketID int64, Wanted models.WantedProperties) (models.Tic
 	var queueID int64
 	err := Connection.QueryRow(`SELECT "Queue" FROM "Tickets" WHERE "ID" = $1`, TicketID).Scan(&queueID)
 	if err != nil {
-		if err.Error() == "sql: no rows in result set" {
+		if err == sql.ErrNoRows {
 			dev.LogDebug(fmt.Sprintf("[DB] Ticket %d wasn't found", TicketID))
 			return models.Ticket{}, false, nil
 		}
@@ -37,7 +37,7 @@ func GetTicket(TicketID int64, QueueID int64, Wanted models.WantedProperties) (m
 	var ticket models.Ticket
 	err := Connection.QueryRow(`SELECT "t"."ID", "t"."Title", "t"."Description", "t"."Queue" AS "QueueID", "t"."Owner" AS "OwnerID", "t"."Severity" AS "SeverityID", "t"."Status" AS "StatusID","t"."CreatedAt","t"."LastModified","t"."StalledUntil","t"."Meta" FROM "Tickets" AS "t" WHERE "ID" = $1 AND "Queue" = $2`, TicketID, QueueID).Scan(&ticket.ID, &ticket.Title, &ticket.Description, &ticket.QueueID, &ticket.OwnerID, &ticket.SeverityID, &ticket.StatusID, &ticket.CreatedAt, &ticket.LastModified, &ticket.StalledUntil, &ticket.Meta)
 	if err != nil {
-		if err.Error() == "sql: no rows in result set" {
+		if err == sql.ErrNoRows {
 			dev.LogDebug(fmt.Sprintf("[DB] Ticket %d wasn't found in queue %d", TicketID, QueueID))
 			return models.Ticket{}, false, nil
 		}
@@ -104,30 +104,30 @@ func GetTicket(TicketID int64, QueueID int64, Wanted models.WantedProperties) (m
 }
 
 //CreateTicket creates a ticket and returns the new id
-func CreateTicket(Title string, Description string, Queue int64, OwnedByNobody bool, Owner int64, Severity models.Severity, Status models.Status, IsStalled bool, StalledUntil string) (int64, error) {
-	dev.LogDebug(fmt.Sprintf("[DB] Creating ticket in queue %d with values: Title: %s, Owner: %d, Severity: %d, Status: %d", Queue, Title, Owner, Severity.ID, Status.ID))
+func CreateTicket(NewTicket models.CreateTicket) (int64, error) {
+	dev.LogDebug(fmt.Sprintf("[DB] Creating ticket in queue %d with values: Title: %s, Owner: %d, Severity: %d, Status: %d", NewTicket.Queue, NewTicket.Title, NewTicket.Owner, NewTicket.Severity.ID, NewTicket.Status.ID))
 	var newID int64
 	var trueOwner sql.NullInt64
 	var trueStall sql.NullString
 
-	if !OwnedByNobody {
+	if !NewTicket.OwnedByNobody {
 		trueOwner.Valid = true
-		trueOwner.Int64 = Owner
+		trueOwner.Int64 = NewTicket.Owner
 	}
 
-	if IsStalled {
+	if NewTicket.IsStalled {
 		trueStall.Valid = true
-		trueStall.String = StalledUntil
+		trueStall.String = NewTicket.StalledUntil
 	}
 
-	err := Connection.QueryRow(`INSERT INTO "Tickets" ("Title", "Description", "Queue", "Owner", "Severity", "Status", "CreatedAt", "LastModified", "StalledUntil", "Meta") VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING "ID"`, Title, Description, Queue, trueOwner, Severity.ID, Status.ID, time.Now(), time.Now(), trueStall, "{}").Scan(&newID)
+	err := Connection.QueryRow(`INSERT INTO "Tickets" ("Title", "Description", "Queue", "Owner", "Severity", "Status", "CreatedAt", "LastModified", "StalledUntil", "Meta") VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING "ID"`, NewTicket.Title, NewTicket.Description, NewTicket.Queue, trueOwner, NewTicket.Severity.ID, NewTicket.Status.ID, time.Now(), time.Now(), trueStall, "{}").Scan(&newID)
 
 	if err == nil {
 		dev.LogDebug(fmt.Sprintf("[DB] Created ticket %d -> Adding initial action", newID))
-		resolvedQueue, _, _ := GetQueueUNSAFE(Queue)
+		resolvedQueue, _, _ := GetQueueUNSAFE(NewTicket.Queue)
 		resolvedOwner := ""
-		if !OwnedByNobody {
-			owner, _, _ := GetUser(Owner)
+		if !NewTicket.OwnedByNobody {
+			owner, _, _ := GetUser(NewTicket.Owner)
 			resolvedOwner = owner.Username
 		}
 
@@ -141,7 +141,7 @@ func CreateTicket(Title string, Description string, Queue int64, OwnedByNobody b
 				<li>Severity: <i>%s</i></li>
 				<li>Status: <i>%s</i></li>
 				<li>StalledUntil: <i>%s</i></li>
-			</ul>`, Title, Description, resolvedQueue.Name, resolvedOwner, Severity.Name, Status.Name, StalledUntil), models.Issuer{Valid: false})
+			</ul>`, NewTicket.Title, NewTicket.Description, resolvedQueue.Name, resolvedOwner, NewTicket.Severity.Name, NewTicket.Status.Name, NewTicket.StalledUntil), models.Issuer{Valid: false})
 
 		if err == nil {
 			dev.LogDebug(fmt.Sprintf("[DB] Initial Action added to ticket %d", newID))

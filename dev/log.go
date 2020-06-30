@@ -30,6 +30,11 @@ func LogError(Error error, Message ...interface{}) {
 	sentry.Flush(time.Second * 5)
 }
 
+//LogErrorNoSentry logs an error without informing sentry
+func LogErrorNoSentry(Error error, Message ...interface{}) {
+	fmt.Printf("[%s] [ERROR] %v\n", dateForLog(), Message)
+}
+
 //LogFatal logs with the info prefix
 func LogFatal(Error error, Message ...interface{}) {
 	fmt.Printf("[%s] [!FATAL!] %v\n", dateForLog(), Message)

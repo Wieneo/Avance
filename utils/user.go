@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"gitlab.gnaucke.dev/avance/avance-app/v2/db"
-	"gitlab.gnaucke.dev/avance/avance-app/v2/dev"
 	"gitlab.gnaucke.dev/avance/avance-app/v2/models"
 	"gitlab.gnaucke.dev/avance/avance-app/v2/redis"
 )
@@ -34,15 +33,13 @@ func GetUserID(r *http.Request) (int64, error) {
 func GetUser(r *http.Request, w http.ResponseWriter) (models.User, error) {
 	userid, err := GetUserID(r)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+		ReportInternalErrorToUser(err, w)
 		return models.User{}, err
 	}
 
 	user, _, err := db.GetUser(userid)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+		ReportInternalErrorToUser(err, w)
 		return models.User{}, err
 	}
 

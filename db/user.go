@@ -1,6 +1,7 @@
 package db
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
 
@@ -17,7 +18,7 @@ func SearchUser(Name string) (int64, bool, error) {
 	//Ignoring casing
 	err := Connection.QueryRow(`SELECT "ID" FROM "Users" WHERE UPPER("Username") = UPPER($1) AND "Active" = true`, Name).Scan(&ID)
 	if err != nil {
-		if err.Error() == "sql: no rows in result set" {
+		if err == sql.ErrNoRows {
 			dev.LogDebug(fmt.Sprintf("[DB] User with username '%s' wasn't found", Name))
 			return ID, false, nil
 		}
@@ -48,7 +49,7 @@ func getUser(UserID int64, RespectActive bool) (models.User, bool, error) {
 	var RawPermissions string
 	err := Connection.QueryRow(`SELECT "ID","Username","Mail", "Permissions", "Firstname", "Lastname" FROM "Users" WHERE "ID" = $1 AND ("Active" = true OR "Active" = $2)`, UserID, RespectActive).Scan(&Requested.ID, &Requested.Username, &Requested.Mail, &RawPermissions, &Requested.Firstname, &Requested.Lastname)
 	if err != nil {
-		if err.Error() == "sql: no rows in result set" {
+		if err == sql.ErrNoRows {
 			dev.LogDebug(fmt.Sprintf("[DB] User %d wasn't found", UserID))
 			return Requested, false, nil
 		}

@@ -25,6 +25,8 @@ type Migration struct {
 	After   string
 }
 
+const migrationsPath = "/db/migrations/"
+
 //Init is called after config is read to connect to postgres
 func Init(ApplyMigrations bool) {
 	dev.LogInfo("Postgres is being initialized")
@@ -107,8 +109,28 @@ func migrate(ApplyMigrations bool) {
 				severity, _, _ := GetSeverityUNSAFE(severityid)
 				status, _, _ := GetStatusUNSAFE(statusid)
 
-				ticket1, _ := CreateTicket("Pipeline broken", "My pipeline is broken!", qid, true, 0, severity, status, false, "")
-				ticket2, _ := CreateTicket("Create User", "Please create a user for my new staff member!", qid, false, userid, severity, status, false, "")
+				newTicket1 := models.CreateTicket{
+					Title:         "Pipeline broken",
+					Description:   "My pipeline is broken!",
+					Queue:         qid,
+					OwnedByNobody: true,
+					Severity:      severity,
+					Status:        status,
+					IsStalled:     false,
+				}
+
+				newTicket2 := models.CreateTicket{
+					Title:         "Create User",
+					Description:   "Please create a user for my new staff member!",
+					Queue:         qid,
+					OwnedByNobody: true,
+					Severity:      severity,
+					Status:        status,
+					IsStalled:     false,
+				}
+
+				ticket1, _ := CreateTicket(newTicket1)
+				ticket2, _ := CreateTicket(newTicket2)
 				AddRelation(ticket1, ticket2, models.ParentOf)
 				AddRelation(ticket2, ticket1, models.ReferencedBy)
 
@@ -145,7 +167,7 @@ func migrate(ApplyMigrations bool) {
 	rows.Close()
 
 	cwd, _ := os.Getwd()
-	files, err := ioutil.ReadDir(fmt.Sprint(cwd, "/db/migrations/"))
+	files, err := ioutil.ReadDir(fmt.Sprint(cwd, migrationsPath))
 	if err != nil {
 		dev.LogFatal(err, "Couldn't find/read migrations: ", err.Error())
 	}
@@ -154,7 +176,7 @@ func migrate(ApplyMigrations bool) {
 	for _, k := range files {
 		if strings.HasSuffix(k.Name(), ".migrate.json") {
 			var migration Migration
-			rawBytes, err := ioutil.ReadFile(fmt.Sprint(cwd, "/db/migrations/", k.Name()))
+			rawBytes, err := ioutil.ReadFile(fmt.Sprint(cwd, migrationsPath, k.Name()))
 			if err != nil {
 				dev.LogFatal(err, "Couldn't read migration file: "+err.Error())
 			}
@@ -241,7 +263,7 @@ func migrate(ApplyMigrations bool) {
 				//Targets contains all SQL Files wich are included in this migration
 				//Concat these here
 				for _, k := range k.Targets {
-					rawBytes, err := ioutil.ReadFile(cwd + "/db/migrations/" + k)
+					rawBytes, err := ioutil.ReadFile(cwd + migrationsPath + k)
 
 					if err != nil {
 						dev.LogFatal(err, "Couldn't read target:", err.Error())
@@ -312,9 +334,9 @@ func deploy() {
 	rows.Close()
 
 	cwd, _ := os.Getwd()
-	rawBytes, err := ioutil.ReadFile(cwd + "/db/migrations/base.sql")
+	rawBytes, err := ioutil.ReadFile(cwd + migrationsPath + "base.sql")
 	if err != nil {
-		dev.LogFatal(err, "Couldn't read "+cwd+"/db/migrations/base.sql! Please check permissions and roles!")
+		dev.LogFatal(err, "Couldn't read "+cwd+migrationsPath+"base.sql! Please check permissions and roles!")
 	}
 
 	_, err = Connection.Query(string(rawBytes))

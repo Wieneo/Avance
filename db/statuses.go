@@ -1,6 +1,7 @@
 package db
 
 import (
+	"database/sql"
 	"fmt"
 
 	"gitlab.gnaucke.dev/avance/avance-app/v2/dev"
@@ -15,7 +16,7 @@ func SearchStatus(Project int64, Name string) (int64, bool, error) {
 	//Ignoring casing
 	err := Connection.QueryRow(`SELECT "ID" FROM "Statuses" WHERE UPPER("Name") = UPPER($1) AND "Project" = $2`, Name, Project).Scan(&ID)
 	if err != nil {
-		if err.Error() == "sql: no rows in result set" {
+		if err == sql.ErrNoRows {
 			dev.LogDebug(fmt.Sprintf("[DB] Found no status with name '%s' in project %d", Name, Project))
 			return ID, false, nil
 		}
@@ -69,7 +70,7 @@ func GetStatus(Project, Status int64) (models.Status, bool, error) {
 		return status, true, err
 	}
 
-	if err.Error() == "sql: no rows in result set" {
+	if err == sql.ErrNoRows {
 		dev.LogDebug(fmt.Sprintf("[DB] Status %d not found in project %d", Status, Project))
 		return status, false, nil
 	}
@@ -91,7 +92,7 @@ func GetStatusUNSAFE(Status int64) (models.Status, bool, error) {
 		return status, true, err
 	}
 
-	if err.Error() == "sql: no rows in result set" {
+	if err == sql.ErrNoRows {
 		dev.LogDebug(fmt.Sprintf("[DB] Status %d not found", Status))
 		return status, false, nil
 	}

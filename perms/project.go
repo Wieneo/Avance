@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"strings"
 
+	"gitlab.gnaucke.dev/avance/avance-app/v2/templates"
 	"gitlab.gnaucke.dev/avance/avance-app/v2/utils"
 
 	"gitlab.gnaucke.dev/avance/avance-app/v2/dev"
@@ -25,27 +26,27 @@ func CheckAccessToProject(next http.Handler) http.Handler {
 			project, found, err := db.GetProject(projectid)
 			if !found {
 				w.WriteHeader(404)
-				dev.ReportUserError(w, "Project not found")
+				dev.ReportUserError(w, templates.ProjectNotFound)
 				return
 			}
 
 			if err != nil {
-				w.WriteHeader(500)
-				dev.ReportError(err, w, err.Error())
+
+				utils.ReportInternalErrorToUser(err, w)
 				return
 			}
 
 			user, err := utils.GetUser(r, w)
 			if err != nil {
-				w.WriteHeader(500)
-				dev.ReportError(err, w, err.Error())
+
+				utils.ReportInternalErrorToUser(err, w)
 				return
 			}
 
 			allperms, perms, err := GetPermissionsToProject(user, project)
 			if err != nil {
-				w.WriteHeader(500)
-				dev.ReportError(err, w, err.Error())
+
+				utils.ReportInternalErrorToUser(err, w)
 				return
 			}
 
@@ -53,7 +54,7 @@ func CheckAccessToProject(next http.Handler) http.Handler {
 				next.ServeHTTP(w, r)
 			} else {
 				w.WriteHeader(403)
-				dev.ReportUserError(w, "You dont have access to that project")
+				dev.ReportUserError(w, templates.ProjectNoPerms)
 				return
 			}
 		} else {

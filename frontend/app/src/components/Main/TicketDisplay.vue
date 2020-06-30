@@ -67,7 +67,7 @@
                       <span class="TicketDisplayProperty" title="Requestor" v-if="req.Type == 0"><v-icon>mdi-human-child</v-icon></span>
                       <span class="TicketDisplayProperty" title="Reader" v-if="req.Type == 1"><v-icon>mdi-magnify</v-icon></span>
                       <span class="TicketDisplayProperty" title="Admin" v-if="req.Type == 2"><v-icon>mdi-head-minus-outline</v-icon></span>
-                      <i v-if="!req.User.Valid" style="margin-left: 10px;">{{req.Mail}}</i>
+                      <em v-if="!req.User.Valid" style="margin-left: 10px;">{{req.Mail}}</em>
                       <v-menu :offset-x=true :offset-y=true :open-on-hover=true :nudge-width="200" v-else>
                         <template v-slot:activator="{ on }">
                           <a style="margin-left: 10px;" v-on="on">{{req.User.Value.Username}}</a>

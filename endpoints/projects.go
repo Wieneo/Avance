@@ -10,6 +10,7 @@ import (
 	"gitlab.gnaucke.dev/avance/avance-app/v2/db"
 	"gitlab.gnaucke.dev/avance/avance-app/v2/dev"
 	"gitlab.gnaucke.dev/avance/avance-app/v2/perms"
+	"gitlab.gnaucke.dev/avance/avance-app/v2/templates"
 	"gitlab.gnaucke.dev/avance/avance-app/v2/utils"
 )
 
@@ -18,8 +19,7 @@ func GetProjects(w http.ResponseWriter, r *http.Request) {
 	if user, err := utils.GetUser(r, w); err == nil {
 		projects, err := perms.GetVisibleProjects(user)
 		if err != nil {
-			w.WriteHeader(500)
-			dev.ReportError(err, w, err.Error())
+			utils.ReportInternalErrorToUser(err, w)
 			return
 		}
 
@@ -33,8 +33,7 @@ func GetProjects(w http.ResponseWriter, r *http.Request) {
 func GetSingleProject(w http.ResponseWriter, r *http.Request) {
 	user, err := utils.GetUser(r, w)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
@@ -42,21 +41,19 @@ func GetSingleProject(w http.ResponseWriter, r *http.Request) {
 	project, found, err := db.GetProject(projectid)
 
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
 	if !found {
 		w.WriteHeader(404)
-		dev.ReportUserError(w, "Project not found")
+		dev.ReportUserError(w, templates.ProjectNotFound)
 		return
 	}
 
 	allperms, perms, err := perms.GetPermissionsToProject(user, project)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
@@ -79,8 +76,7 @@ func CreateProject(w http.ResponseWriter, r *http.Request) {
 
 	rawBytes, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
@@ -99,8 +95,7 @@ func CreateProject(w http.ResponseWriter, r *http.Request) {
 
 	user, err := utils.GetUser(r, w)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
@@ -109,8 +104,7 @@ func CreateProject(w http.ResponseWriter, r *http.Request) {
 		if admin {
 			projects, err := db.GetAllProjects()
 			if err != nil {
-				w.WriteHeader(500)
-				dev.ReportError(err, w, err.Error())
+				utils.ReportInternalErrorToUser(err, w)
 				return
 			}
 
@@ -129,16 +123,14 @@ func CreateProject(w http.ResponseWriter, r *http.Request) {
 
 			id, err := db.CreateProject(req.Name, req.Description)
 			if err != nil {
-				w.WriteHeader(500)
-				dev.ReportError(err, w, err.Error())
+				utils.ReportInternalErrorToUser(err, w)
 				return
 			}
 
 			project, found, err := db.GetProject(id)
 			//If the project is not found something went horribly wrong -> ReportError here
 			if err != nil || !found {
-				w.WriteHeader(500)
-				dev.ReportError(err, w, err.Error())
+				utils.ReportInternalErrorToUser(err, w)
 				return
 			}
 
@@ -150,8 +142,7 @@ func CreateProject(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	} else {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 }
@@ -163,28 +154,25 @@ func ChangeProject(w http.ResponseWriter, r *http.Request) {
 
 	user, err := utils.GetUser(r, w)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
 	project, found, err := db.GetProject(projectid)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
 	if !found {
 		w.WriteHeader(404)
-		dev.ReportUserError(w, "Project not found")
+		dev.ReportUserError(w, templates.ProjectNotFound)
 		return
 	}
 
 	allperms, perms, err := perms.GetPermissionsToProject(user, project)
 	if err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 
@@ -192,8 +180,7 @@ func ChangeProject(w http.ResponseWriter, r *http.Request) {
 		//Parse JSON
 		rawBytes, err := ioutil.ReadAll(r.Body)
 		if err != nil {
-			w.WriteHeader(500)
-			dev.ReportError(err, w, err.Error())
+			utils.ReportInternalErrorToUser(err, w)
 			return
 		}
 
@@ -220,14 +207,13 @@ func ChangeProject(w http.ResponseWriter, r *http.Request) {
 
 		if !somethingChanged {
 			w.WriteHeader(406)
-			dev.ReportUserError(w, "Nothing changed")
+			dev.ReportUserError(w, templates.NothingChanged)
 			return
 		}
 
 		err = db.PatchProject(project)
 		if err != nil {
-			w.WriteHeader(500)
-			dev.ReportError(err, w, err.Error())
+			utils.ReportInternalErrorToUser(err, w)
 			return
 		}
 

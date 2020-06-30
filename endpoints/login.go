@@ -8,6 +8,7 @@ import (
 	"gitlab.gnaucke.dev/avance/avance-app/v2/db"
 	"gitlab.gnaucke.dev/avance/avance-app/v2/dev"
 	"gitlab.gnaucke.dev/avance/avance-app/v2/redis"
+	"gitlab.gnaucke.dev/avance/avance-app/v2/utils"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -35,9 +36,7 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 
 	//Select ID + Password from Database
 	if rows, err := db.Connection.Query(`SELECT "ID","Password" FROM "Users" WHERE "Username" = $1 AND "Active" = true`, loginRequest.Username); err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, "An error happened on our side :( Please try again later!")
-		dev.LogError(err, err.Error())
+		utils.ReportInternalErrorToUser(err, w)
 	} else {
 		//If the query returned an empty result set
 		if !rows.Next() {
@@ -50,9 +49,7 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 		var PasswordHash string
 
 		if err := rows.Scan(&UserID, &PasswordHash); err != nil {
-			w.WriteHeader(500)
-			dev.ReportError(err, w, "An error happened on our side :( Please try again later!")
-			dev.LogError(err, err.Error())
+			utils.ReportInternalErrorToUser(err, w)
 			return
 		}
 
@@ -68,9 +65,7 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 		//Generate Session ID
 		SessionKey, err := redis.CreateSession(UserID)
 		if err != nil {
-			w.WriteHeader(500)
-			dev.ReportError(err, w, "An error happened on our side :( Please try again later!")
-			dev.LogError(err, err.Error())
+			utils.ReportInternalErrorToUser(err, w)
 			return
 		}
 
@@ -91,8 +86,7 @@ func LogoutUser(w http.ResponseWriter, r *http.Request) {
 		//Check if maybe cookie was set
 		keks, err := r.Cookie("session")
 		if err != nil {
-			w.WriteHeader(500)
-			dev.ReportError(err, w, err.Error())
+			utils.ReportInternalErrorToUser(err, w)
 			return
 		}
 
@@ -106,8 +100,7 @@ func LogoutUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := redis.DestroySession(r); err != nil {
-		w.WriteHeader(500)
-		dev.ReportError(err, w, err.Error())
+		utils.ReportInternalErrorToUser(err, w)
 		return
 	}
 

@@ -1,6 +1,7 @@
 package db
 
 import (
+	"database/sql"
 	"fmt"
 
 	"gitlab.gnaucke.dev/avance/avance-app/v2/dev"
@@ -13,7 +14,7 @@ func GetQueue(ProjectID, QueueID int64) (models.Queue, bool, error) {
 	var queue models.Queue
 	err := Connection.QueryRow(`SELECT "ID", "Name" FROM "Queue" WHERE "ID" = $1 AND "Project" = $2`, QueueID, ProjectID).Scan(&queue.ID, &queue.Name)
 	if err != nil {
-		if err.Error() == "sql: no rows in result set" {
+		if err == sql.ErrNoRows {
 			dev.LogDebug(fmt.Sprintf("[DB] Requested queue (Q: %d, P: %d) wasnt found -> Returning empty queue struct", QueueID, ProjectID))
 			return models.Queue{}, false, nil
 		}
@@ -32,7 +33,7 @@ func GetQueueUNSAFE(QueueID int64) (models.Queue, bool, error) {
 	var queue models.Queue
 	err := Connection.QueryRow(`SELECT "ID", "Name" FROM "Queue" WHERE "ID" = $1`, QueueID).Scan(&queue.ID, &queue.Name)
 	if err != nil {
-		if err.Error() == "sql: no rows in result set" {
+		if err == sql.ErrNoRows {
 			dev.LogDebug(fmt.Sprintf("[DB] Requested queue %d wasnt found -> Returning empty queue struct", QueueID))
 			return models.Queue{}, false, nil
 		}
